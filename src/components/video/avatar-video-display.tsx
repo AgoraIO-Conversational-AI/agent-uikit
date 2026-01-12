@@ -1,44 +1,47 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import type { IRemoteVideoTrack } from "agora-rtc-sdk-ng"
+import * as React from "react";
+import type { IRemoteVideoTrack } from "agora-rtc-sdk-ng";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
-export type AvatarVideoState = "connected" | "loading" | "disconnected"
+export type AvatarVideoState = "connected" | "loading" | "disconnected";
 
 export interface AvatarVideoDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Remote video track from Agora RTC
    */
-  videoTrack?: IRemoteVideoTrack | null
+  videoTrack?: IRemoteVideoTrack | null;
 
   /**
    * Current connection state
    * @default "disconnected"
    */
-  state?: AvatarVideoState
+  state?: AvatarVideoState;
 
   /**
    * Show connection status overlay
    * @default false
    */
-  showStatus?: boolean
+  showStatus?: boolean;
 
   /**
    * Placeholder content when no video
    */
-  placeholder?: React.ReactNode
+  placeholder?: React.ReactNode;
 
   /**
    * Use MediaStream instead of Agora's play() method
    * Enables multiple video elements to show the same track
    * @default false
    */
-  useMediaStream?: boolean
+  useMediaStream?: boolean;
 }
 
-export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDisplayProps>(
+export const AvatarVideoDisplay = React.forwardRef<
+  HTMLDivElement,
+  AvatarVideoDisplayProps
+>(
   (
     {
       className,
@@ -49,66 +52,80 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
       useMediaStream = false,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const videoContainerRef = React.useRef<HTMLDivElement>(null)
-    const videoElementRef = React.useRef<HTMLVideoElement>(null)
-    const [isPlaying, setIsPlaying] = React.useState(false)
+    const videoContainerRef = React.useRef<HTMLDivElement>(null);
+    const videoElementRef = React.useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = React.useState(false);
 
     // MediaStream mode - use native video element
     React.useEffect(() => {
       if (!useMediaStream || !videoTrack || !videoElementRef.current) {
-        if (useMediaStream) setIsPlaying(false)
-        return
+        if (useMediaStream) setIsPlaying(false);
+        return;
       }
 
       try {
-        const mediaStreamTrack = videoTrack.getMediaStreamTrack()
-        const stream = new MediaStream([mediaStreamTrack])
-        videoElementRef.current.srcObject = stream
-        videoElementRef.current.play()
-        setIsPlaying(true)
-        console.log("[AvatarVideoDisplay] MediaStream video playing")
+        const mediaStreamTrack = videoTrack.getMediaStreamTrack();
+        const stream = new MediaStream([mediaStreamTrack]);
+        videoElementRef.current.srcObject = stream;
+        videoElementRef.current.play().catch((error) => {
+          // Ignore AbortError - happens when play is interrupted by track change
+          if (error.name !== "AbortError") {
+            console.error("[AvatarVideoDisplay] Failed to play video:", error);
+          }
+        });
+        setIsPlaying(true);
+        console.log("[AvatarVideoDisplay] MediaStream video playing");
       } catch (error) {
-        console.error("[AvatarVideoDisplay] Failed to play MediaStream:", error)
-        setIsPlaying(false)
+        console.error(
+          "[AvatarVideoDisplay] Failed to play MediaStream:",
+          error,
+        );
+        setIsPlaying(false);
       }
 
       return () => {
         if (videoElementRef.current) {
-          videoElementRef.current.srcObject = null
+          videoElementRef.current.srcObject = null;
         }
-        setIsPlaying(false)
-      }
-    }, [videoTrack, useMediaStream])
+        setIsPlaying(false);
+      };
+    }, [videoTrack, useMediaStream]);
 
     // Agora play() mode - use container div
     React.useEffect(() => {
       if (useMediaStream || !videoTrack || !videoContainerRef.current) {
-        if (!useMediaStream) setIsPlaying(false)
-        return
+        if (!useMediaStream) setIsPlaying(false);
+        return;
       }
 
       try {
-        videoTrack.play(videoContainerRef.current)
-        setIsPlaying(true)
-        console.log("[AvatarVideoDisplay] Agora video track playing")
+        videoTrack.play(videoContainerRef.current);
+        setIsPlaying(true);
+        console.log("[AvatarVideoDisplay] Agora video track playing");
       } catch (error) {
-        console.error("[AvatarVideoDisplay] Failed to play video track:", error)
-        setIsPlaying(false)
+        console.error(
+          "[AvatarVideoDisplay] Failed to play video track:",
+          error,
+        );
+        setIsPlaying(false);
       }
 
       return () => {
         try {
-          videoTrack.stop()
-          setIsPlaying(false)
+          videoTrack.stop();
+          setIsPlaying(false);
         } catch (error) {
-          console.error("[AvatarVideoDisplay] Failed to stop video track:", error)
+          console.error(
+            "[AvatarVideoDisplay] Failed to stop video track:",
+            error,
+          );
         }
-      }
-    }, [videoTrack, useMediaStream])
+      };
+    }, [videoTrack, useMediaStream]);
 
-    const showPlaceholder = !isPlaying || state === "disconnected"
+    const showPlaceholder = !isPlaying || state === "disconnected";
 
     return (
       <div
@@ -116,7 +133,7 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
         className={cn(
           "relative overflow-hidden rounded-lg bg-muted",
           "flex items-center justify-center",
-          className
+          className,
         )}
         {...props}
       >
@@ -126,7 +143,7 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
             ref={videoContainerRef}
             className={cn(
               "absolute inset-2 rounded-lg overflow-hidden",
-              showPlaceholder && "hidden"
+              showPlaceholder && "hidden",
             )}
           />
         )}
@@ -139,7 +156,7 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
             playsInline
             className={cn(
               "absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] object-cover rounded-lg",
-              showPlaceholder && "hidden"
+              showPlaceholder && "hidden",
             )}
           />
         )}
@@ -164,7 +181,9 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
                     />
                   </svg>
                 </div>
-                <p className="text-sm">{state === "loading" ? "Connecting..." : "No video"}</p>
+                <p className="text-sm">
+                  {state === "loading" ? "Connecting..." : "No video"}
+                </p>
               </div>
             )}
           </div>
@@ -183,8 +202,8 @@ export const AvatarVideoDisplay = React.forwardRef<HTMLDivElement, AvatarVideoDi
           </div>
         )}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-AvatarVideoDisplay.displayName = "AvatarVideoDisplay"
+AvatarVideoDisplay.displayName = "AvatarVideoDisplay";

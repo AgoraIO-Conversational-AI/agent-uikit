@@ -1,48 +1,51 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import type { ICameraVideoTrack } from "agora-rtc-sdk-ng"
+import * as React from "react";
+import type { ICameraVideoTrack } from "agora-rtc-sdk-ng";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 export interface LocalVideoPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Local camera video track from Agora RTC
    */
-  videoTrack?: ICameraVideoTrack | null
+  videoTrack?: ICameraVideoTrack | null;
 
   /**
    * Mirror the video horizontally (like a mirror)
    * @default true
    */
-  isMirrored?: boolean
+  isMirrored?: boolean;
 
   /**
    * Show label overlay
    * @default false
    */
-  showLabel?: boolean
+  showLabel?: boolean;
 
   /**
    * Custom label text
    * @default "You"
    */
-  label?: string
+  label?: string;
 
   /**
    * Placeholder content when no video
    */
-  placeholder?: React.ReactNode
+  placeholder?: React.ReactNode;
 
   /**
    * Use MediaStream instead of Agora's play() method
    * Enables multiple video elements to show the same track
    * @default false
    */
-  useMediaStream?: boolean
+  useMediaStream?: boolean;
 }
 
-export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPreviewProps>(
+export const LocalVideoPreview = React.forwardRef<
+  HTMLDivElement,
+  LocalVideoPreviewProps
+>(
   (
     {
       className,
@@ -54,66 +57,74 @@ export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPrev
       useMediaStream = false,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const videoContainerRef = React.useRef<HTMLDivElement>(null)
-    const videoElementRef = React.useRef<HTMLVideoElement>(null)
-    const [isPlaying, setIsPlaying] = React.useState(false)
+    const videoContainerRef = React.useRef<HTMLDivElement>(null);
+    const videoElementRef = React.useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = React.useState(false);
 
     // MediaStream mode - use native video element
     React.useEffect(() => {
       if (!useMediaStream || !videoTrack || !videoElementRef.current) {
-        if (useMediaStream) setIsPlaying(false)
-        return
+        if (useMediaStream) setIsPlaying(false);
+        return;
       }
 
       try {
-        const mediaStreamTrack = videoTrack.getMediaStreamTrack()
-        const stream = new MediaStream([mediaStreamTrack])
-        videoElementRef.current.srcObject = stream
-        videoElementRef.current.play()
-        setIsPlaying(true)
-        console.log("[LocalVideoPreview] MediaStream video playing")
+        const mediaStreamTrack = videoTrack.getMediaStreamTrack();
+        const stream = new MediaStream([mediaStreamTrack]);
+        videoElementRef.current.srcObject = stream;
+        videoElementRef.current.play().catch((error) => {
+          // Ignore AbortError - happens when play is interrupted by track change
+          if (error.name !== "AbortError") {
+            console.error("[LocalVideoPreview] Failed to play video:", error);
+          }
+        });
+        setIsPlaying(true);
+        console.log("[LocalVideoPreview] MediaStream video playing");
       } catch (error) {
-        console.error("[LocalVideoPreview] Failed to play MediaStream:", error)
-        setIsPlaying(false)
+        console.error("[LocalVideoPreview] Failed to play MediaStream:", error);
+        setIsPlaying(false);
       }
 
       return () => {
         if (videoElementRef.current) {
-          videoElementRef.current.srcObject = null
+          videoElementRef.current.srcObject = null;
         }
-        setIsPlaying(false)
-      }
-    }, [videoTrack, useMediaStream])
+        setIsPlaying(false);
+      };
+    }, [videoTrack, useMediaStream]);
 
     // Agora play() mode - use container div
     React.useEffect(() => {
       if (useMediaStream || !videoTrack || !videoContainerRef.current) {
-        if (!useMediaStream) setIsPlaying(false)
-        return
+        if (!useMediaStream) setIsPlaying(false);
+        return;
       }
 
       try {
-        videoTrack.play(videoContainerRef.current)
-        setIsPlaying(true)
-        console.log("[LocalVideoPreview] Agora video track playing")
+        videoTrack.play(videoContainerRef.current);
+        setIsPlaying(true);
+        console.log("[LocalVideoPreview] Agora video track playing");
       } catch (error) {
-        console.error("[LocalVideoPreview] Failed to play video track:", error)
-        setIsPlaying(false)
+        console.error("[LocalVideoPreview] Failed to play video track:", error);
+        setIsPlaying(false);
       }
 
       return () => {
         try {
-          videoTrack.stop()
-          setIsPlaying(false)
+          videoTrack.stop();
+          setIsPlaying(false);
         } catch (error) {
-          console.error("[LocalVideoPreview] Failed to stop video track:", error)
+          console.error(
+            "[LocalVideoPreview] Failed to stop video track:",
+            error,
+          );
         }
-      }
-    }, [videoTrack, useMediaStream])
+      };
+    }, [videoTrack, useMediaStream]);
 
-    const showPlaceholder = !isPlaying
+    const showPlaceholder = !isPlaying;
 
     return (
       <div
@@ -121,7 +132,7 @@ export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPrev
         className={cn(
           "relative overflow-hidden rounded-lg bg-muted",
           "flex items-center justify-center",
-          className
+          className,
         )}
         {...props}
       >
@@ -132,7 +143,7 @@ export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPrev
             className={cn(
               "absolute inset-2 rounded-lg overflow-hidden",
               isMirrored && "scale-x-[-1]",
-              showPlaceholder && "hidden"
+              showPlaceholder && "hidden",
             )}
           />
         )}
@@ -147,7 +158,7 @@ export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPrev
             className={cn(
               "absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] object-cover rounded-lg",
               isMirrored && "scale-x-[-1]",
-              showPlaceholder && "hidden"
+              showPlaceholder && "hidden",
             )}
           />
         )}
@@ -185,8 +196,8 @@ export const LocalVideoPreview = React.forwardRef<HTMLDivElement, LocalVideoPrev
           </div>
         )}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-LocalVideoPreview.displayName = "LocalVideoPreview"
+LocalVideoPreview.displayName = "LocalVideoPreview";
