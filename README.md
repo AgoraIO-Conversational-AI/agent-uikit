@@ -28,6 +28,9 @@ React component library for building voice AI user interfaces with Agora.
   - [AvatarVideoDisplay](#avatarvideodisplay)
   - [Avatar](#avatar)
   - [CameraSelector](#cameraselector)
+- [Settings Components](#settings-components)
+  - [AgentSettings](#agentsettings)
+  - [SettingsDialog](#settingsdialog)
 - [Layout Components](#layout-components)
   - [VideoGrid](#videogrid)
   - [MobileTabs](#mobiletabs)
@@ -842,6 +845,166 @@ import { CameraSelector } from '@agora/ui-kit'
 - Toggle camera on/off with video icon
 - Error state support
 - Dropdown menu for device selection
+
+---
+
+## Settings Components
+
+### AgentSettings
+
+UI controls for configuring Agora Conversational AI agent settings before starting a conversation.
+
+**Props:**
+
+```typescript
+interface AgentSettingsProps {
+  enableAivad: boolean; // Whether AIVAD (TURN) is enabled
+  onEnableAivadChange: (enabled: boolean) => void;
+  language: string; // STT language code (e.g., "en-US")
+  onLanguageChange: (language: string) => void;
+  prompt?: string; // System prompt for the agent
+  onPromptChange?: (prompt: string) => void;
+  greeting?: string; // Greeting message when joining
+  onGreetingChange?: (greeting: string) => void;
+  languages?: Item[]; // Optional custom language list
+  disabled?: boolean; // Disable when connected
+  className?: string;
+}
+```
+
+**Usage:**
+
+```tsx
+import { AgentSettings } from "@agora/agent-ui-kit";
+
+function App() {
+  const [enableAivad, setEnableAivad] = useState(true);
+  const [language, setLanguage] = useState("en-US");
+  const [prompt, setPrompt] = useState("You are a helpful AI assistant...");
+  const [greeting, setGreeting] = useState("Hello! How can I help you today?");
+  const [isConnected, setIsConnected] = useState(false);
+
+  const handleStart = async () => {
+    // Pass settings as query params to backend
+    const params = new URLSearchParams({
+      enable_aivad: enableAivad.toString(),
+      asr_language: language,
+    });
+    if (prompt.trim()) params.append("prompt", prompt.trim());
+    if (greeting.trim()) params.append("greeting", greeting.trim());
+
+    const response = await fetch(`${backendUrl}/start-agent?${params}`);
+    // ... rest of connection logic
+  };
+
+  return (
+    <>
+      <AgentSettings
+        enableAivad={enableAivad}
+        onEnableAivadChange={setEnableAivad}
+        language={language}
+        onLanguageChange={setLanguage}
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        greeting={greeting}
+        onGreetingChange={setGreeting}
+        disabled={isConnected}
+      />
+      <button onClick={handleStart} disabled={isConnected}>
+        Start Conversation
+      </button>
+    </>
+  );
+}
+```
+
+**Features:**
+
+- AIVAD (AI Voice Activity Detection / TURN) toggle
+- STT language selection dropdown
+- System prompt configuration (optional, shows textarea when onPromptChange provided)
+- Greeting message configuration (optional, shows input when onGreetingChange provided)
+- Default languages: en-US, en-GB, es-ES, es-MX, fr-FR, de-DE, it-IT, pt-BR, ja-JP, ko-KR, zh-CN, zh-TW
+- Custom language list support
+- Disabled state when connected
+- Accessible with proper labels
+
+**Backend Integration:**
+
+The settings map to Agora Conversational AI REST API parameters:
+
+- `enableAivad` → `?enable_aivad=true` → `properties.advanced_features.enable_aivad`
+- `language` → `?asr_language=en-US` → `properties.asr.language`
+- `prompt` → `?prompt=...` → `properties.chat.context.content`
+- `greeting` → `?greeting=...` → `properties.chat.greeting_message`
+
+### SettingsDialog
+
+Modal dialog wrapper for AgentSettings component with open/close state management.
+
+**Props:**
+
+```typescript
+interface SettingsDialogProps extends Omit<AgentSettingsProps, "className"> {
+  open: boolean; // Whether dialog is open
+  onOpenChange: (open: boolean) => void; // Dialog open state callback
+  title?: string; // Dialog title (default: "Agent Settings")
+  description?: string; // Optional dialog description
+}
+```
+
+**Usage:**
+
+```tsx
+import { SettingsDialog } from "@agora/agent-ui-kit";
+import { Settings } from "lucide-react";
+
+function App() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [enableAivad, setEnableAivad] = useState(true);
+  const [language, setLanguage] = useState("en-US");
+  const [prompt, setPrompt] = useState("You are a helpful AI assistant...");
+  const [greeting, setGreeting] = useState("Hello! How can I help you?");
+  const [isConnected, setIsConnected] = useState(false);
+
+  return (
+    <>
+      {/* Settings Icon Button */}
+      <button
+        onClick={() => setIsSettingsOpen(true)}
+        aria-label="Open settings"
+      >
+        <Settings className="h-5 w-5" />
+      </button>
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        title="Agent Settings"
+        description="Configure your AI agent before starting"
+        enableAivad={enableAivad}
+        onEnableAivadChange={setEnableAivad}
+        language={language}
+        onLanguageChange={setLanguage}
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        greeting={greeting}
+        onGreetingChange={setGreeting}
+        disabled={isConnected}
+      />
+    </>
+  );
+}
+```
+
+**Features:**
+
+- Modal dialog overlay with backdrop
+- Accessible with proper ARIA attributes
+- Close on escape key or backdrop click
+- Includes all AgentSettings features
+- Customizable title and description
 
 ---
 
