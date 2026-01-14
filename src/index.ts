@@ -68,13 +68,6 @@ export type {
   CameraDevice,
 } from "./components/video/camera-selector";
 
-// Settings Components
-export { AgentSettings } from "./components/settings/agent-settings";
-export type { AgentSettingsProps } from "./components/settings/agent-settings";
-
-export { SettingsDialog } from "./components/settings/settings-dialog";
-export type { SettingsDialogProps } from "./components/settings/settings-dialog";
-
 // Layout Components
 export {
   VideoGrid,
@@ -104,13 +97,6 @@ export type { ValuePickerProps } from "./components/primitives/value-picker";
 export { DropdownMenu } from "./components/primitives/dropdown-menu";
 export { Command } from "./components/primitives/command";
 export { Popover } from "./components/primitives/popover";
-export {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "./components/primitives/dialog";
 
 // Branding
 export { AgoraLogo } from "./components/branding/agora-logo";
