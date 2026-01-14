@@ -98,6 +98,13 @@ export { DropdownMenu } from "./components/primitives/dropdown-menu";
 export { Command } from "./components/primitives/command";
 export { Popover } from "./components/primitives/popover";
 
+// Settings
+export { SettingsDialog } from "./components/settings/settings-dialog";
+export type { SettingsDialogProps } from "./components/settings/settings-dialog";
+
+export { AgentSettings } from "./components/settings/agent-settings";
+export type { AgentSettingsProps } from "./components/settings/agent-settings";
+
 // Branding
 export { AgoraLogo } from "./components/branding/agora-logo";
 export type { AgoraLogoProps } from "./components/branding/agora-logo";
