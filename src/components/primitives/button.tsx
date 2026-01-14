@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
   "relative inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all cursor-pointer disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -23,13 +23,14 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
-export interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  label?: string
-  labelClassName?: string
+export interface ButtonProps
+  extends React.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  label?: string;
+  labelClassName?: string;
 }
 
 function Button({
@@ -41,7 +42,7 @@ function Button({
   labelClassName,
   ...props
 }: ButtonProps) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : "button";
 
   const button = (
     <Comp
@@ -49,19 +50,21 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
-  )
+  );
 
   // If label is provided, wrap button and label in a flex container
   if (label) {
     return (
       <div className="flex flex-col items-center">
         {button}
-        <p className={cn("text-muted-foreground mt-2 text-xs", labelClassName)}>{label}</p>
+        <p className={cn("text-muted-foreground mt-2 text-xs", labelClassName)}>
+          {label}
+        </p>
       </div>
-    )
+    );
   }
 
-  return button
+  return button;
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

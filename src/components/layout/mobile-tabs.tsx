@@ -1,37 +1,37 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 export interface Tab {
-  id: string
-  label: string
-  icon?: React.ReactNode
-  content: React.ReactNode
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  content: React.ReactNode;
 }
 
 export interface MobileTabsProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * List of tabs
    */
-  tabs: Tab[]
+  tabs: Tab[];
 
   /**
    * Currently active tab ID
    */
-  activeTab?: string
+  activeTab?: string;
 
   /**
    * Callback when tab changes
    */
-  onTabChange?: (tabId: string) => void
+  onTabChange?: (tabId: string) => void;
 
   /**
    * Position of tab buttons
    * @default "top"
    */
-  tabPosition?: "top" | "bottom"
+  tabPosition?: "top" | "bottom";
 }
 
 /**
@@ -42,20 +42,32 @@ export interface MobileTabsProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
   (
-    { className, tabs, activeTab: controlledActiveTab, onTabChange, tabPosition = "top", ...props },
-    ref
+    {
+      className,
+      tabs,
+      activeTab: controlledActiveTab,
+      onTabChange,
+      tabPosition = "top",
+      ...props
+    },
+    ref,
   ) => {
-    const [internalActiveTab, setInternalActiveTab] = React.useState(tabs[0]?.id || "")
+    const [internalActiveTab, setInternalActiveTab] = React.useState(
+      tabs[0]?.id || "",
+    );
 
-    const activeTab = controlledActiveTab !== undefined ? controlledActiveTab : internalActiveTab
-    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content
+    const activeTab =
+      controlledActiveTab !== undefined
+        ? controlledActiveTab
+        : internalActiveTab;
+    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
     const handleTabChange = (tabId: string) => {
       if (controlledActiveTab === undefined) {
-        setInternalActiveTab(tabId)
+        setInternalActiveTab(tabId);
       }
-      onTabChange?.(tabId)
-    }
+      onTabChange?.(tabId);
+    };
 
     const tabButtons = (
       <div className="flex border-b bg-muted/30">
@@ -67,7 +79,7 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
                 "flex flex-1 items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
                 activeTab === tab.id
                   ? "bg-background text-foreground border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {tab.icon && <span className="h-4 w-4">{tab.icon}</span>}
@@ -77,10 +89,14 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
           </React.Fragment>
         ))}
       </div>
-    )
+    );
 
     return (
-      <div ref={ref} className={cn("flex h-full flex-col overflow-hidden", className)} {...props}>
+      <div
+        ref={ref}
+        className={cn("flex h-full flex-col overflow-hidden", className)}
+        {...props}
+      >
         {/* Top tabs */}
         {tabPosition === "top" && tabButtons}
 
@@ -90,8 +106,8 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
         {/* Bottom tabs */}
         {tabPosition === "bottom" && tabButtons}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-MobileTabs.displayName = "MobileTabs"
+MobileTabs.displayName = "MobileTabs";

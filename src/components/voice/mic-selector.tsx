@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Check, ChevronDown, Mic, MicOff } from "lucide-react"
+import { useEffect, useState } from "react";
+import { Check, ChevronDown, Mic, MicOff } from "lucide-react";
 
-import { useAudioDevices } from "../../hooks/use-audio-devices"
-import { Chip } from "../primitives/chip"
+import { useAudioDevices } from "../../hooks/use-audio-devices";
+import { Chip } from "../primitives/chip";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../primitives/dropdown-menu"
-import { IconButton } from "../primitives/icon-button"
-import { LiveWaveform } from "./live-waveform"
-import type { MicButtonState } from "./mic-button"
+} from "../primitives/dropdown-menu";
+import { IconButton } from "../primitives/icon-button";
+import { LiveWaveform } from "./live-waveform";
+import type { MicButtonState } from "./mic-button";
 
 export interface MicSelectorProps {
-  value?: string
-  onValueChange?: (deviceId: string) => void
-  muted?: boolean
-  onMutedChange?: (muted: boolean) => void
-  disabled?: boolean
-  className?: string
+  value?: string;
+  onValueChange?: (deviceId: string) => void;
+  muted?: boolean;
+  onMutedChange?: (muted: boolean) => void;
+  disabled?: boolean;
+  className?: string;
   /**
    * Current state of the mic selector (idle, listening, processing, error)
    * @default "idle"
    */
-  state?: MicButtonState
+  state?: MicButtonState;
 }
 
 export function MicSelector({
@@ -38,47 +38,48 @@ export function MicSelector({
   className: _className,
   state,
 }: MicSelectorProps) {
-  const { devices, loading, error, hasPermission, loadDevices } = useAudioDevices()
-  const [internalMuted, setInternalMuted] = useState(false)
+  const { devices, loading, error, hasPermission, loadDevices } =
+    useAudioDevices();
+  const [internalMuted, setInternalMuted] = useState(false);
 
   // Use controlled muted if provided, otherwise use internal state
-  const isMuted = muted !== undefined ? muted : internalMuted
+  const isMuted = muted !== undefined ? muted : internalMuted;
 
   // console.log("supriya state: ", state)
   // console.log("supriya error: ", error)
   // console.log("supriya hasPermission: ", hasPermission)
 
   // Use controlled value if provided, otherwise use first device
-  const selectedDevice = value || devices[0]?.deviceId || ""
+  const selectedDevice = value || devices[0]?.deviceId || "";
 
   // Notify parent when default device is selected and no value is controlled
   useEffect(() => {
     if (!value && selectedDevice && devices.length > 0) {
-      onValueChange?.(selectedDevice)
+      onValueChange?.(selectedDevice);
     }
-  }, [value, selectedDevice, devices.length, onValueChange])
+  }, [value, selectedDevice, devices.length, onValueChange]);
 
   const handleDeviceSelect = (deviceId: string, e?: React.MouseEvent) => {
-    e?.preventDefault()
-    onValueChange?.(deviceId)
-  }
+    e?.preventDefault();
+    onValueChange?.(deviceId);
+  };
 
   const handleDropdownOpenChange = async (open: boolean) => {
     if (open && !hasPermission && !loading) {
-      await loadDevices()
+      await loadDevices();
     }
-  }
+  };
 
   const toggleMute = () => {
-    const newMuted = !isMuted
+    const newMuted = !isMuted;
     if (muted === undefined) {
-      setInternalMuted(newMuted)
+      setInternalMuted(newMuted);
     }
-    onMutedChange?.(newMuted)
-  }
+    onMutedChange?.(newMuted);
+  };
 
-  const isError = state === "error" || !hasPermission
-  console.log("supriya-isError: ", isError, isMuted)
+  const isError = state === "error" || !hasPermission;
+  console.log("supriya-isError: ", isError, isMuted);
 
   return (
     <Chip>
@@ -100,7 +101,9 @@ export function MicSelector({
         </IconButton>
         {isError && (
           <div className="bg-warning absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full">
-            <span className="text-hard-black text-xs leading-none font-bold">!</span>
+            <span className="text-hard-black text-xs leading-none font-bold">
+              !
+            </span>
           </div>
         )}
       </div>
@@ -124,7 +127,9 @@ export function MicSelector({
               Loading devices...
             </div>
           ) : error ? (
-            <div className="text-error px-4 py-3 text-center text-sm">Error: {error}</div>
+            <div className="text-error px-4 py-3 text-center text-sm">
+              Error: {error}
+            </div>
           ) : devices.length === 0 ? (
             <div className="text-muted-foreground px-4 py-3 text-center text-sm">
               No microphones available
@@ -140,7 +145,9 @@ export function MicSelector({
                   disabled={loading && isError}
                 >
                   <span className="truncate">{device.label}</span>
-                  {selectedDevice === device.deviceId && <Check className="size-5 flex-shrink-0" />}
+                  {selectedDevice === device.deviceId && (
+                    <Check className="size-5 flex-shrink-0" />
+                  )}
                 </DropdownMenuItem>
               ))}
             </>
@@ -148,5 +155,5 @@ export function MicSelector({
         </DropdownMenuContent>
       </DropdownMenu>
     </Chip>
-  )
+  );
 }

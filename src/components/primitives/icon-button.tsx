@@ -1,7 +1,7 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 const iconButtonVariants = cva(
   "relative inline-flex items-center justify-center cursor-pointer transition-all disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 outline-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-6 [&_svg]:shrink-0",
@@ -12,8 +12,10 @@ const iconButtonVariants = cva(
         square: "rounded-md",
       },
       variant: {
-        filled: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
-        outlined: "border border-primary text-primary hover:bg-primary/10 active:bg-primary/20",
+        filled:
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
+        outlined:
+          "border border-primary text-primary hover:bg-primary/10 active:bg-primary/20",
         standard: "text-foreground hover:bg-accent/10 active:bg-accent/20",
       },
       size: {
@@ -29,16 +31,27 @@ const iconButtonVariants = cva(
       variant: "filled",
       size: "default",
     },
-  }
-)
+  },
+);
 
 export interface IconButtonProps
-  extends React.ComponentProps<"button">, VariantProps<typeof iconButtonVariants> {}
+  extends
+    React.ComponentProps<"button">,
+    VariantProps<typeof iconButtonVariants> {}
 
-function IconButton({ className, shape, variant, size, ...props }: IconButtonProps) {
+function IconButton({
+  className,
+  shape,
+  variant,
+  size,
+  ...props
+}: IconButtonProps) {
   return (
-    <button className={cn(iconButtonVariants({ shape, variant, size, className }))} {...props} />
-  )
+    <button
+      className={cn(iconButtonVariants({ shape, variant, size, className }))}
+      {...props}
+    />
+  );
 }
 
-export { IconButton, iconButtonVariants }
+export { IconButton, iconButtonVariants };

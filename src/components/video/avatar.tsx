@@ -1,68 +1,68 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
-export type AvatarSize = "sm" | "md" | "lg"
+export type AvatarSize = "sm" | "md" | "lg";
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Image URL for the avatar
    */
-  src?: string
+  src?: string;
 
   /**
    * Icon to display (takes precedence over initials if no image)
    */
-  icon?: React.ReactNode
+  icon?: React.ReactNode;
 
   /**
    * Custom initials to display (takes precedence over name)
    */
-  initials?: string
+  initials?: string;
 
   /**
    * Full name (used to generate initials if initials not provided)
    */
-  name?: string
+  name?: string;
 
   /**
    * Size of the avatar
    * @default "md"
    */
-  size?: AvatarSize
+  size?: AvatarSize;
 
   /**
    * Background color for the avatar
    * @default "bg-gradient-to-br from-blue-500 to-blue-600"
    */
-  bgColor?: string
+  bgColor?: string;
 
   /**
    * Alt text for image
    */
-  alt?: string
+  alt?: string;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
   sm: "h-8 w-8",
   md: "h-10 w-10",
   lg: "h-12 w-12",
-}
+};
 
 const getInitials = (name?: string, customInitials?: string): string => {
-  if (customInitials) return customInitials.toUpperCase()
+  if (customInitials) return customInitials.toUpperCase();
   if (name) {
     return name
       .split(" ")
       .slice(0, 2)
       .map((part) => part[0])
       .join("")
-      .toUpperCase()
+      .toUpperCase();
   }
-  return "?"
-}
+  return "?";
+};
 
 export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
   (
@@ -77,17 +77,19 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       alt = "avatar",
       ...props
     },
-    ref
+    ref,
   ) => {
-    const [imageError, setImageError] = React.useState(false)
-    const displayInitials = getInitials(name, initials)
+    const [imageError, setImageError] = React.useState(false);
+    const displayInitials = getInitials(name, initials);
 
     // Debug: Log once per unique initials
     React.useEffect(() => {
       if (displayInitials) {
-        console.log(`[Avatar] Rendering with initials: "${displayInitials}", size: ${size}`)
+        console.log(
+          `[Avatar] Rendering with initials: "${displayInitials}", size: ${size}`,
+        );
       }
-    }, [displayInitials, size])
+    }, [displayInitials, size]);
 
     return (
       <div
@@ -95,7 +97,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         className={cn(
           "ring-border flex items-center justify-center overflow-hidden rounded-full ring-1",
           sizeClasses[size],
-          className
+          className,
         )}
         {...props}
       >
@@ -107,22 +109,27 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             onError={() => setImageError(true)}
           />
         ) : icon ? (
-          <div className={cn("h-full w-full flex items-center justify-center text-white", bgColor)}>
+          <div
+            className={cn(
+              "h-full w-full flex items-center justify-center text-white",
+              bgColor,
+            )}
+          >
             {icon}
           </div>
         ) : (
           <div
             className={cn(
               "h-full w-full flex items-center justify-center text-xs font-semibold text-white",
-              bgColor
+              bgColor,
             )}
           >
             {displayInitials}
           </div>
         )}
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-Avatar.displayName = "Avatar"
+Avatar.displayName = "Avatar";

@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { MessageCircle, X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { MessageCircle, X } from "lucide-react";
 
-import { useIsMobile } from "../../hooks/use-is-mobile"
-import { EMessageStatus, IMessageListItem } from "../../lib/message-engine"
-import { cn, renderMarkdownToHtml } from "../../lib/utils"
+import { useIsMobile } from "../../hooks/use-is-mobile";
+import { EMessageStatus, IMessageListItem } from "../../lib/message-engine";
+import { cn, renderMarkdownToHtml } from "../../lib/utils";
 
-export { EMessageStatus } from "../../lib/message-engine"
-export type { IMessageListItem } from "../../lib/message-engine"
+export { EMessageStatus } from "../../lib/message-engine";
+export type { IMessageListItem } from "../../lib/message-engine";
 
 export interface ConvoTextStreamProps {
-  messageList: IMessageListItem[]
-  currentInProgressMessage?: IMessageListItem | null
-  agentUID: string | undefined
-  messageSource?: "rtc" | "rtm" | "auto"
-  className?: string
+  messageList: IMessageListItem[];
+  currentInProgressMessage?: IMessageListItem | null;
+  agentUID: string | undefined;
+  messageSource?: "rtc" | "rtm" | "auto";
+  className?: string;
 }
 
 export function ConvoTextStream({
@@ -25,15 +25,15 @@ export function ConvoTextStream({
   messageSource: _messageSource = "auto",
   className = "",
 }: ConvoTextStreamProps) {
-  const isMobile = useIsMobile()
-  const [isOpen, setIsOpen] = useState(false)
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
-  const [hasNewMessages, setHasNewMessages] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
-  const lastMessageRef = useRef<HTMLDivElement>(null)
-  const prevMessageLengthRef = useRef(messageList.length)
-  const prevMessageTextRef = useRef("")
-  const hasSeenFirstMessageRef = useRef(false)
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
+  const prevMessageLengthRef = useRef(messageList.length);
+  const prevMessageTextRef = useRef("");
+  const hasSeenFirstMessageRef = useRef(false);
 
   // Debug log for message detection
   useEffect(() => {
@@ -48,10 +48,10 @@ export function ConvoTextStream({
         "Current in progress:",
         currentInProgressMessage,
         "Agent UID:",
-        agentUID
-      )
+        agentUID,
+      );
     }
-  }, [messageList, currentInProgressMessage, agentUID])
+  }, [messageList, currentInProgressMessage, agentUID]);
 
   //  Helper to check if we should show streaming message
   const shouldShowStreamingMessage = useCallback(() => {
@@ -59,115 +59,133 @@ export function ConvoTextStream({
       currentInProgressMessage !== null &&
       currentInProgressMessage.status === EMessageStatus.IN_PROGRESS &&
       currentInProgressMessage.text.trim().length > 0
-    )
-  }, [currentInProgressMessage])
+    );
+  }, [currentInProgressMessage]);
 
   // Scroll to bottom function for direct calls
   const scrollToBottom = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }
+  };
 
   const handleScroll = () => {
     if (scrollRef.current) {
-      const { scrollHeight, scrollTop, clientHeight } = scrollRef.current
-      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100
-      setShouldAutoScroll(isAtBottom)
+      const { scrollHeight, scrollTop, clientHeight } = scrollRef.current;
+      const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+      setShouldAutoScroll(isAtBottom);
     }
-  }
+  };
 
   // Check if streaming content has significantly changed
   const hasContentChanged = () => {
-    if (!currentInProgressMessage) return false
+    if (!currentInProgressMessage) return false;
 
-    const currentText = currentInProgressMessage.text || ""
-    const textLengthDiff = currentText.length - prevMessageTextRef.current.length
+    const currentText = currentInProgressMessage.text || "";
+    const textLengthDiff =
+      currentText.length - prevMessageTextRef.current.length;
 
     // Consider significant change if more than 20 new characters
-    const hasSignificantChange = textLengthDiff > 20
+    const hasSignificantChange = textLengthDiff > 20;
 
     // Update reference
     if (hasSignificantChange) {
-      prevMessageTextRef.current = currentText
+      prevMessageTextRef.current = currentText;
     }
 
-    return hasSignificantChange
-  }
+    return hasSignificantChange;
+  };
 
   // Effect for auto-opening chat when first streaming message arrives
 
   useEffect(() => {
     // Check if this is the first message and chat should be opened
-    const hasNewMessage = messageList.length > 0
-    const hasInProgressMessage = shouldShowStreamingMessage() && currentInProgressMessage !== null
+    const hasNewMessage = messageList.length > 0;
+    const hasInProgressMessage =
+      shouldShowStreamingMessage() && currentInProgressMessage !== null;
 
     // Auto-open on first message (both desktop and mobile)
-    if ((hasNewMessage || hasInProgressMessage) && !hasSeenFirstMessageRef.current) {
+    if (
+      (hasNewMessage || hasInProgressMessage) &&
+      !hasSeenFirstMessageRef.current
+    ) {
       // Schedule state updates to avoid synchronous setState in effect
       Promise.resolve().then(() => {
-        setIsOpen(true)
-        setHasNewMessages(true)
-      })
-      hasSeenFirstMessageRef.current = true
+        setIsOpen(true);
+        setHasNewMessages(true);
+      });
+      hasSeenFirstMessageRef.current = true;
     }
-  }, [messageList, currentInProgressMessage, isMobile, shouldShowStreamingMessage])
+  }, [
+    messageList,
+    currentInProgressMessage,
+    isMobile,
+    shouldShowStreamingMessage,
+  ]);
 
   useEffect(() => {
     // Auto-scroll in these cases:
     // 1. New complete message arrived
     // 2. User is already at bottom
     // 3. Streaming content has changed significantly
-    const hasNewMessage = messageList.length > prevMessageLengthRef.current
-    const hasStreamingChange = hasContentChanged()
+    const hasNewMessage = messageList.length > prevMessageLengthRef.current;
+    const hasStreamingChange = hasContentChanged();
 
-    if ((hasNewMessage || shouldAutoScroll || hasStreamingChange) && scrollRef.current) {
+    if (
+      (hasNewMessage || shouldAutoScroll || hasStreamingChange) &&
+      scrollRef.current
+    ) {
       // Use direct scroll to bottom for more reliable scrolling
-      scrollToBottom()
+      scrollToBottom();
     }
 
-    prevMessageLengthRef.current = messageList.length
+    prevMessageLengthRef.current = messageList.length;
   }, [
     messageList,
     currentInProgressMessage?.text,
     shouldAutoScroll,
     hasContentChanged,
     scrollToBottom,
-  ])
+  ]);
 
   // Extra safety: ensure scroll happens after content renders during active streaming
   useEffect(() => {
-    if (currentInProgressMessage?.status === EMessageStatus.IN_PROGRESS && shouldAutoScroll) {
-      const timer = setTimeout(scrollToBottom, 100)
-      return () => clearTimeout(timer)
+    if (
+      currentInProgressMessage?.status === EMessageStatus.IN_PROGRESS &&
+      shouldAutoScroll
+    ) {
+      const timer = setTimeout(scrollToBottom, 100);
+      return () => clearTimeout(timer);
     }
   }, [
     currentInProgressMessage?.text,
     currentInProgressMessage?.status,
     shouldAutoScroll,
     scrollToBottom,
-  ])
+  ]);
 
   // Toggle chat open/closed
   const toggleChat = () => {
-    setIsOpen(!isOpen)
+    setIsOpen(!isOpen);
     // If opening the chat, consider it as having seen the first message
     if (!isOpen) {
-      hasSeenFirstMessageRef.current = true
-      setHasNewMessages(false) // Clear pulse indicator when opened
+      hasSeenFirstMessageRef.current = true;
+      setHasNewMessages(false); // Clear pulse indicator when opened
     }
-  }
+  };
 
   // Helper to determine if message is from AI
   const isAIMessage = (message: IMessageListItem) => {
     // The AI should be uid=0 (agent) OR matching the agentUID if provided
-    return message.uid === 0 || (agentUID && message.uid.toString() === agentUID)
-  }
+    return (
+      message.uid === 0 || (agentUID && message.uid.toString() === agentUID)
+    );
+  };
 
   // Combine complete messages with in-progress message for rendering
-  const allMessages = [...messageList]
+  const allMessages = [...messageList];
   if (shouldShowStreamingMessage() && currentInProgressMessage) {
-    allMessages.push(currentInProgressMessage)
+    allMessages.push(currentInProgressMessage);
   }
 
   return (
@@ -178,7 +196,7 @@ export function ConvoTextStream({
         isOpen
           ? "right-4 bottom-32 left-4 md:right-8 md:bottom-24 md:left-auto"
           : "right-4 bottom-6 md:right-8 md:bottom-8",
-        className
+        className,
       )}
     >
       {isOpen ? (
@@ -196,7 +214,11 @@ export function ConvoTextStream({
             </button>
           </div>
 
-          <div className="flex-1 overflow-auto" ref={scrollRef} onScroll={handleScroll}>
+          <div
+            className="flex-1 overflow-auto"
+            ref={scrollRef}
+            onScroll={handleScroll}
+          >
             <div className="space-y-4 p-4">
               {allMessages.map((message, index) => (
                 <div
@@ -204,14 +226,16 @@ export function ConvoTextStream({
                   ref={index === allMessages.length - 1 ? lastMessageRef : null}
                   className={cn(
                     "flex w-full items-start gap-2",
-                    isAIMessage(message) ? "flex-row" : "flex-row-reverse"
+                    isAIMessage(message) ? "flex-row" : "flex-row-reverse",
                   )}
                 >
                   {/* Avatar */}
                   <div
                     className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium"
                     style={{
-                      backgroundColor: isAIMessage(message) ? "#A0FAFF" : "#333333",
+                      backgroundColor: isAIMessage(message)
+                        ? "#A0FAFF"
+                        : "#333333",
                       color: isAIMessage(message) ? "#000000" : "#FFFFFF",
                     }}
                   >
@@ -222,17 +246,22 @@ export function ConvoTextStream({
                   <div
                     className={cn(
                       "flex",
-                      isAIMessage(message) ? "flex-col items-start" : "flex-col items-end"
+                      isAIMessage(message)
+                        ? "flex-col items-start"
+                        : "flex-col items-end",
                     )}
                   >
                     <div
                       className={cn(
                         "rounded-[15px] px-3 py-2",
                         isAIMessage(message) ? "text-left" : "text-right",
-                        message.status === EMessageStatus.IN_PROGRESS && "animate-pulse"
+                        message.status === EMessageStatus.IN_PROGRESS &&
+                          "animate-pulse",
                       )}
                       style={{
-                        backgroundColor: isAIMessage(message) ? "transparent" : "#333333",
+                        backgroundColor: isAIMessage(message)
+                          ? "transparent"
+                          : "#333333",
                         color: isAIMessage(message) ? "#A0FAFF" : "#FFFFFF",
                       }}
                       dangerouslySetInnerHTML={{
@@ -251,12 +280,12 @@ export function ConvoTextStream({
           className={cn(
             "group mr-2 flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300 ease-in-out hover:scale-110 active:scale-110",
             "border-white bg-[#333333] hover:bg-white active:bg-white",
-            hasNewMessages && "animate-chat-pulse"
+            hasNewMessages && "animate-chat-pulse",
           )}
         >
           <MessageCircle className="h-6 w-6 text-white transition-colors duration-300 ease-in-out group-hover:text-black group-active:text-black" />
         </button>
       )}
     </div>
-  )
+  );
 }

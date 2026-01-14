@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown } from "lucide-react"
+import * as React from "react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { Check, ChevronDown } from "lucide-react";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 interface Item {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export interface ValuePickerProps {
-  items: Item[]
-  value?: string
-  onValueChange?: (value: string) => void
-  placeholder?: string
-  label?: string
-  disabled?: boolean
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  maxHeight?: string
+  items: Item[];
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  disabled?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  maxHeight?: string;
 }
 
 const ValuePicker = React.forwardRef<
@@ -39,10 +39,10 @@ const ValuePicker = React.forwardRef<
       onOpenChange,
       maxHeight,
     },
-    ref
+    ref,
   ) => {
-    const selectedItem = items.find((i) => i.id === value)
-    const hasScroll = !!maxHeight
+    const selectedItem = items.find((i) => i.id === value);
+    const hasScroll = !!maxHeight;
 
     return (
       <div className="flex flex-col gap-3">
@@ -60,11 +60,13 @@ const ValuePicker = React.forwardRef<
               "bg-input-field-bg text-font-high text-normal inline-flex w-full items-center justify-between border p-3 font-medium outline-hidden",
               "data-[state=closed]:rounded-md data-[state=open]:rounded-none",
               "data-[placeholder]:text-muted-foreground",
-              "disabled:pointer-events-none disabled:opacity-50"
+              "disabled:pointer-events-none disabled:opacity-50",
             )}
           >
             <SelectPrimitive.Value placeholder={placeholder} asChild>
-              <span className="truncate leading-tight">{selectedItem?.name || placeholder}</span>
+              <span className="truncate leading-tight">
+                {selectedItem?.name || placeholder}
+              </span>
             </SelectPrimitive.Value>
             <SelectPrimitive.Icon asChild>
               <ChevronDown className="size-5" />
@@ -80,7 +82,7 @@ const ValuePicker = React.forwardRef<
                 "data-[side=bottom]:slide-in-from-top-2",
                 "data-[side=left]:slide-in-from-right-2",
                 "data-[side=right]:slide-in-from-left-2",
-                "data-[side=top]:slide-in-from-bottom-2"
+                "data-[side=top]:slide-in-from-bottom-2",
               )}
               position="popper"
               sideOffset={0}
@@ -107,7 +109,7 @@ const ValuePicker = React.forwardRef<
                         "bg-input-field-bg text-normal relative flex cursor-pointer items-center gap-2 rounded-sm p-3 pr-8 outline-hidden select-none",
                         "transition-colors hover:rounded-none hover:bg-[var(--color-neutral)]/25",
                         "data-[state=checked]:rounded-none data-[state=checked]:bg-[var(--color-neutral)]/15",
-                        "focus-visible:bg-[var(--color-neutral)]/15"
+                        "focus-visible:bg-[var(--color-neutral)]/15",
                       )}
                     >
                       <SelectPrimitive.ItemText className="flex-1">
@@ -131,10 +133,10 @@ const ValuePicker = React.forwardRef<
           </SelectPrimitive.Portal>
         </SelectPrimitive.Root>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-ValuePicker.displayName = "ValuePicker"
+ValuePicker.displayName = "ValuePicker";
 
-export { ValuePicker, type Item }
+export { ValuePicker, type Item };

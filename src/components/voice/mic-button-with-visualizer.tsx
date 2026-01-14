@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react";
 // Import from peer dependency
 // @ts-expect-error - peer dependency
-import { IMicrophoneAudioTrack, useRTCClient } from "agora-rtc-react"
-import { Mic, MicOff } from "lucide-react"
+import { IMicrophoneAudioTrack, useRTCClient } from "agora-rtc-react";
+import { Mic, MicOff } from "lucide-react";
 
 interface AudioBar {
-  height: number
+  height: number;
 }
 
 export interface MicButtonWithVisualizerProps {
-  isEnabled: boolean
-  setIsEnabled: (enabled: boolean) => void
-  track: IMicrophoneAudioTrack | MediaStream | null
-  enabledColor?: string
-  disabledColor?: string
-  onToggle?: () => void | Promise<void>
-  className?: string
+  isEnabled: boolean;
+  setIsEnabled: (enabled: boolean) => void;
+  track: IMicrophoneAudioTrack | MediaStream | null;
+  enabledColor?: string;
+  disabledColor?: string;
+  onToggle?: () => void | Promise<void>;
+  className?: string;
   /**
    * @deprecated Use `track` instead. Will be removed in next major version.
    */
-  localMicrophoneTrack?: IMicrophoneAudioTrack | null
+  localMicrophoneTrack?: IMicrophoneAudioTrack | null;
 }
 
 export function MicButtonWithVisualizer({
@@ -34,121 +34,125 @@ export function MicButtonWithVisualizer({
   className = "",
   localMicrophoneTrack, // deprecated
 }: MicButtonWithVisualizerProps) {
-  const [audioData, setAudioData] = useState<AudioBar[]>(Array(5).fill({ height: 0 }))
-  const client = useRTCClient()
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const animationFrameRef = useRef<number | undefined>(undefined)
+  const [audioData, setAudioData] = useState<AudioBar[]>(
+    Array(5).fill({ height: 0 }),
+  );
+  const client = useRTCClient();
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   // Support deprecated prop
-  const audioTrack = track || localMicrophoneTrack
+  const audioTrack = track || localMicrophoneTrack;
 
   useEffect(() => {
     const updateAudioData = () => {
-      if (!analyserRef.current) return
+      if (!analyserRef.current) return;
 
-      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
-      analyserRef.current.getByteFrequencyData(dataArray)
+      const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+      analyserRef.current.getByteFrequencyData(dataArray);
 
-      const segmentSize = Math.floor(dataArray.length / 5)
+      const segmentSize = Math.floor(dataArray.length / 5);
       const newAudioData = Array(5)
         .fill(0)
         .map((_, index) => {
-          const start = index * segmentSize
-          const end = start + segmentSize
-          const segment = dataArray.slice(start, end)
-          const average = segment.reduce((a, b) => a + b, 0) / segment.length
+          const start = index * segmentSize;
+          const end = start + segmentSize;
+          const segment = dataArray.slice(start, end);
+          const average = segment.reduce((a, b) => a + b, 0) / segment.length;
 
-          const scaledHeight = Math.min(60, (average / 255) * 100 * 1.2)
-          const height = Math.pow(scaledHeight / 60, 0.7) * 60
+          const scaledHeight = Math.min(60, (average / 255) * 100 * 1.2);
+          const height = Math.pow(scaledHeight / 60, 0.7) * 60;
 
           return {
             height: height,
-          }
-        })
+          };
+        });
 
-      setAudioData(newAudioData)
-      animationFrameRef.current = requestAnimationFrame(updateAudioData)
-    }
+      setAudioData(newAudioData);
+      animationFrameRef.current = requestAnimationFrame(updateAudioData);
+    };
 
     const cleanupAudioAnalyser = () => {
       if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
+        cancelAnimationFrame(animationFrameRef.current);
       }
       if (audioContextRef.current) {
-        audioContextRef.current.close()
-        audioContextRef.current = null
+        audioContextRef.current.close();
+        audioContextRef.current = null;
       }
-      setAudioData(Array(5).fill({ height: 0 }))
-    }
+      setAudioData(Array(5).fill({ height: 0 }));
+    };
 
     const setupAudioAnalyser = async () => {
-      if (!audioTrack) return
+      if (!audioTrack) return;
 
       try {
-        audioContextRef.current = new AudioContext()
-        analyserRef.current = audioContextRef.current.createAnalyser()
-        analyserRef.current.fftSize = 64
-        analyserRef.current.smoothingTimeConstant = 0.5
+        audioContextRef.current = new AudioContext();
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        analyserRef.current.fftSize = 64;
+        analyserRef.current.smoothingTimeConstant = 0.5;
 
-        let mediaStream: MediaStream
+        let mediaStream: MediaStream;
         if (audioTrack instanceof MediaStream) {
-          mediaStream = audioTrack
+          mediaStream = audioTrack;
         } else {
           // Agora track
-          const mediaStreamTrack = audioTrack.getMediaStreamTrack()
-          mediaStream = new MediaStream([mediaStreamTrack])
+          const mediaStreamTrack = audioTrack.getMediaStreamTrack();
+          mediaStream = new MediaStream([mediaStreamTrack]);
         }
 
-        const source = audioContextRef.current.createMediaStreamSource(mediaStream)
-        source.connect(analyserRef.current)
+        const source =
+          audioContextRef.current.createMediaStreamSource(mediaStream);
+        source.connect(analyserRef.current);
 
-        updateAudioData()
+        updateAudioData();
       } catch (error) {
-        console.error("Error setting up audio analyser:", error)
+        console.error("Error setting up audio analyser:", error);
       }
-    }
+    };
 
     if (audioTrack && isEnabled) {
-      setupAudioAnalyser()
+      setupAudioAnalyser();
     } else {
-      cleanupAudioAnalyser()
+      cleanupAudioAnalyser();
     }
 
-    return () => cleanupAudioAnalyser()
-  }, [audioTrack, isEnabled])
+    return () => cleanupAudioAnalyser();
+  }, [audioTrack, isEnabled]);
 
   const toggleMicrophone = async () => {
     // If custom onToggle provided, use it
     if (onToggle) {
-      await onToggle()
-      return
+      await onToggle();
+      return;
     }
 
     // Otherwise, handle Agora track toggle
-    const agoraTrack = audioTrack && !(audioTrack instanceof MediaStream) ? audioTrack : null
+    const agoraTrack =
+      audioTrack && !(audioTrack instanceof MediaStream) ? audioTrack : null;
     if (agoraTrack) {
-      const newState = !isEnabled
+      const newState = !isEnabled;
       try {
-        await agoraTrack.setEnabled(newState)
+        await agoraTrack.setEnabled(newState);
         if (!newState) {
-          await client.unpublish(agoraTrack)
+          await client.unpublish(agoraTrack);
         } else {
-          await client.publish(agoraTrack)
+          await client.publish(agoraTrack);
         }
-        setIsEnabled(newState)
-        console.log("Microphone state updated successfully")
+        setIsEnabled(newState);
+        console.log("Microphone state updated successfully");
       } catch (error) {
-        console.error("Failed to toggle microphone:", error)
-        agoraTrack.setEnabled(isEnabled)
+        console.error("Failed to toggle microphone:", error);
+        agoraTrack.setEnabled(isEnabled);
       }
     } else {
       // Just toggle state for MediaStream
-      setIsEnabled(!isEnabled)
+      setIsEnabled(!isEnabled);
     }
-  }
+  };
 
-  const activeColor = isEnabled ? enabledColor : disabledColor
+  const activeColor = isEnabled ? enabledColor : disabledColor;
 
   return (
     <button
@@ -189,5 +193,5 @@ export function MicButtonWithVisualizer({
         )}
       </div>
     </button>
-  )
+  );
 }

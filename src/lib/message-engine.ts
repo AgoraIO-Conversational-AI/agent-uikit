@@ -1,51 +1,51 @@
-import { decodeStreamMessage } from "./utils"
+import { decodeStreamMessage } from "./utils";
 
-const DEFAULT_MESSAGE_CACHE_TIMEOUT = 1000 * 60 * 5 // 5 minutes
-const DEFAULT_INTERVAL = 200 // milliseconds
-const CONSOLE_LOG_PREFIX = "[MessageService]"
+const DEFAULT_MESSAGE_CACHE_TIMEOUT = 1000 * 60 * 5; // 5 minutes
+const DEFAULT_INTERVAL = 200; // milliseconds
+const CONSOLE_LOG_PREFIX = "[MessageService]";
 
 export type TDataChunk = {
-  message_id: string
-  part_idx: number
-  part_sum: number
-  content: string
-}
+  message_id: string;
+  part_idx: number;
+  part_sum: number;
+  content: string;
+};
 
-const logger = console
+const logger = console;
 
 export type TDataChunkMessageV1 = {
   /** Boolean indicating if the text will no longer change (always True for ASR results) */
-  is_final: boolean
+  is_final: boolean;
   /** Int user ID - 0 for AI agent, non-zero for corresponding user int uid */
-  stream_id: number
+  stream_id: number;
   /** String unique identifier for each subtitle message */
-  message_id: string
+  message_id: string;
   /** String data type, defaults to 'transcribe' */
-  data_type: string
+  data_type: string;
   /** Int timestamp when subtitle was generated */
-  text_ts: number
+  text_ts: number;
   /** String subtitle content */
-  text: string
-}
+  text: string;
+};
 
 export type TDataChunkMessageWord = {
-  word: string
-  start_ms: number
-  duration_ms: number
-  stable: boolean
-}
+  word: string;
+  start_ms: number;
+  duration_ms: number;
+  stable: boolean;
+};
 
 export type TMessageEngineObjectWord = TDataChunkMessageWord & {
-  word_status?: EMessageStatus
-}
+  word_status?: EMessageStatus;
+};
 
 export type TQueueItem = {
-  turn_id: number
-  text: string
-  words: TMessageEngineObjectWord[]
-  status: EMessageStatus
-  stream_id: number
-}
+  turn_id: number;
+  text: string;
+  words: TMessageEngineObjectWord[];
+  status: EMessageStatus;
+  stream_id: number;
+};
 
 // https://github.com/TEN-framework/ten_ai_base/blob/main/interface/ten_ai_base/transcription.py
 /**
@@ -86,36 +86,36 @@ export enum EMessageEngineMode {
 }
 
 export interface ITranscriptionBase {
-  object: ETranscriptionObjectType
-  text: string
-  start_ms: number
-  duration_ms: number
-  language: string
-  turn_id: number
-  stream_id: number
-  user_id: string
-  words: TDataChunkMessageWord[] | null
+  object: ETranscriptionObjectType;
+  text: string;
+  start_ms: number;
+  duration_ms: number;
+  language: string;
+  turn_id: number;
+  stream_id: number;
+  user_id: string;
+  words: TDataChunkMessageWord[] | null;
 }
 
 export interface IUserTranscription extends ITranscriptionBase {
-  object: ETranscriptionObjectType.USER_TRANSCRIPTION // "user.transcription"
-  final: boolean
+  object: ETranscriptionObjectType.USER_TRANSCRIPTION; // "user.transcription"
+  final: boolean;
 }
 
 export interface IAgentTranscription extends ITranscriptionBase {
-  object: ETranscriptionObjectType.AGENT_TRANSCRIPTION // "assistant.transcription"
-  quiet: boolean
-  turn_seq_id: number
-  turn_status: EMessageStatus
+  object: ETranscriptionObjectType.AGENT_TRANSCRIPTION; // "assistant.transcription"
+  quiet: boolean;
+  turn_seq_id: number;
+  turn_status: EMessageStatus;
 }
 
 export interface IMessageInterrupt {
-  object: ETranscriptionObjectType.MSG_INTERRUPTED // "message.interrupt"
-  message_id: string
-  data_type: "message"
-  turn_id: number
-  start_ms: number
-  send_ts: number
+  object: ETranscriptionObjectType.MSG_INTERRUPTED; // "message.interrupt"
+  message_id: string;
+  data_type: "message";
+  turn_id: number;
+  start_ms: number;
+  send_ts: number;
 }
 
 /**
@@ -126,34 +126,37 @@ export interface IMessageInterrupt {
  * @property status - Current status of the message (e.g. in progress, completed, interrupted)
  */
 export interface IMessageListItem {
-  uid: number
-  turn_id: number
-  text: string
-  status: EMessageStatus
+  uid: number;
+  turn_id: number;
+  text: string;
+  status: EMessageStatus;
 }
 
 interface IMessageArrayItem<T> {
-  uid: number
-  turn_id: number
-  _time: number
-  text: string
-  status: EMessageStatus
-  metadata: T | null
+  uid: number;
+  turn_id: number;
+  _time: number;
+  text: string;
+  status: EMessageStatus;
+  metadata: T | null;
 }
 
 // Type definitions for RTC and RTM engines
 export type IAgoraRTCClient = {
-  on: (event: string, callback: (...args: any[]) => void) => void
-  off?: (event: string, callback: (...args: any[]) => void) => void
-  uid?: string | number
-}
+  on: (event: string, callback: (...args: any[]) => void) => void;
+  off?: (event: string, callback: (...args: any[]) => void) => void;
+  uid?: string | number;
+};
 
 export type RTMClient = {
-  addEventListener: (event: string, callback: (...args: any[]) => void) => void
-  removeEventListener?: (event: string, callback: (...args: any[]) => void) => void
-}
+  addEventListener: (event: string, callback: (...args: any[]) => void) => void;
+  removeEventListener?: (
+    event: string,
+    callback: (...args: any[]) => void,
+  ) => void;
+};
 
-export type UID = string | number
+export type UID = string | number;
 
 /**
  * Message engine that handles real-time transcription and subtitle rendering
@@ -175,84 +178,91 @@ export type UID = string | number
  */
 export class MessageEngine {
   // handle rtc-engine stream message
-  private _messageCache: Record<string, TDataChunk[]> = {}
-  private _messageCacheTimeout: number = DEFAULT_MESSAGE_CACHE_TIMEOUT
+  private _messageCache: Record<string, TDataChunk[]> = {};
+  private _messageCacheTimeout: number = DEFAULT_MESSAGE_CACHE_TIMEOUT;
 
   /** @deprecated */
-  private _legacyMode: boolean = false
+  private _legacyMode: boolean = false;
 
-  private _mode: EMessageEngineMode = EMessageEngineMode.AUTO // mode should only be set once
-  private _queue: TQueueItem[] = []
-  private _interval: number = DEFAULT_INTERVAL // milliseconds
-  private _intervalRef: NodeJS.Timeout | null = null
-  private _pts: number = 0 // current pts
-  private _lastPoppedQueueItem: TQueueItem | null | undefined = null
-  private _isRunning: boolean = false
-  private _rtcEngine: IAgoraRTCClient | null = null
-  private _rtmClient: RTMClient | null = null
-  private _channelName: string | null = null
+  private _mode: EMessageEngineMode = EMessageEngineMode.AUTO; // mode should only be set once
+  private _queue: TQueueItem[] = [];
+  private _interval: number = DEFAULT_INTERVAL; // milliseconds
+  private _intervalRef: NodeJS.Timeout | null = null;
+  private _pts: number = 0; // current pts
+  private _lastPoppedQueueItem: TQueueItem | null | undefined = null;
+  private _isRunning: boolean = false;
+  private _rtcEngine: IAgoraRTCClient | null = null;
+  private _rtmClient: RTMClient | null = null;
+  private _channelName: string | null = null;
 
   // Event listener references for cleanup
-  private _rtcStreamMessageHandler: ((uid: UID, payload: Uint8Array) => void) | null = null
-  private _rtcAudioMetadataHandler: ((metadata: Uint8Array) => void) | null = null
-  private _rtmMessageHandler: ((event: any) => void) | null = null
+  private _rtcStreamMessageHandler:
+    | ((uid: UID, payload: Uint8Array) => void)
+    | null = null;
+  private _rtcAudioMetadataHandler: ((metadata: Uint8Array) => void) | null =
+    null;
+  private _rtmMessageHandler: ((event: any) => void) | null = null;
 
-  public messageList: IMessageArrayItem<Partial<IUserTranscription | IAgentTranscription>>[] = []
+  public messageList: IMessageArrayItem<
+    Partial<IUserTranscription | IAgentTranscription>
+  >[] = [];
   /**
    * Callback function that gets triggered whenever the message list is updated
    * Takes the updated message list as a parameter and returns void
    * Can be null if no callback is needed
    */
-  public onMessageListUpdate: ((messageList: IMessageListItem[]) => void) | null = null
+  public onMessageListUpdate:
+    | ((messageList: IMessageListItem[]) => void)
+    | null = null;
 
   constructor(config: {
-    rtcEngine?: IAgoraRTCClient
-    rtmClient?: RTMClient
-    channelName?: string
-    renderMode?: EMessageEngineMode
-    callback?: (messageList: IMessageListItem[]) => void
+    rtcEngine?: IAgoraRTCClient;
+    rtmClient?: RTMClient;
+    channelName?: string;
+    renderMode?: EMessageEngineMode;
+    callback?: (messageList: IMessageListItem[]) => void;
   }) {
-    this._rtcEngine = config.rtcEngine || null
-    this._rtmClient = config.rtmClient || null
-    this._channelName = config.channelName || null
+    this._rtcEngine = config.rtcEngine || null;
+    this._rtmClient = config.rtmClient || null;
+    this._channelName = config.channelName || null;
 
     if (this._rtcEngine) {
-      this._listenRtcEvents()
+      this._listenRtcEvents();
     }
 
     if (this._rtmClient && this._channelName) {
-      this._listenRtmEvents()
+      this._listenRtmEvents();
     }
 
     this.run({
       legacyMode: false,
-    })
-    this.setMode(config.renderMode ?? EMessageEngineMode.AUTO)
-    this.onMessageListUpdate = config.callback ?? null
+    });
+    this.setMode(config.renderMode ?? EMessageEngineMode.AUTO);
+    this.onMessageListUpdate = config.callback ?? null;
   }
 
   private _listenRtcEvents() {
     if (!this._rtcEngine) {
-      return
+      return;
     }
 
     // Audio metadata handler for PTS synchronization
     this._rtcAudioMetadataHandler = (metadata: Uint8Array) => {
-      const pts64 = Number(new DataView(metadata.buffer).getBigUint64(0, true))
-      this.setPts(pts64)
-    }
-    this._rtcEngine.on("audio-metadata", this._rtcAudioMetadataHandler)
+      const pts64 = Number(new DataView(metadata.buffer).getBigUint64(0, true));
+      this.setPts(pts64);
+    };
+    this._rtcEngine.on("audio-metadata", this._rtcAudioMetadataHandler);
 
     // Stream message handler
     this._rtcStreamMessageHandler = (_: UID, payload: Uint8Array) => {
-      this.handleStreamMessage(payload)
-    }
-    this._rtcEngine.on("stream-message", this._rtcStreamMessageHandler)
+      this.handleStreamMessage(payload);
+    };
+    this._rtcEngine.on("stream-message", this._rtcStreamMessageHandler);
   }
 
   private _listenRtmEvents() {
     if (!this._rtmClient) {
-      return
+      return;
     }
 
     // RTM message handler
@@ -260,195 +270,230 @@ export class MessageEngine {
       // Check if this is a message from the subscribed channel
       if (event.channelName === this._channelName || !event.channelName) {
         // Handle RTM message payload (can be string or Uint8Array)
-        const payload = event.message
+        const payload = event.message;
 
         if (typeof payload === "string") {
           // If it's already a string, convert to Uint8Array for processing
-          const encoder = new TextEncoder()
-          this.handleStreamMessage(encoder.encode(payload))
+          const encoder = new TextEncoder();
+          this.handleStreamMessage(encoder.encode(payload));
         } else if (payload instanceof Uint8Array) {
-          this.handleStreamMessage(payload)
+          this.handleStreamMessage(payload);
         } else {
-          logger.warn(CONSOLE_LOG_PREFIX, "Unknown RTM message format", payload)
+          logger.warn(
+            CONSOLE_LOG_PREFIX,
+            "Unknown RTM message format",
+            payload,
+          );
         }
       }
-    }
+    };
 
-    this._rtmClient.addEventListener("message", this._rtmMessageHandler)
+    this._rtmClient.addEventListener("message", this._rtmMessageHandler);
   }
 
   public run(options?: { legacyMode?: boolean }) {
-    this._isRunning = true
-    this._legacyMode = options?.legacyMode ?? false
+    this._isRunning = true;
+    this._legacyMode = options?.legacyMode ?? false;
   }
 
   public setupInterval() {
     if (!this._isRunning) {
-      console.error(CONSOLE_LOG_PREFIX, "Message service is not running")
-      return
+      console.error(CONSOLE_LOG_PREFIX, "Message service is not running");
+      return;
     }
     if (this._intervalRef) {
-      clearInterval(this._intervalRef)
-      this._intervalRef = null
+      clearInterval(this._intervalRef);
+      this._intervalRef = null;
     }
-    this._intervalRef = setInterval(this._handleQueue.bind(this), this._interval)
+    this._intervalRef = setInterval(
+      this._handleQueue.bind(this),
+      this._interval,
+    );
   }
 
   public teardownInterval() {
     if (this._intervalRef) {
-      clearInterval(this._intervalRef)
-      this._intervalRef = null
+      clearInterval(this._intervalRef);
+      this._intervalRef = null;
     }
   }
 
   public setPts(pts: number) {
     if (this._pts < pts) {
-      this._pts = pts
+      this._pts = pts;
     }
   }
 
   public handleStreamMessage(stream: Uint8Array) {
     if (!this._isRunning) {
-      logger.warn(CONSOLE_LOG_PREFIX, "Message service is not running")
-      return
+      logger.warn(CONSOLE_LOG_PREFIX, "Message service is not running");
+      return;
     }
-    const chunk = this.streamMessage2Chunk(stream)
+    const chunk = this.streamMessage2Chunk(stream);
     if (this._legacyMode) {
-      this.handleChunk(chunk, this.handleMessageLegacy.bind(this))
-      return
+      this.handleChunk(chunk, this.handleMessageLegacy.bind(this));
+      return;
     }
-    this.handleChunk<IUserTranscription | IAgentTranscription | IMessageInterrupt>(
-      chunk,
-      this.handleMessage.bind(this)
-    )
+    this.handleChunk<
+      IUserTranscription | IAgentTranscription | IMessageInterrupt
+    >(chunk, this.handleMessage.bind(this));
   }
 
   /** @deprecated */
   public handleMessageLegacy(message: TDataChunkMessageV1) {
-    const isTextValid = message?.text && message.text?.trim().length > 0
+    const isTextValid = message?.text && message.text?.trim().length > 0;
     if (!isTextValid) {
       logger.debug(
         CONSOLE_LOG_PREFIX,
         "[handleMessageLegacy]",
         "Drop message with empty text",
-        message
-      )
-      return
+        message,
+      );
+      return;
     }
     const lastEndedItem = this.messageList.findLast(
-      (item) => item.uid === message.stream_id && item.status === EMessageStatus.END
-    )
+      (item) =>
+        item.uid === message.stream_id && item.status === EMessageStatus.END,
+    );
     const lastInProgressItem = this.messageList.findLast(
-      (item) => item.uid === message.stream_id && item.status === EMessageStatus.IN_PROGRESS
-    )
+      (item) =>
+        item.uid === message.stream_id &&
+        item.status === EMessageStatus.IN_PROGRESS,
+    );
     if (lastEndedItem) {
       logger.debug(
         CONSOLE_LOG_PREFIX,
         "[handleMessageLegacy]",
         "lastEndedItem",
-        JSON.stringify(lastEndedItem)
-      )
+        JSON.stringify(lastEndedItem),
+      );
       if (lastEndedItem._time >= message.text_ts) {
-        logger.debug(CONSOLE_LOG_PREFIX, "[handleMessageLegacy] discard lastEndedItem")
+        logger.debug(
+          CONSOLE_LOG_PREFIX,
+          "[handleMessageLegacy] discard lastEndedItem",
+        );
         // discard
-        return
+        return;
       } else {
         if (lastInProgressItem) {
-          logger.debug(CONSOLE_LOG_PREFIX, "[handleMessageLegacy] update lastInProgressItem")
-          lastInProgressItem._time = message.text_ts
-          lastInProgressItem.text = message.text
+          logger.debug(
+            CONSOLE_LOG_PREFIX,
+            "[handleMessageLegacy] update lastInProgressItem",
+          );
+          lastInProgressItem._time = message.text_ts;
+          lastInProgressItem.text = message.text;
           lastInProgressItem.status = message.is_final
             ? EMessageStatus.END
-            : EMessageStatus.IN_PROGRESS
+            : EMessageStatus.IN_PROGRESS;
         } else {
-          logger.debug(CONSOLE_LOG_PREFIX, "[handleMessageLegacy] append new item")
+          logger.debug(
+            CONSOLE_LOG_PREFIX,
+            "[handleMessageLegacy] append new item",
+          );
           this._appendChatHistory({
             uid: message.stream_id,
             turn_id: message.text_ts,
             _time: message.text_ts,
             text: message.text,
-            status: message.is_final ? EMessageStatus.END : EMessageStatus.IN_PROGRESS,
+            status: message.is_final
+              ? EMessageStatus.END
+              : EMessageStatus.IN_PROGRESS,
             metadata: null,
-          })
+          });
         }
       }
     } else {
       if (lastInProgressItem) {
-        logger.debug(CONSOLE_LOG_PREFIX, "[handleMessageLegacy] update lastInProgressItem")
-        lastInProgressItem._time = message.text_ts
-        lastInProgressItem.text = message.text
+        logger.debug(
+          CONSOLE_LOG_PREFIX,
+          "[handleMessageLegacy] update lastInProgressItem",
+        );
+        lastInProgressItem._time = message.text_ts;
+        lastInProgressItem.text = message.text;
         lastInProgressItem.status = message.is_final
           ? EMessageStatus.END
-          : EMessageStatus.IN_PROGRESS
+          : EMessageStatus.IN_PROGRESS;
       } else {
-        logger.debug(CONSOLE_LOG_PREFIX, "[handleMessageLegacy] append new item")
+        logger.debug(
+          CONSOLE_LOG_PREFIX,
+          "[handleMessageLegacy] append new item",
+        );
         this._appendChatHistory({
           uid: message.stream_id,
           turn_id: message.text_ts,
           _time: message.text_ts,
           text: message.text,
-          status: message.is_final ? EMessageStatus.END : EMessageStatus.IN_PROGRESS,
+          status: message.is_final
+            ? EMessageStatus.END
+            : EMessageStatus.IN_PROGRESS,
           metadata: null,
-        })
+        });
       }
     }
-    this.messageList.sort((a, b) => a._time - b._time)
-    this._mutateChatHistory()
+    this.messageList.sort((a, b) => a._time - b._time);
+    this._mutateChatHistory();
   }
 
-  public handleMessage(message: IUserTranscription | IAgentTranscription | IMessageInterrupt) {
+  public handleMessage(
+    message: IUserTranscription | IAgentTranscription | IMessageInterrupt,
+  ) {
     // check if message is transcription
-    const isAgentMessage = message.object === ETranscriptionObjectType.AGENT_TRANSCRIPTION
-    const isUserMessage = message.object === ETranscriptionObjectType.USER_TRANSCRIPTION
-    const isMessageInterrupt = message.object === ETranscriptionObjectType.MSG_INTERRUPTED
+    const isAgentMessage =
+      message.object === ETranscriptionObjectType.AGENT_TRANSCRIPTION;
+    const isUserMessage =
+      message.object === ETranscriptionObjectType.USER_TRANSCRIPTION;
+    const isMessageInterrupt =
+      message.object === ETranscriptionObjectType.MSG_INTERRUPTED;
     if (!isAgentMessage && !isUserMessage && !isMessageInterrupt) {
-      logger.debug(CONSOLE_LOG_PREFIX, "Unknown message type", message)
-      return
+      logger.debug(CONSOLE_LOG_PREFIX, "Unknown message type", message);
+      return;
     }
     // set mode (only once)
     if (isAgentMessage && this._mode === EMessageEngineMode.AUTO) {
       // check if words is empty, and set mode
       if (!message.words) {
-        this.setMode(EMessageEngineMode.TEXT)
+        this.setMode(EMessageEngineMode.TEXT);
       } else {
-        this.setupInterval()
-        this.setMode(EMessageEngineMode.WORD)
+        this.setupInterval();
+        this.setMode(EMessageEngineMode.WORD);
       }
     }
     // handle Agent Message
     if (isAgentMessage && this._mode === EMessageEngineMode.WORD) {
-      this.handleWordAgentMessage(message)
-      return
+      this.handleWordAgentMessage(message);
+      return;
     }
     if (isAgentMessage && this._mode === EMessageEngineMode.TEXT) {
-      this.handleTextMessage(message as unknown as IUserTranscription)
-      return
+      this.handleTextMessage(message as unknown as IUserTranscription);
+      return;
     }
     // handle User Message
     if (isUserMessage) {
-      this.handleTextMessage(message)
-      return
+      this.handleTextMessage(message);
+      return;
     }
     // handle Message Interrupt
     if (isMessageInterrupt) {
-      this.handleMessageInterrupt(message)
-      return
+      this.handleMessageInterrupt(message);
+      return;
     }
     // unknown mode
-    console.error(CONSOLE_LOG_PREFIX, "Unknown mode", message)
+    console.error(CONSOLE_LOG_PREFIX, "Unknown mode", message);
   }
 
   public handleTextMessage(message: IUserTranscription) {
-    const turn_id = message.turn_id
-    const text = message.text || ""
-    const stream_id = message.stream_id
-    const turn_status = EMessageStatus.END
+    const turn_id = message.turn_id;
+    const text = message.text || "";
+    const stream_id = message.stream_id;
+    const turn_status = EMessageStatus.END;
 
     // 💬 [Issue 2 Fix] Determine UID
     // If user_id is present and non-empty, use it. Otherwise use stream_id.
     // stream_id: 0 = agent, non-zero = user
     const uid =
-      message.user_id && message.user_id.trim() !== "" ? parseInt(message.user_id, 10) : stream_id
+      message.user_id && message.user_id.trim() !== ""
+        ? parseInt(message.user_id, 10)
+        : stream_id;
 
     console.log("💬 [Issue 2] handleTextMessage:", {
       stream_id,
@@ -456,11 +501,11 @@ export class MessageEngine {
       uid,
       isAgent: stream_id === 0,
       text: text.substring(0, 50),
-    })
+    });
 
     const targetChatHistoryItem = this.messageList.find(
-      (item) => item.turn_id === turn_id && item.uid === uid
-    )
+      (item) => item.turn_id === turn_id && item.uid === uid,
+    );
     // if not found, push to messageList
     if (!targetChatHistoryItem) {
       this._appendChatHistory({
@@ -470,45 +515,55 @@ export class MessageEngine {
         text,
         status: turn_status,
         metadata: message,
-      })
+      });
     } else {
       // if found, update text and status
-      targetChatHistoryItem.text = text
-      targetChatHistoryItem.status = turn_status
-      targetChatHistoryItem.metadata = message
+      targetChatHistoryItem.text = text;
+      targetChatHistoryItem.status = turn_status;
+      targetChatHistoryItem.metadata = message;
     }
-    this._mutateChatHistory()
+    this._mutateChatHistory();
   }
 
   public handleMessageInterrupt(message: IMessageInterrupt) {
-    logger.debug(CONSOLE_LOG_PREFIX, "handleMessageInterrupt", message)
-    const turn_id = message.turn_id
-    const start_ms = message.start_ms
+    logger.debug(CONSOLE_LOG_PREFIX, "handleMessageInterrupt", message);
+    const turn_id = message.turn_id;
+    const start_ms = message.start_ms;
     this._interruptQueue({
       turn_id,
       start_ms,
-    })
-    this._mutateChatHistory()
+    });
+    this._mutateChatHistory();
   }
 
   public handleWordAgentMessage(message: IAgentTranscription) {
     // drop message if turn_status is undefined
     if (typeof message.turn_status === "undefined") {
-      logger.debug(CONSOLE_LOG_PREFIX, "Drop message with undefined turn_status", message)
-      return
+      logger.debug(
+        CONSOLE_LOG_PREFIX,
+        "Drop message with undefined turn_status",
+        message,
+      );
+      return;
     }
 
-    logger.debug(CONSOLE_LOG_PREFIX, "handleWordAgentMessage", JSON.stringify(message))
+    logger.debug(
+      CONSOLE_LOG_PREFIX,
+      "handleWordAgentMessage",
+      JSON.stringify(message),
+    );
 
-    const turn_id = message.turn_id
-    const text = message.text || ""
-    const words = message.words || []
-    const stream_id = message.stream_id
+    const turn_id = message.turn_id;
+    const text = message.text || "";
+    const words = message.words || [];
+    const stream_id = message.stream_id;
 
     // 💬 [Issue 2 Fix] Determine UID
     // If user_id is present and non-empty, use it. Otherwise use stream_id.
     const uid =
-      message.user_id && message.user_id.trim() !== "" ? parseInt(message.user_id, 10) : stream_id
+      message.user_id && message.user_id.trim() !== ""
+        ? parseInt(message.user_id, 10)
+        : stream_id;
 
     console.log("💬 [Issue 2] handleWordAgentMessage:", {
       stream_id,
@@ -516,18 +571,22 @@ export class MessageEngine {
       uid,
       isAgent: stream_id === 0,
       text: text.substring(0, 50),
-    })
+    });
 
-    const lastPoppedQueueItemTurnId = this._lastPoppedQueueItem?.turn_id
+    const lastPoppedQueueItemTurnId = this._lastPoppedQueueItem?.turn_id;
     // drop message if turn_id is less than last popped queue item
     // except for the first turn(greeting message, turn_id is 0)
-    if (lastPoppedQueueItemTurnId && turn_id !== 0 && turn_id <= lastPoppedQueueItemTurnId) {
+    if (
+      lastPoppedQueueItemTurnId &&
+      turn_id !== 0 &&
+      turn_id <= lastPoppedQueueItemTurnId
+    ) {
       logger.debug(
         CONSOLE_LOG_PREFIX,
         "Drop message with turn_id less than last popped queue item",
-        message
-      )
-      return
+        message,
+      );
+      return;
     }
     this._pushToQueue({
       turn_id,
@@ -535,12 +594,15 @@ export class MessageEngine {
       text,
       status: message.turn_status,
       stream_id: uid, // Pass uid instead of stream_id
-    })
+    });
   }
 
-  public sortWordsWithStatus(words: TDataChunkMessageWord[], turn_status: EMessageStatus) {
+  public sortWordsWithStatus(
+    words: TDataChunkMessageWord[],
+    turn_status: EMessageStatus,
+  ) {
     if (words.length === 0) {
-      return words
+      return words;
     }
     const sortedWords: TMessageEngineObjectWord[] = words
       .map((word) => ({
@@ -551,15 +613,15 @@ export class MessageEngine {
       .reduce((acc, curr) => {
         // Only add if start_ms is unique
         if (!acc.find((word) => word.start_ms === curr.start_ms)) {
-          acc.push(curr)
+          acc.push(curr);
         }
-        return acc
-      }, [] as TMessageEngineObjectWord[])
-    const isMessageFinal = turn_status !== EMessageStatus.IN_PROGRESS
+        return acc;
+      }, [] as TMessageEngineObjectWord[]);
+    const isMessageFinal = turn_status !== EMessageStatus.IN_PROGRESS;
     if (isMessageFinal) {
-      sortedWords[sortedWords.length - 1].word_status = turn_status
+      sortedWords[sortedWords.length - 1].word_status = turn_status;
     }
-    return sortedWords
+    return sortedWords;
   }
 
   public setMode(mode: EMessageEngineMode) {
@@ -568,66 +630,66 @@ export class MessageEngine {
         CONSOLE_LOG_PREFIX,
         "Mode should only be set once, but it is set again",
         "current mode:",
-        this._mode
-      )
-      return
+        this._mode,
+      );
+      return;
     }
     if (mode === EMessageEngineMode.AUTO) {
       logger.warn(
         CONSOLE_LOG_PREFIX,
         "Unknown mode should not be set again",
         "current mode:",
-        this._mode
-      )
-      return
+        this._mode,
+      );
+      return;
     }
-    this._mode = mode
+    this._mode = mode;
   }
 
   public cleanMessageCache() {
-    this._messageCache = {}
+    this._messageCache = {};
   }
 
   public cleanup() {
-    logger.debug(CONSOLE_LOG_PREFIX, "Cleanup message service")
-    this._isRunning = false
-    this._legacyMode = false
+    logger.debug(CONSOLE_LOG_PREFIX, "Cleanup message service");
+    this._isRunning = false;
+    this._legacyMode = false;
 
     // Remove RTC event listeners
     if (this._rtcEngine && this._rtcEngine.off) {
       if (this._rtcStreamMessageHandler) {
-        this._rtcEngine.off("stream-message", this._rtcStreamMessageHandler)
+        this._rtcEngine.off("stream-message", this._rtcStreamMessageHandler);
       }
       if (this._rtcAudioMetadataHandler) {
-        this._rtcEngine.off("audio-metadata", this._rtcAudioMetadataHandler)
+        this._rtcEngine.off("audio-metadata", this._rtcAudioMetadataHandler);
       }
     }
 
     // Remove RTM event listeners
     if (this._rtmClient && this._rtmClient.removeEventListener) {
       if (this._rtmMessageHandler) {
-        this._rtmClient.removeEventListener("message", this._rtmMessageHandler)
+        this._rtmClient.removeEventListener("message", this._rtmMessageHandler);
       }
     }
 
     // (super) cleanup message cache
-    this.cleanMessageCache()
+    this.cleanMessageCache();
     // teardown interval
-    this.teardownInterval()
+    this.teardownInterval();
     // cleanup queue
-    this._queue = []
-    this._lastPoppedQueueItem = null
-    this._pts = 0
+    this._queue = [];
+    this._lastPoppedQueueItem = null;
+    this._pts = 0;
     // cleanup messageList
-    this.messageList = []
+    this.messageList = [];
     // cleanup mode
-    this._mode = EMessageEngineMode.AUTO
+    this._mode = EMessageEngineMode.AUTO;
   }
 
   // utils: Uint8Array -> string
   public streamMessage2Chunk(stream: Uint8Array) {
-    const chunk = decodeStreamMessage(stream)
-    return chunk
+    const chunk = decodeStreamMessage(stream);
+    return chunk;
   }
 
   /**
@@ -638,89 +700,114 @@ export class MessageEngine {
    * part_data: string, base64 encoded content
    */
   public handleChunk<
-    T extends TDataChunkMessageV1 | IUserTranscription | IAgentTranscription | IMessageInterrupt,
+    T extends
+      | TDataChunkMessageV1
+      | IUserTranscription
+      | IAgentTranscription
+      | IMessageInterrupt,
   >(chunk: string, callback?: (message: T) => void): void {
     try {
       // split chunk by '|'
-      const [msgId, partIdx, partSum, partData] = chunk.split("|")
+      const [msgId, partIdx, partSum, partData] = chunk.split("|");
       // convert to TDataChunk
       const input: TDataChunk = {
         message_id: msgId,
         part_idx: parseInt(partIdx, 10),
         part_sum: partSum === "???" ? -1 : parseInt(partSum, 10), // -1 means total parts unknown
         content: partData,
-      }
+      };
       // check if total parts is known, skip if unknown
       if (input.part_sum === -1) {
-        logger.debug(CONSOLE_LOG_PREFIX, "total parts unknown, waiting for further parts.")
-        return
+        logger.debug(
+          CONSOLE_LOG_PREFIX,
+          "total parts unknown, waiting for further parts.",
+        );
+        return;
       }
 
       // check if cached
       // case 1: not cached, create new cache
       if (!this._messageCache[input.message_id]) {
-        this._messageCache[input.message_id] = []
+        this._messageCache[input.message_id] = [];
         // set cache timeout, drop it if incomplete after timeout
         setTimeout(() => {
           if (
             this._messageCache[input.message_id] &&
             this._messageCache[input.message_id].length < input.part_sum
           ) {
-            logger.debug(CONSOLE_LOG_PREFIX, input.message_id, "message cache timeout, drop it.")
-            delete this._messageCache[input.message_id]
+            logger.debug(
+              CONSOLE_LOG_PREFIX,
+              input.message_id,
+              "message cache timeout, drop it.",
+            );
+            delete this._messageCache[input.message_id];
           }
-        }, this._messageCacheTimeout)
+        }, this._messageCacheTimeout);
       }
       // case 2: cached, add to cache(and sort by part_idx)
-      if (!this._messageCache[input.message_id]?.find((item) => item.part_idx === input.part_idx)) {
+      if (
+        !this._messageCache[input.message_id]?.find(
+          (item) => item.part_idx === input.part_idx,
+        )
+      ) {
         // unique push
-        this._messageCache[input.message_id].push(input)
+        this._messageCache[input.message_id].push(input);
       }
-      this._messageCache[input.message_id].sort((a, b) => a.part_idx - b.part_idx)
+      this._messageCache[input.message_id].sort(
+        (a, b) => a.part_idx - b.part_idx,
+      );
 
       // check if complete
       if (this._messageCache[input.message_id].length === input.part_sum) {
-        const message = this._messageCache[input.message_id].map((chunk) => chunk.content).join("")
+        const message = this._messageCache[input.message_id]
+          .map((chunk) => chunk.content)
+          .join("");
 
         // decode message
-        logger.debug(CONSOLE_LOG_PREFIX, "[message]", atob(message))
+        logger.debug(CONSOLE_LOG_PREFIX, "[message]", atob(message));
 
-        const decodedMessage = JSON.parse(atob(message))
+        const decodedMessage = JSON.parse(atob(message));
 
-        logger.debug(CONSOLE_LOG_PREFIX, "[decodedMessage]", decodedMessage)
+        logger.debug(CONSOLE_LOG_PREFIX, "[decodedMessage]", decodedMessage);
 
         // callback
-        callback?.(decodedMessage)
+        callback?.(decodedMessage);
 
         // delete cache
-        delete this._messageCache[input.message_id]
+        delete this._messageCache[input.message_id];
       }
 
       // end
-      return
+      return;
     } catch (error: unknown) {
-      console.error(CONSOLE_LOG_PREFIX, "handleChunk error", error)
-      return
+      console.error(CONSOLE_LOG_PREFIX, "handleChunk error", error);
+      return;
     }
   }
 
   private _pushToQueue(data: {
-    turn_id: number
-    words: TMessageEngineObjectWord[]
-    text: string
-    status: EMessageStatus
-    stream_id: number
+    turn_id: number;
+    words: TMessageEngineObjectWord[];
+    text: string;
+    status: EMessageStatus;
+    stream_id: number;
   }) {
-    const targetQueueItem = this._queue.find((item) => item.turn_id === data.turn_id)
+    const targetQueueItem = this._queue.find(
+      (item) => item.turn_id === data.turn_id,
+    );
     const latestTurnId = this._queue.reduce((max, item) => {
-      return Math.max(max, item.turn_id)
-    }, 0)
+      return Math.max(max, item.turn_id);
+    }, 0);
     // if not found, push to queue or drop if turn_id is less than latestTurnId
     if (!targetQueueItem) {
       // drop if turn_id is less than latestTurnId
       if (data.turn_id < latestTurnId) {
-        logger.debug(CONSOLE_LOG_PREFIX, "Drop message with turn_id less than latestTurnId", data)
-        return
+        logger.debug(
+          CONSOLE_LOG_PREFIX,
+          "Drop message with turn_id less than latestTurnId",
+          data,
+        );
+        return;
       }
       const newQueueItem = {
         turn_id: data.turn_id,
@@ -728,123 +815,147 @@ export class MessageEngine {
         words: this.sortWordsWithStatus(data.words, data.status),
         status: data.status,
         stream_id: data.stream_id,
-      }
-      logger.debug(CONSOLE_LOG_PREFIX, "Push to queue", newQueueItem, JSON.stringify(newQueueItem))
+      };
+      logger.debug(
+        CONSOLE_LOG_PREFIX,
+        "Push to queue",
+        newQueueItem,
+        JSON.stringify(newQueueItem),
+      );
       // push to queue
-      this._queue.push(newQueueItem)
-      return
+      this._queue.push(newQueueItem);
+      return;
     }
     // if found, update text, words(sorted with status) and turn_status
     logger.debug(
       CONSOLE_LOG_PREFIX,
       "Update queue item",
       JSON.stringify(targetQueueItem),
-      JSON.stringify(data)
-    )
-    targetQueueItem.text = data.text
+      JSON.stringify(data),
+    );
+    targetQueueItem.text = data.text;
     targetQueueItem.words = this.sortWordsWithStatus(
       [...targetQueueItem.words, ...data.words],
-      data.status
-    )
+      data.status,
+    );
     // if targetQueueItem.status is end, and data.status is in_progress, skip status update (unexpected case)
     if (
       targetQueueItem.status !== EMessageStatus.IN_PROGRESS &&
       data.status === EMessageStatus.IN_PROGRESS
     ) {
-      return
+      return;
     }
-    targetQueueItem.status = data.status
+    targetQueueItem.status = data.status;
   }
 
   private _handleQueue() {
-    const queueLength = this._queue.length
+    const queueLength = this._queue.length;
     // empty queue, skip
     if (queueLength === 0) {
-      logger.debug(CONSOLE_LOG_PREFIX, "Queue is empty, skip")
-      return
+      logger.debug(CONSOLE_LOG_PREFIX, "Queue is empty, skip");
+      return;
     }
-    const curPTS = this._pts
+    const curPTS = this._pts;
     // only one item, update messageList with queueItem
     if (queueLength === 1) {
       console.debug(
         CONSOLE_LOG_PREFIX,
         "Queue has only one item, update messageList",
-        JSON.stringify(this._queue[0])
-      )
-      const queueItem = this._queue[0]
-      this._handleTurnObj(queueItem, curPTS)
-      this._mutateChatHistory()
-      return
+        JSON.stringify(this._queue[0]),
+      );
+      const queueItem = this._queue[0];
+      this._handleTurnObj(queueItem, curPTS);
+      this._mutateChatHistory();
+      return;
     }
     if (queueLength > 2) {
-      console.error(CONSOLE_LOG_PREFIX, "Queue length is greater than 2, but it should not happen")
+      console.error(
+        CONSOLE_LOG_PREFIX,
+        "Queue length is greater than 2, but it should not happen",
+      );
     }
     // assume the queueLength is 2
     if (queueLength > 1) {
-      this._queue = this._queue.sort((a, b) => a.turn_id - b.turn_id)
-      const nextItem = this._queue[this._queue.length - 1]
-      const lastItem = this._queue[this._queue.length - 2]
+      this._queue = this._queue.sort((a, b) => a.turn_id - b.turn_id);
+      const nextItem = this._queue[this._queue.length - 1];
+      const lastItem = this._queue[this._queue.length - 2];
       // check if nextItem is started
-      const firstWordOfNextItem = nextItem.words[0]
+      const firstWordOfNextItem = nextItem.words[0];
       // if firstWordOfNextItem.start_ms > curPTS, work on lastItem
       if (firstWordOfNextItem.start_ms > curPTS) {
-        this._handleTurnObj(lastItem, curPTS)
-        this._mutateChatHistory()
-        return
+        this._handleTurnObj(lastItem, curPTS);
+        this._mutateChatHistory();
+        return;
       }
       // if firstWordOfNextItem.start_ms <= curPTS, work on nextItem, assume lastItem is interrupted(and drop it)
       const lastItemCorrespondingChatHistoryItem = this.messageList.find(
-        (item) => item.turn_id === lastItem.turn_id && item.uid === lastItem.stream_id
-      )
+        (item) =>
+          item.turn_id === lastItem.turn_id && item.uid === lastItem.stream_id,
+      );
       if (!lastItemCorrespondingChatHistoryItem) {
-        logger.warn(CONSOLE_LOG_PREFIX, "No corresponding messageList item found", lastItem)
-        return
+        logger.warn(
+          CONSOLE_LOG_PREFIX,
+          "No corresponding messageList item found",
+          lastItem,
+        );
+        return;
       }
-      lastItemCorrespondingChatHistoryItem.status = EMessageStatus.INTERRUPTED
-      this._lastPoppedQueueItem = this._queue.shift()
+      lastItemCorrespondingChatHistoryItem.status = EMessageStatus.INTERRUPTED;
+      this._lastPoppedQueueItem = this._queue.shift();
       // handle nextItem
-      this._handleTurnObj(nextItem, curPTS)
-      this._mutateChatHistory()
-      return
+      this._handleTurnObj(nextItem, curPTS);
+      this._mutateChatHistory();
+      return;
     }
   }
 
   private _interruptQueue(options: { turn_id: number; start_ms: number }) {
-    const turn_id = options.turn_id
-    const start_ms = options.start_ms
-    const correspondingQueueItem = this._queue.find((item) => item.turn_id === turn_id)
+    const turn_id = options.turn_id;
+    const start_ms = options.start_ms;
+    const correspondingQueueItem = this._queue.find(
+      (item) => item.turn_id === turn_id,
+    );
     if (!correspondingQueueItem) {
-      logger.debug(CONSOLE_LOG_PREFIX, "No corresponding queue item found", options)
-      return
+      logger.debug(
+        CONSOLE_LOG_PREFIX,
+        "No corresponding queue item found",
+        options,
+      );
+      return;
     }
     // if correspondingQueueItem exists, update its status to interrupted
-    correspondingQueueItem.status = EMessageStatus.INTERRUPTED
+    correspondingQueueItem.status = EMessageStatus.INTERRUPTED;
     // split words into two parts, set left one word and all right words to interrupted
-    const leftWords = correspondingQueueItem.words.filter((word) => word.start_ms <= start_ms)
-    const rightWords = correspondingQueueItem.words.filter((word) => word.start_ms > start_ms)
+    const leftWords = correspondingQueueItem.words.filter(
+      (word) => word.start_ms <= start_ms,
+    );
+    const rightWords = correspondingQueueItem.words.filter(
+      (word) => word.start_ms > start_ms,
+    );
     // check if leftWords is empty
-    const isLeftWordsEmpty = leftWords.length === 0
+    const isLeftWordsEmpty = leftWords.length === 0;
     if (isLeftWordsEmpty) {
       // if leftWords is empty, set all words to interrupted
       correspondingQueueItem.words.forEach((word) => {
-        word.word_status = EMessageStatus.INTERRUPTED
-      })
+        word.word_status = EMessageStatus.INTERRUPTED;
+      });
     } else {
       // if leftWords is not empty, set leftWords[leftWords.length - 1].word_status to interrupted
-      leftWords[leftWords.length - 1].word_status = EMessageStatus.INTERRUPTED
+      leftWords[leftWords.length - 1].word_status = EMessageStatus.INTERRUPTED;
       // and all right words to interrupted
       rightWords.forEach((word) => {
-        word.word_status = EMessageStatus.INTERRUPTED
-      })
+        word.word_status = EMessageStatus.INTERRUPTED;
+      });
       // update words
-      correspondingQueueItem.words = [...leftWords, ...rightWords]
+      correspondingQueueItem.words = [...leftWords, ...rightWords];
     }
   }
 
   private _handleTurnObj(queueItem: TQueueItem, curPTS: number) {
     let correspondingChatHistoryItem = this.messageList.find(
-      (item) => item.turn_id === queueItem.turn_id && item.uid === queueItem.stream_id
-    )
+      (item) =>
+        item.turn_id === queueItem.turn_id && item.uid === queueItem.stream_id,
+    );
     logger.debug(
       CONSOLE_LOG_PREFIX,
       "_handleTurnObj",
@@ -852,14 +963,14 @@ export class MessageEngine {
       JSON.stringify(queueItem),
       JSON.stringify(queueItem.words),
       "correspondingChatHistoryItem",
-      JSON.stringify(correspondingChatHistoryItem)
-    )
+      JSON.stringify(correspondingChatHistoryItem),
+    );
     if (!correspondingChatHistoryItem) {
       logger.debug(
         CONSOLE_LOG_PREFIX,
         "No corresponding messageList item found",
-        "push to messageList"
-      )
+        "push to messageList",
+      );
       correspondingChatHistoryItem = {
         turn_id: queueItem.turn_id,
         uid: queueItem.stream_id,
@@ -867,66 +978,68 @@ export class MessageEngine {
         text: "",
         status: queueItem.status,
         metadata: queueItem,
-      }
-      this._appendChatHistory(correspondingChatHistoryItem)
+      };
+      this._appendChatHistory(correspondingChatHistoryItem);
     }
     // update correspondingChatHistoryItem._time for chatHistory auto-scroll
-    correspondingChatHistoryItem._time = new Date().getTime()
+    correspondingChatHistoryItem._time = new Date().getTime();
     // update correspondingChatHistoryItem.metadata
-    correspondingChatHistoryItem.metadata = queueItem
+    correspondingChatHistoryItem.metadata = queueItem;
     // update correspondingChatHistoryItem.status if queueItem.status is interrupted(from message.interrupt event)
     if (queueItem.status === EMessageStatus.INTERRUPTED) {
-      correspondingChatHistoryItem.status = EMessageStatus.INTERRUPTED
+      correspondingChatHistoryItem.status = EMessageStatus.INTERRUPTED;
     }
     // pop all valid word items(those word.start_ms <= curPTS) in queueItem
-    const validWords: TMessageEngineObjectWord[] = []
-    const restWords: TMessageEngineObjectWord[] = []
+    const validWords: TMessageEngineObjectWord[] = [];
+    const restWords: TMessageEngineObjectWord[] = [];
     for (const word of queueItem.words) {
       if (word.start_ms <= curPTS) {
-        validWords.push(word)
+        validWords.push(word);
       } else {
-        restWords.push(word)
+        restWords.push(word);
       }
     }
     // check if restWords is empty
-    const isRestWordsEmpty = restWords.length === 0
+    const isRestWordsEmpty = restWords.length === 0;
     // check if validWords last word is final
     const isLastWordFinal =
-      validWords[validWords.length - 1]?.word_status !== EMessageStatus.IN_PROGRESS
+      validWords[validWords.length - 1]?.word_status !==
+      EMessageStatus.IN_PROGRESS;
     // if restWords is empty and validWords last word is final, this turn is ended
     if (isRestWordsEmpty && isLastWordFinal) {
       // update messageList with queueItem
-      correspondingChatHistoryItem.text = queueItem.text
-      correspondingChatHistoryItem.status = queueItem.status
+      correspondingChatHistoryItem.text = queueItem.text;
+      correspondingChatHistoryItem.status = queueItem.status;
       // pop queueItem
-      this._lastPoppedQueueItem = this._queue.shift()
-      return
+      this._lastPoppedQueueItem = this._queue.shift();
+      return;
     }
     // if restWords is not empty, update correspondingChatHistoryItem.text
     const validWordsText = validWords
       .filter((word) => word.word_status === EMessageStatus.IN_PROGRESS)
       .map((word) => word.word)
-      .join("")
-    correspondingChatHistoryItem.text = validWordsText
+      .join("");
+    correspondingChatHistoryItem.text = validWordsText;
     // if validWords last word is interrupted, this turn is ended
     const isLastWordInterrupted =
-      validWords[validWords.length - 1]?.word_status === EMessageStatus.INTERRUPTED
+      validWords[validWords.length - 1]?.word_status ===
+      EMessageStatus.INTERRUPTED;
     if (isLastWordInterrupted) {
       // pop queueItem
-      this._lastPoppedQueueItem = this._queue.shift()
-      return
+      this._lastPoppedQueueItem = this._queue.shift();
+      return;
     }
-    return
+    return;
   }
 
   private _appendChatHistory(
-    item: IMessageArrayItem<Partial<IUserTranscription | IAgentTranscription>>
+    item: IMessageArrayItem<Partial<IUserTranscription | IAgentTranscription>>,
   ) {
     // if item.turn_id is 0, append to the front of messageList(greeting message)
     if (item.turn_id === 0) {
-      this.messageList = [item, ...this.messageList]
+      this.messageList = [item, ...this.messageList];
     } else {
-      this.messageList.push(item)
+      this.messageList.push(item);
     }
   }
 
@@ -936,8 +1049,10 @@ export class MessageEngine {
       CONSOLE_LOG_PREFIX,
       "Mutate messageList",
       this._pts,
-      this.messageList.map((item) => `${item.text}[status: ${item.status}]`).join("\n")
-    )
-    this.onMessageListUpdate?.(this.messageList as IMessageListItem[])
+      this.messageList
+        .map((item) => `${item.text}[status: ${item.status}]`)
+        .join("\n"),
+    );
+    this.onMessageListUpdate?.(this.messageList as IMessageListItem[]);
   }
 }

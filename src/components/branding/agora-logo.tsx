@@ -1,8 +1,8 @@
-import React from "react"
+import React from "react";
 
 export interface AgoraLogoProps {
-  size?: number
-  className?: string
+  size?: number;
+  className?: string;
 }
 
 export function AgoraLogo({ size = 18, className = "" }: AgoraLogoProps) {
@@ -20,5 +20,5 @@ export function AgoraLogo({ size = 18, className = "" }: AgoraLogoProps) {
         fill="#00C2FF"
       />
     </svg>
-  )
+  );
 }

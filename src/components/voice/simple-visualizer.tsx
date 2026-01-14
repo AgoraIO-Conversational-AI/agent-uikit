@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { cn } from "../../lib/utils"
+import { cn } from "../../lib/utils";
 
 export interface SimpleVisualizerProps {
-  data: number[]
-  className?: string
+  data: number[];
+  className?: string;
   /** Color for active/lit bars */
-  activeColor?: string
+  activeColor?: string;
   /** Color for inactive/unlit bars */
-  inactiveColor?: string
+  inactiveColor?: string;
   /** Bar width in pixels */
-  barWidth?: number
+  barWidth?: number;
   /** Bar height in pixels */
-  barHeight?: number
+  barHeight?: number;
   /** Gap between bars in pixels */
-  barGap?: number
+  barGap?: number;
 }
 
 export function SimpleVisualizer({
@@ -45,5 +45,5 @@ export function SimpleVisualizer({
         />
       ))}
     </div>
-  )
+  );
 }
