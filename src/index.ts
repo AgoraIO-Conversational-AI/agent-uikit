@@ -102,6 +102,10 @@ export { Popover } from "./components/primitives/popover";
 export { SettingsDialog } from "./components/settings/settings-dialog";
 export type { SettingsDialogProps } from "./components/settings/settings-dialog";
 
+// Session
+export { SessionPanel } from "./components/session/session-panel";
+export type { SessionPanelProps } from "./components/session/session-panel";
+
 export { AgentSettings } from "./components/settings/agent-settings";
 export type { AgentSettingsProps } from "./components/settings/agent-settings";
 

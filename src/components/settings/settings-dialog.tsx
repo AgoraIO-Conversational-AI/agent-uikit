@@ -31,6 +31,10 @@ export interface SettingsDialogProps extends Omit<
    * Dialog description
    */
   description?: string;
+  /**
+   * Optional content rendered after AgentSettings (e.g. SessionPanel)
+   */
+  children?: React.ReactNode;
 }
 
 /**
@@ -63,6 +67,7 @@ export const SettingsDialog = React.forwardRef<
       onOpenChange,
       title = "Agent Settings",
       description,
+      children,
       ...agentSettingsProps
     },
     ref,
@@ -77,6 +82,7 @@ export const SettingsDialog = React.forwardRef<
             )}
           </DialogHeader>
           <AgentSettings {...agentSettingsProps} />
+          {children}
         </DialogContent>
       </Dialog>
     );
