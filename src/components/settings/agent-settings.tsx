@@ -3,9 +3,18 @@
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 import { ValuePicker, type Item } from "../primitives/value-picker";
+import { useAudioDevices } from "../../hooks/use-audio-devices";
 import { cn } from "../../lib/utils";
 
 export interface AgentSettingsProps {
+  /**
+   * Selected microphone device ID (empty string = system default)
+   */
+  selectedMicId?: string;
+  /**
+   * Callback when microphone selection changes
+   */
+  onMicChange?: (deviceId: string) => void;
   /**
    * Whether AIVAD (AI Voice Activity Detection / TURN) is enabled
    */
@@ -91,6 +100,8 @@ export const AgentSettings = React.forwardRef<
 >(
   (
     {
+      selectedMicId,
+      onMicChange,
       enableAivad,
       onEnableAivadChange,
       language,
@@ -105,8 +116,33 @@ export const AgentSettings = React.forwardRef<
     },
     ref,
   ) => {
+    const { devices: audioDevices } = useAudioDevices();
+
+    const SYSTEM_DEFAULT_MIC = "system-default";
+
+    const micItems: Item[] = [
+      { id: SYSTEM_DEFAULT_MIC, name: "System Default" },
+      ...audioDevices.map((d) => ({ id: d.deviceId, name: d.label })),
+    ];
+
+    const handleMicValueChange = (value: string) => {
+      onMicChange?.(value === SYSTEM_DEFAULT_MIC ? "" : value);
+    };
+
     return (
       <div ref={ref} className={cn("flex flex-col gap-6", className)}>
+        {/* Microphone Picker */}
+        {onMicChange && (
+          <ValuePicker
+            label="Microphone"
+            items={micItems}
+            value={selectedMicId || SYSTEM_DEFAULT_MIC}
+            onValueChange={handleMicValueChange}
+            placeholder="Select a microphone..."
+            maxHeight="200px"
+          />
+        )}
+
         {/* Language Picker */}
         <ValuePicker
           label="Speech Recognition Language"

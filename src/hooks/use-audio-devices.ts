@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import AgoraRTC from "agora-rtc-sdk-ng";
 
 export interface AudioDevice {
   deviceId: string;
@@ -22,65 +23,24 @@ export function useAudioDevices(): UseAudioDevicesReturn {
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
 
-  const loadDevicesWithoutPermission = useCallback(async () => {
+  const loadDevices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const deviceList = await navigator.mediaDevices.enumerateDevices();
+      const microphones = await AgoraRTC.getMicrophones();
 
-      const audioInputs = deviceList
-        .filter((device) => device.kind === "audioinput")
-        .map((device) => {
-          let cleanLabel =
-            device.label || `Microphone ${device.deviceId.slice(0, 8)}`;
-          cleanLabel = cleanLabel.replace(/\s*\([^)]*\)/g, "").trim();
+      const audioInputs = microphones.map((device) => {
+        let cleanLabel =
+          device.label || `Microphone ${device.deviceId.slice(0, 8)}`;
+        cleanLabel = cleanLabel.replace(/\s*\([^)]*\)/g, "").trim();
 
-          return {
-            deviceId: device.deviceId,
-            label: cleanLabel,
-            groupId: device.groupId,
-          };
-        });
-
-      setDevices(audioInputs);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to get audio devices",
-      );
-      console.error("Error getting audio devices:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadDevicesWithPermission = useCallback(async () => {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const tempStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        return {
+          deviceId: device.deviceId,
+          label: cleanLabel,
+          groupId: device.groupId,
+        };
       });
-      tempStream.getTracks().forEach((track) => track.stop());
-
-      const deviceList = await navigator.mediaDevices.enumerateDevices();
-
-      const audioInputs = deviceList
-        .filter((device) => device.kind === "audioinput")
-        .map((device) => {
-          let cleanLabel =
-            device.label || `Microphone ${device.deviceId.slice(0, 8)}`;
-          cleanLabel = cleanLabel.replace(/\s*\([^)]*\)/g, "").trim();
-
-          return {
-            deviceId: device.deviceId,
-            label: cleanLabel,
-            groupId: device.groupId,
-          };
-        });
 
       setDevices(audioInputs);
       setHasPermission(true);
@@ -92,36 +52,28 @@ export function useAudioDevices(): UseAudioDevicesReturn {
     } finally {
       setLoading(false);
     }
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
-    loadDevicesWithoutPermission();
-  }, [loadDevicesWithoutPermission]);
+    loadDevices();
+  }, [loadDevices]);
 
   useEffect(() => {
-    const handleDeviceChange = () => {
-      if (hasPermission) {
-        loadDevicesWithPermission();
-      } else {
-        loadDevicesWithoutPermission();
-      }
+    AgoraRTC.onMicrophoneChanged = (info) => {
+      console.log("Microphone changed:", info.state, info.device.label);
+      loadDevices();
     };
-
-    navigator.mediaDevices.addEventListener("devicechange", handleDeviceChange);
 
     return () => {
-      navigator.mediaDevices.removeEventListener(
-        "devicechange",
-        handleDeviceChange,
-      );
+      AgoraRTC.onMicrophoneChanged = undefined;
     };
-  }, [hasPermission, loadDevicesWithPermission, loadDevicesWithoutPermission]);
+  }, [loadDevices]);
 
   return {
     devices,
     loading,
     error,
     hasPermission,
-    loadDevices: loadDevicesWithPermission,
+    loadDevices,
   };
 }
