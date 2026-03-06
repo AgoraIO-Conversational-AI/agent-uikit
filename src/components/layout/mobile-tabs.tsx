@@ -76,7 +76,7 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
             <button
               onClick={() => handleTabChange(tab.id)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
+                "cursor-pointer flex flex-1 items-center justify-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
                 activeTab === tab.id
                   ? "bg-background text-foreground border-b-2 border-primary"
                   : "text-muted-foreground hover:text-foreground",

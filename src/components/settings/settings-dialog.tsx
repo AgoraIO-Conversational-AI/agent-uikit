@@ -81,7 +81,7 @@ export const SettingsDialog = React.forwardRef<
             {description && (
               <DialogDescription>{description}</DialogDescription>
             )}
-            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <DialogClose className="cursor-pointer absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
