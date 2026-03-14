@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+import { debug } from "../../lib/debug";
+
 // Type definitions for Agora tracks (peer dependency)
 export type ILocalAudioTrack = {
   getMediaStreamTrack: () => MediaStreamTrack;
@@ -30,7 +32,6 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
   const animate = () => {
     if (!analyserRef.current) {
-      console.log("No analyser found in animate");
       return;
     }
 
@@ -48,7 +49,6 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
     barsRef.current.forEach((bar, index) => {
       if (!bar) {
-        console.log("No bar found at index", index);
         return;
       }
 
@@ -74,13 +74,11 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
   useEffect(() => {
     if (!track) {
-      console.log("No track provided");
       return;
     }
 
     const startVisualizer = async () => {
       try {
-        console.log("Starting visualizer");
         audioContextRef.current = new AudioContext();
         analyserRef.current = audioContextRef.current.createAnalyser();
         analyserRef.current.fftSize = 64;
@@ -92,7 +90,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
           // Direct MediaStream - get audio tracks
           const audioTracks = track.getAudioTracks();
           if (audioTracks.length === 0) {
-            console.error("No audio tracks found in MediaStream");
+            debug.warn("AudioVisualizer: MediaStream has no audio tracks");
             return;
           }
           mediaStreamTrack = audioTracks[0];
@@ -105,18 +103,16 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
         const source = audioContextRef.current.createMediaStreamSource(stream);
         source.connect(analyserRef.current);
 
-        console.log("Setup complete, starting animation");
         setIsVisualizing(true);
         animate();
       } catch (error) {
-        console.error("Error starting visualizer:", error);
+        debug.error("AudioVisualizer: failed to start", error);
       }
     };
 
     startVisualizer();
 
     return () => {
-      console.log("Cleaning up");
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

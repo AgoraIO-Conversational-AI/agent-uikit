@@ -45,10 +45,6 @@ export function MicSelector({
   // Use controlled muted if provided, otherwise use internal state
   const isMuted = muted !== undefined ? muted : internalMuted;
 
-  // console.log("supriya state: ", state)
-  // console.log("supriya error: ", error)
-  // console.log("supriya hasPermission: ", hasPermission)
-
   // Use controlled value if provided, otherwise use first device
   const selectedDevice = value || devices[0]?.deviceId || "";
 
@@ -79,7 +75,6 @@ export function MicSelector({
   };
 
   const isError = state === "error" || !hasPermission;
-  console.log("supriya-isError: ", isError, isMuted);
 
   return (
     <Chip>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import AgoraRTC from "agora-rtc-sdk-ng";
+import AgoraRTC from "agora-rtc-react";
 
 export interface AudioDevice {
   deviceId: string;
@@ -48,7 +48,6 @@ export function useAudioDevices(): UseAudioDevicesReturn {
       setError(
         err instanceof Error ? err.message : "Failed to get audio devices",
       );
-      console.error("Error getting audio devices:", err);
     } finally {
       setLoading(false);
     }
@@ -59,8 +58,7 @@ export function useAudioDevices(): UseAudioDevicesReturn {
   }, [loadDevices]);
 
   useEffect(() => {
-    AgoraRTC.onMicrophoneChanged = (info) => {
-      console.log("Microphone changed:", info.state, info.device.label);
+    AgoraRTC.onMicrophoneChanged = () => {
       loadDevices();
     };
 

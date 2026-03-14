@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { ICameraVideoTrack } from "agora-rtc-sdk-ng";
 
+import { debug } from "../../lib/debug";
 import { cn } from "../../lib/utils";
 
 export interface LocalVideoPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -96,15 +97,14 @@ export const LocalVideoPreview = React.forwardRef<
         const stream = new MediaStream([mediaStreamTrack]);
         videoElementRef.current.srcObject = stream;
         videoElementRef.current.play().catch((error) => {
-          // Ignore AbortError - happens when play is interrupted by track change
-          if (error.name !== "AbortError") {
-            console.error("[LocalVideoPreview] Failed to play video:", error);
+          // Ignore AbortError — happens when play is interrupted by a track change
+          if ((error as DOMException).name !== "AbortError") {
+            debug.error("LocalVideoPreview: MediaStream playback failed", error);
           }
         });
         setIsPlaying(true);
-        console.log("[LocalVideoPreview] MediaStream video playing");
       } catch (error) {
-        console.error("[LocalVideoPreview] Failed to play MediaStream:", error);
+        debug.error("LocalVideoPreview: failed to attach MediaStream", error);
         setIsPlaying(false);
       }
 
@@ -126,9 +126,8 @@ export const LocalVideoPreview = React.forwardRef<
       try {
         videoTrack.play(videoContainerRef.current);
         setIsPlaying(true);
-        console.log("[LocalVideoPreview] Agora video track playing");
       } catch (error) {
-        console.error("[LocalVideoPreview] Failed to play video track:", error);
+        debug.error("LocalVideoPreview: failed to play video track", error);
         setIsPlaying(false);
       }
 
@@ -137,10 +136,7 @@ export const LocalVideoPreview = React.forwardRef<
           videoTrack.stop();
           setIsPlaying(false);
         } catch (error) {
-          console.error(
-            "[LocalVideoPreview] Failed to stop video track:",
-            error,
-          );
+          debug.error("LocalVideoPreview: failed to stop video track", error);
         }
       };
     }, [videoTrack, useMediaStream]);

@@ -82,15 +82,6 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     const [imageError, setImageError] = React.useState(false);
     const displayInitials = getInitials(name, initials);
 
-    // Debug: Log once per unique initials
-    React.useEffect(() => {
-      if (displayInitials) {
-        console.log(
-          `[Avatar] Rendering with initials: "${displayInitials}", size: ${size}`,
-        );
-      }
-    }, [displayInitials, size]);
-
     return (
       <div
         ref={ref}

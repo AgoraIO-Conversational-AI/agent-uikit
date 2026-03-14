@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { IRemoteVideoTrack } from "agora-rtc-sdk-ng";
 
+import { debug } from "../../lib/debug";
 import { cn } from "../../lib/utils";
 
 export type AvatarVideoState = "connected" | "loading" | "disconnected";
@@ -70,18 +71,14 @@ export const AvatarVideoDisplay = React.forwardRef<
         const stream = new MediaStream([mediaStreamTrack]);
         videoElementRef.current.srcObject = stream;
         videoElementRef.current.play().catch((error) => {
-          // Ignore AbortError - happens when play is interrupted by track change
-          if (error.name !== "AbortError") {
-            console.error("[AvatarVideoDisplay] Failed to play video:", error);
+          // Ignore AbortError — happens when play is interrupted by a track change
+          if ((error as DOMException).name !== "AbortError") {
+            debug.error("AvatarVideoDisplay: MediaStream playback failed", error);
           }
         });
         setIsPlaying(true);
-        console.log("[AvatarVideoDisplay] MediaStream video playing");
       } catch (error) {
-        console.error(
-          "[AvatarVideoDisplay] Failed to play MediaStream:",
-          error,
-        );
+        debug.error("AvatarVideoDisplay: failed to attach MediaStream", error);
         setIsPlaying(false);
       }
 
@@ -103,12 +100,8 @@ export const AvatarVideoDisplay = React.forwardRef<
       try {
         videoTrack.play(videoContainerRef.current);
         setIsPlaying(true);
-        console.log("[AvatarVideoDisplay] Agora video track playing");
       } catch (error) {
-        console.error(
-          "[AvatarVideoDisplay] Failed to play video track:",
-          error,
-        );
+        debug.error("AvatarVideoDisplay: failed to play video track", error);
         setIsPlaying(false);
       }
 
@@ -117,10 +110,7 @@ export const AvatarVideoDisplay = React.forwardRef<
           videoTrack.stop();
           setIsPlaying(false);
         } catch (error) {
-          console.error(
-            "[AvatarVideoDisplay] Failed to stop video track:",
-            error,
-          );
+          debug.error("AvatarVideoDisplay: failed to stop video track", error);
         }
       };
     }, [videoTrack, useMediaStream]);
