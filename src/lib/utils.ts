@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import DOMPurify from "dompurify";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -97,5 +98,10 @@ export function renderMarkdownToHtml(text: string): string {
   // Join with <br/> tags
   processed = formattedLines.join("<br/>");
 
+  // Sanitize against XSS. DOMPurify requires a DOM so it is skipped in SSR
+  // environments; the component that renders the output is always client-side.
+  if (typeof window !== "undefined") {
+    return DOMPurify.sanitize(processed, { ALLOWED_TAGS: ["strong", "a", "br", "div", "span"], ALLOWED_ATTR: ["href", "target", "rel", "class"] });
+  }
   return processed;
 }
