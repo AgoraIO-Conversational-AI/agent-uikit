@@ -25,6 +25,11 @@
       "import": "./dist/rtc/index.mjs",
       "require": "./dist/rtc/index.js",
       "types": "./dist/rtc/index.d.ts"
+    },
+    "./thymia": {
+      "import": "./dist/thymia/index.mjs",
+      "require": "./dist/thymia/index.js",
+      "types": "./dist/thymia/index.d.ts"
     }
   },
   "scripts": {
@@ -64,11 +69,15 @@
     "agora-agent-client-toolkit": ">=0.1.0",
     "agora-agent-client-toolkit-react": ">=0.1.0",
     "agora-rtc-react": ">=2.0.0",
+    "agora-rtm-sdk": ">=2.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "agora-rtc-react": {
+      "optional": true
+    },
+    "agora-rtm-sdk": {
       "optional": true
     },
     "agora-agent-client-toolkit": {

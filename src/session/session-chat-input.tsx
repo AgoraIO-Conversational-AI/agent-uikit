@@ -104,7 +104,7 @@ export function SessionChatInput({
         disabled={!text.trim() || inFlight}
         aria-label="Send message"
         shape="round"
-        variant="primary"
+        variant="filled"
         size="sm"
       >
         <Send className="size-4" />
@@ -113,8 +113,7 @@ export function SessionChatInput({
         <Button
           onClick={handleInterrupt}
           disabled={inFlight}
-          variant="outline"
-          size="sm"
+          variant="secondary"
           aria-label={interruptLabel}
         >
           <StopCircle className="size-4 mr-1" />

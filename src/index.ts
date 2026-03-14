@@ -47,6 +47,8 @@ export { ConvoTextStream } from "./components/chat/convo-text-stream";
 export type { ConvoTextStreamProps } from "./components/chat/convo-text-stream";
 
 // Video Components
+export type { PlayableVideoTrack } from "./hooks/use-video-playback";
+
 export { Avatar } from "./components/video/avatar";
 export type { AvatarProps, AvatarSize } from "./components/video/avatar";
 
@@ -110,18 +112,8 @@ export type { AgentSettingsProps } from "./components/settings/agent-settings";
 export { AgoraLogo } from "./components/branding/agora-logo";
 export type { AgoraLogoProps } from "./components/branding/agora-logo";
 
-// Demo
-export { HelloWorld } from "./components/primitives/hello-world";
-export type { HelloWorldProps } from "./components/primitives/hello-world";
-
-// Thymia Components
-export { ThymiaPanel } from "./components/thymia/thymia-panel";
-export type { ThymiaPanelProps } from "./components/thymia/thymia-panel";
-
-// RTM & Thymia Hooks
-export { useRTMSubscription } from "./hooks/use-rtm-subscription";
-export type { RTMMessage, RTMEventSource } from "./hooks/use-rtm-subscription";
-export { useThymia } from "./hooks/use-thymia";
+// ThymiaPanel, useThymia, and useRTMSubscription require agora-rtm-sdk
+// at runtime. Import them from "agora-agent-uikit/thymia" instead.
 
 // Utilities
 export { cn, renderMarkdownToHtml, decodeStreamMessage } from "./lib/utils";

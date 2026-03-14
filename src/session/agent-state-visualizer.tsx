@@ -19,7 +19,6 @@ export interface AgentStateVisualizerProps {
   overrideState?: AgentVisualizerState;
   size?: AgentVisualizerSize;
   className?: string;
-  lottieBasePath?: string;
   lottiePaths?: Partial<Record<AgentVisualizerState, string>>;
 }
 
@@ -59,7 +58,6 @@ export function AgentStateVisualizer({
   overrideState,
   size,
   className,
-  lottieBasePath,
   lottiePaths,
 }: AgentStateVisualizerProps) {
   const { agentState } = useAgentState();
@@ -72,7 +70,6 @@ export function AgentStateVisualizer({
       state={activeState}
       size={size}
       className={className}
-      lottieBasePath={lottieBasePath}
       lottiePaths={lottiePaths}
     />
   );

@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { IRemoteVideoTrack } from "agora-rtc-sdk-ng";
-
-import { debug } from "../../lib/debug";
+import { useVideoPlayback, type PlayableVideoTrack } from "../../hooks/use-video-playback";
 import { cn } from "../../lib/utils";
 
 export type AvatarVideoState = "connected" | "loading" | "disconnected";
@@ -12,7 +10,7 @@ export interface AvatarVideoDisplayProps extends React.HTMLAttributes<HTMLDivEle
   /**
    * Remote video track from Agora RTC
    */
-  videoTrack?: IRemoteVideoTrack | null;
+  videoTrack?: PlayableVideoTrack | null;
 
   /**
    * Current connection state
@@ -57,63 +55,14 @@ export const AvatarVideoDisplay = React.forwardRef<
   ) => {
     const videoContainerRef = React.useRef<HTMLDivElement>(null);
     const videoElementRef = React.useRef<HTMLVideoElement>(null);
-    const [isPlaying, setIsPlaying] = React.useState(false);
 
-    // MediaStream mode - use native video element
-    React.useEffect(() => {
-      if (!useMediaStream || !videoTrack || !videoElementRef.current) {
-        if (useMediaStream) setIsPlaying(false);
-        return;
-      }
-
-      try {
-        const mediaStreamTrack = videoTrack.getMediaStreamTrack();
-        const stream = new MediaStream([mediaStreamTrack]);
-        videoElementRef.current.srcObject = stream;
-        videoElementRef.current.play().catch((error) => {
-          // Ignore AbortError — happens when play is interrupted by a track change
-          if ((error as DOMException).name !== "AbortError") {
-            debug.error("AvatarVideoDisplay: MediaStream playback failed", error);
-          }
-        });
-        setIsPlaying(true);
-      } catch (error) {
-        debug.error("AvatarVideoDisplay: failed to attach MediaStream", error);
-        setIsPlaying(false);
-      }
-
-      return () => {
-        if (videoElementRef.current) {
-          videoElementRef.current.srcObject = null;
-        }
-        setIsPlaying(false);
-      };
-    }, [videoTrack, useMediaStream]);
-
-    // Agora play() mode - use container div
-    React.useEffect(() => {
-      if (useMediaStream || !videoTrack || !videoContainerRef.current) {
-        if (!useMediaStream) setIsPlaying(false);
-        return;
-      }
-
-      try {
-        videoTrack.play(videoContainerRef.current);
-        setIsPlaying(true);
-      } catch (error) {
-        debug.error("AvatarVideoDisplay: failed to play video track", error);
-        setIsPlaying(false);
-      }
-
-      return () => {
-        try {
-          videoTrack.stop();
-          setIsPlaying(false);
-        } catch (error) {
-          debug.error("AvatarVideoDisplay: failed to stop video track", error);
-        }
-      };
-    }, [videoTrack, useMediaStream]);
+    const { isPlaying } = useVideoPlayback({
+      videoTrack: videoTrack ?? null,
+      useMediaStream,
+      videoContainerRef,
+      videoElementRef,
+      debugLabel: "AvatarVideoDisplay",
+    });
 
     const showPlaceholder = !isPlaying || state === "disconnected";
 

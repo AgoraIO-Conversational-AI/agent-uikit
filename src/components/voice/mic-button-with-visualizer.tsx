@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-// Import from peer dependency
-// @ts-expect-error - peer dependency
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - optional peer dependency, types may not be available
 import { IMicrophoneAudioTrack, useRTCClient } from "agora-rtc-react";
 import { Mic, MicOff } from "lucide-react";
+
+import { debug } from "../../lib/debug";
 
 interface AudioBar {
   height: number;
@@ -108,8 +110,8 @@ export function MicButtonWithVisualizer({
         source.connect(analyserRef.current);
 
         updateAudioData();
-      } catch {
-        // Swallowed — component is best-effort
+      } catch (error) {
+        debug.error("MicButtonWithVisualizer: failed to setup audio analyser", error);
       }
     };
 
@@ -143,6 +145,7 @@ export function MicButtonWithVisualizer({
         }
         setIsEnabled(newState);
       } catch (error) {
+        debug.error("MicButtonWithVisualizer: failed to toggle microphone", error);
         agoraTrack.setEnabled(isEnabled);
       }
     } else {
@@ -160,6 +163,7 @@ export function MicButtonWithVisualizer({
       style={{
         borderColor: activeColor,
       }}
+      aria-label={isEnabled ? "Mute microphone" : "Unmute microphone"}
     >
       <div className="absolute inset-0 flex items-center justify-center gap-1">
         {audioData.map((bar, index) => (
