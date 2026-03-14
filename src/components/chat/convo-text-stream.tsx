@@ -4,17 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 
 import { useIsMobile } from "../../hooks/use-is-mobile";
-import { EMessageStatus, IMessageListItem } from "../../lib/message-engine";
+import { EMessageStatus, IMessageListItem } from "../../lib/message-types";
 import { cn, renderMarkdownToHtml } from "../../lib/utils";
 
-export { EMessageStatus } from "../../lib/message-engine";
-export type { IMessageListItem } from "../../lib/message-engine";
+export { EMessageStatus } from "../../lib/message-types";
+export type { IMessageListItem } from "../../lib/message-types";
 
 export interface ConvoTextStreamProps {
   messageList: IMessageListItem[];
   currentInProgressMessage?: IMessageListItem | null;
   agentUID: string | undefined;
-  messageSource?: "rtc" | "rtm" | "auto";
   className?: string;
 }
 
@@ -22,7 +21,6 @@ export function ConvoTextStream({
   messageList,
   currentInProgressMessage = null,
   agentUID,
-  messageSource: _messageSource = "auto",
   className = "",
 }: ConvoTextStreamProps) {
   const isMobile = useIsMobile();
@@ -34,24 +32,6 @@ export function ConvoTextStream({
   const prevMessageLengthRef = useRef(messageList.length);
   const prevMessageTextRef = useRef("");
   const hasSeenFirstMessageRef = useRef(false);
-
-  // Debug log for message detection
-  useEffect(() => {
-    if (messageList.length > 0 || currentInProgressMessage) {
-      console.log(
-        "ConvoTextStream - Messages:",
-        messageList.map((m) => ({
-          uid: m.uid,
-          text: m.text,
-          status: m.status,
-        })),
-        "Current in progress:",
-        currentInProgressMessage,
-        "Agent UID:",
-        agentUID,
-      );
-    }
-  }, [messageList, currentInProgressMessage, agentUID]);
 
   //  Helper to check if we should show streaming message
   const shouldShowStreamingMessage = useCallback(() => {
@@ -201,8 +181,8 @@ export function ConvoTextStream({
     >
       {isOpen ? (
         <div
-          className="chatbox expanded mx-auto flex max-w-96 min-w-96 max-h-[600px] flex-col shadow-lg md:mx-0"
-          style={{ backgroundColor: "#171717", borderRadius: "15px" }}
+          className="chatbox expanded mx-auto flex max-w-96 min-w-96 max-h-[600px] flex-col rounded-[15px] shadow-lg md:mx-0"
+          style={{ backgroundColor: "var(--background, #171717)" }}
         >
           <div className="flex shrink-0 items-center justify-end p-2">
             <h3 className="mr-auto ml-2 font-semibold">Transcription</h3>
@@ -234,9 +214,11 @@ export function ConvoTextStream({
                     className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium"
                     style={{
                       backgroundColor: isAIMessage(message)
-                        ? "#A0FAFF"
-                        : "#333333",
-                      color: isAIMessage(message) ? "#000000" : "#FFFFFF",
+                        ? "var(--primary, #A0FAFF)"
+                        : "var(--card_layer_1, #333333)",
+                      color: isAIMessage(message)
+                        ? "var(--font-high, #000000)"
+                        : "var(--foreground, #ffffff)",
                     }}
                   >
                     {isAIMessage(message) ? "AI" : "U"}
@@ -261,8 +243,10 @@ export function ConvoTextStream({
                       style={{
                         backgroundColor: isAIMessage(message)
                           ? "transparent"
-                          : "#333333",
-                        color: isAIMessage(message) ? "#A0FAFF" : "#FFFFFF",
+                          : "var(--card_layer_1, #333333)",
+                        color: isAIMessage(message)
+                          ? "var(--primary, #A0FAFF)"
+                          : "var(--foreground, #ffffff)",
                       }}
                       dangerouslySetInnerHTML={{
                         __html: renderMarkdownToHtml(message.text),
