@@ -4,6 +4,13 @@ import * as React from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 import { cn } from "../../lib/utils";
+import ambientSrc from "../../assets/lottie/ambient.lottie";
+import analyzingSrc from "../../assets/lottie/analyzing.lottie";
+import disconnectedSrc from "../../assets/lottie/disconnected.lottie";
+import joiningSrc from "../../assets/lottie/joining.lottie";
+import listeningsrc from "../../assets/lottie/listening.lottie";
+import notJoinedSrc from "../../assets/lottie/not-joined.lottie";
+import talkingSrc from "../../assets/lottie/talking.lottie";
 
 export type AgentVisualizerState =
   | "not-joined"
@@ -17,40 +24,33 @@ export type AgentVisualizerState =
 export type AgentVisualizerSize = "sm" | "md" | "lg";
 
 export interface AgentVisualizerProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * Current state of the agent visualizer
-   */
+  /** Current state of the agent visualizer. */
   state: AgentVisualizerState;
 
   /**
-   * Size of the visualizer
+   * Size of the visualizer.
    * @default "md"
    */
   size?: AgentVisualizerSize;
 
   /**
-   * Base path for lottie files.
-   * @default "/agora-uikit/lottie"
-   * @example "https://cdn.example.com/lottie"
-   * @example "/custom-path/lottie"
-   */
-  lottieBasePath?: string;
-
-  /**
-   * Custom paths for specific states. Overrides lottieBasePath for specified states.
-   * @example { "listening": "https://cdn.example.com/custom-listening.lottie" }
+   * Override the animation source for one or more states. Accepts any URL or
+   * data URL accepted by DotLottieReact's `src` prop. Bundled animations are
+   * used for any state not overridden.
+   * @example { talking: "https://cdn.example.com/custom-talking.lottie" }
    */
   lottiePaths?: Partial<Record<AgentVisualizerState, string>>;
 }
 
-const stateToLottieFile: Record<AgentVisualizerState, string> = {
-  "not-joined": "Dark Mode - 340p - 01 - Not Joined.lottie",
-  joining: "Dark Mode - 340p - 02 - Joining.lottie",
-  ambient: "Dark Mode - 340p - 03 - Ambient.lottie",
-  listening: "Dark Mode - 340p - 04 - Listening v3.2.lottie",
-  analyzing: "Dark Mode - 340p - 05 - Analyzing - Scale Down Once.lottie",
-  talking: "Dark Mode - 340p - 06 - Talking v3.lottie",
-  disconnected: "Dark Mode - 340p - 07 - Disconnected.lottie",
+// Bundled animation data URLs — no external files or CDN required.
+const bundledAnimations: Record<AgentVisualizerState, string> = {
+  "not-joined": notJoinedSrc,
+  joining: joiningSrc,
+  ambient: ambientSrc,
+  listening: listeningsrc,
+  analyzing: analyzingSrc,
+  talking: talkingSrc,
+  disconnected: disconnectedSrc,
 };
 
 const stateToText: Record<AgentVisualizerState, string> = {
@@ -89,20 +89,15 @@ export const AgentVisualizer = React.forwardRef<
     {
       state,
       size = "md",
-      lottieBasePath = "/agora-uikit/lottie",
       lottiePaths,
       className,
       ...props
     },
     ref,
   ) => {
-    const lottieFileName = stateToLottieFile[state];
     const displayText = stateToText[state];
     const sizeConfig = sizeClasses[size];
-
-    // Use custom path if provided, otherwise construct from base path
-    const lottieSrc =
-      lottiePaths?.[state] || `${lottieBasePath}/${lottieFileName}`;
+    const lottieSrc = lottiePaths?.[state] ?? bundledAnimations[state];
 
     return (
       <div
