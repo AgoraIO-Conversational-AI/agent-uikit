@@ -29,14 +29,17 @@ describe("AgentVisualizer Component", () => {
     expect(props.className).toBe("custom-class");
   });
 
-  it("exports AgentVisualizerState type", () => {
+  it("exports AgentVisualizerState type with all 7 values", () => {
     const states: AgentVisualizerState[] = [
       "not-joined",
+      "joining",
+      "ambient",
       "listening",
+      "analyzing",
       "talking",
-      "thinking",
+      "disconnected",
     ];
-    expect(states.length).toBe(4);
+    expect(states.length).toBe(7);
   });
 
   it("renders with different states", () => {
@@ -48,10 +51,19 @@ describe("AgentVisualizer Component", () => {
     rerender(<AgentVisualizer state="talking" />);
     expect(container).toBeInTheDocument();
 
-    rerender(<AgentVisualizer state="thinking" />);
+    rerender(<AgentVisualizer state="analyzing" />);
     expect(container).toBeInTheDocument();
 
     rerender(<AgentVisualizer state="not-joined" />);
+    expect(container).toBeInTheDocument();
+
+    rerender(<AgentVisualizer state="joining" />);
+    expect(container).toBeInTheDocument();
+
+    rerender(<AgentVisualizer state="ambient" />);
+    expect(container).toBeInTheDocument();
+
+    rerender(<AgentVisualizer state="disconnected" />);
     expect(container).toBeInTheDocument();
   });
 
