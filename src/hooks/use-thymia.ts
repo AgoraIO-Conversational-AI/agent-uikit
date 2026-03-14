@@ -50,39 +50,12 @@ export function useThymia(
       setClinical(msg.clinical as Record<string, number | null>);
     if (msg.safety) setSafety(msg.safety as Record<string, unknown>);
 
-    const keys = Object.keys(
-      (msg.biomarkers || {}) as Record<string, unknown>,
-    ).filter((k) => {
-      const v = (msg.biomarkers as Record<string, number | null>)[k];
-      return (
-        v !== null &&
-        v !== undefined &&
-        Number.isFinite(v) &&
-        Math.abs(v) >= 0.001
-      );
-    });
-    if (keys.length > 0) {
-      const serverTs = msg._server_ts as number | undefined;
-      const lag = serverTs ? `lag=${Date.now() - serverTs}ms` : "no_server_ts";
-      console.log(
-        `[RTM_RECV] t=${Date.now()} biomarkers ${lag} keys=[${keys.join(",")}]`,
-      );
-    }
   }, []);
 
   const handleProgress = useCallback((msg: Record<string, unknown>) => {
     if (msg.progress) {
       const p = msg.progress as ThymiaState["progress"];
       setProgress(p);
-      const summary = Object.entries(p)
-        .map(
-          ([k, v]) =>
-            `${k}:${v.speech_seconds.toFixed(1)}/${v.trigger_seconds}s${v.processing ? "*" : ""}`,
-        )
-        .join(" ");
-      const serverTs = msg._server_ts as number | undefined;
-      const lag = serverTs ? `lag=${Date.now() - serverTs}ms` : "no_server_ts";
-      console.log(`[RTM_RECV] t=${Date.now()} progress ${lag} ${summary}`);
     }
   }, []);
 

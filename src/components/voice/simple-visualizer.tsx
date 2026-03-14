@@ -20,8 +20,8 @@ export interface SimpleVisualizerProps {
 export function SimpleVisualizer({
   data,
   className,
-  activeColor: _activeColor = "bg-gray-700",
-  inactiveColor: _inactiveColor = "bg-gray-300",
+  activeColor = "#374151",
+  inactiveColor = "#d1d5db",
   barWidth = 3,
   barHeight = 16,
   barGap = 2,
@@ -37,7 +37,7 @@ export function SimpleVisualizer({
           style={{
             width: `${barWidth}px`,
             height: `${barHeight}px`,
-            backgroundColor: value > 0 ? "#374151" : "#d1d5db",
+            backgroundColor: value > 0 ? activeColor : inactiveColor,
             borderRadius: "9999px",
             transition: "background-color 75ms",
             willChange: "background-color",

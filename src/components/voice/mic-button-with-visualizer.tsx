@@ -13,6 +13,7 @@ interface AudioBar {
 export interface MicButtonWithVisualizerProps {
   isEnabled: boolean;
   setIsEnabled: (enabled: boolean) => void;
+  /** Audio source — either an Agora microphone track or a native MediaStream. Supersedes the deprecated `localMicrophoneTrack` prop. */
   track: IMicrophoneAudioTrack | MediaStream | null;
   enabledColor?: string;
   disabledColor?: string;
@@ -107,8 +108,8 @@ export function MicButtonWithVisualizer({
         source.connect(analyserRef.current);
 
         updateAudioData();
-      } catch (error) {
-        console.error("Error setting up audio analyser:", error);
+      } catch {
+        // Swallowed — component is best-effort
       }
     };
 
@@ -141,9 +142,7 @@ export function MicButtonWithVisualizer({
           await client.publish(agoraTrack);
         }
         setIsEnabled(newState);
-        console.log("Microphone state updated successfully");
       } catch (error) {
-        console.error("Failed to toggle microphone:", error);
         agoraTrack.setEnabled(isEnabled);
       }
     } else {

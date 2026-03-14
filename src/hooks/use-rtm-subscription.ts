@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { debug } from "../lib/debug";
+
 export interface RTMMessage {
   object: string;
   [key: string]: unknown;
@@ -62,27 +64,17 @@ export function useRTMSubscription(
         } else if (messageData instanceof Uint8Array) {
           msgStr = new TextDecoder("utf-8").decode(messageData);
         } else {
-          console.log(
-            `[useRTMSubscription:${messageType}] unknown event type:`,
-            typeof messageData,
-            event,
-          );
           return;
         }
 
         const parsed = JSON.parse(msgStr) as RTMMessage;
         if (parsed.object === messageType) {
-          console.log(`[useRTMSubscription] matched ${messageType}`);
           callbackRef.current(parsed);
         }
-      } catch (e) {
-        console.log(`[useRTMSubscription:${messageType}] parse error:`, e);
+      } catch (error) {
+        debug.warn(`useRTMSubscription [${messageType}]: failed to parse message`, error);
       }
     };
-
-    console.log(
-      `[useRTMSubscription] subscribing to "${messageType}", enabled=${enabled}`,
-    );
 
     rtmSource.on("message", handler);
     return () => {
