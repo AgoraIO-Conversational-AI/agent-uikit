@@ -21,11 +21,8 @@ export type { SimpleVisualizerProps } from "./components/voice/simple-visualizer
 export { LiveWaveform } from "./components/voice/live-waveform";
 export type { LiveWaveformProps } from "./components/voice/live-waveform";
 
-export { MicButtonWithVisualizer } from "./components/voice/mic-button-with-visualizer";
-export type { MicButtonWithVisualizerProps } from "./components/voice/mic-button-with-visualizer";
-
-export { MicSelector } from "./components/voice/mic-selector";
-export type { MicSelectorProps } from "./components/voice/mic-selector";
+// MicButtonWithVisualizer, MicSelector, and useAudioDevices require agora-rtc-react
+// at runtime. Import them from "agora-agent-uikit/rtc" instead.
 
 // Chat Components
 export {
@@ -128,5 +125,7 @@ export { useThymia } from "./hooks/use-thymia";
 
 // Utilities
 export { cn, renderMarkdownToHtml, decodeStreamMessage } from "./lib/utils";
-export type { IMessageListItem, EMessageStatus } from "./lib/message-engine";
-export { MessageEngine } from "./lib/message-engine";
+
+// Theme
+export { applyCustomTheme, getCurrentTheme, hexToRgbString } from "./lib/theme/apply-theme";
+export type { RemoteThemeConfig } from "./lib/theme/apply-theme";
