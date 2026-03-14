@@ -66,6 +66,9 @@ export const MicButton = React.forwardRef<HTMLButtonElement, MicButtonProps>(
           disabled && "cursor-not-allowed opacity-50",
           className,
         )}
+        aria-label={
+          isError ? "Microphone error" : state === "listening" ? "Microphone active" : "Microphone"
+        }
         {...props}
       >
         <div className="flex items-center justify-center gap-1.5">

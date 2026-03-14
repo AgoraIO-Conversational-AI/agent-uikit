@@ -42,12 +42,12 @@ export function ConvoTextStream({
     );
   }, [currentInProgressMessage]);
 
-  // Scroll to bottom function for direct calls
-  const scrollToBottom = () => {
+  // Scroll to bottom — stable ref to avoid effect churn
+  const scrollToBottom = useCallback(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  };
+  }, []);
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -57,8 +57,8 @@ export function ConvoTextStream({
     }
   };
 
-  // Check if streaming content has significantly changed
-  const hasContentChanged = () => {
+  // Check if streaming content has significantly changed — stable ref
+  const hasContentChanged = useCallback(() => {
     if (!currentInProgressMessage) return false;
 
     const currentText = currentInProgressMessage.text || "";
@@ -74,7 +74,7 @@ export function ConvoTextStream({
     }
 
     return hasSignificantChange;
-  };
+  }, [currentInProgressMessage]);
 
   // Effect for auto-opening chat when first streaming message arrives
 
@@ -89,11 +89,8 @@ export function ConvoTextStream({
       (hasNewMessage || hasInProgressMessage) &&
       !hasSeenFirstMessageRef.current
     ) {
-      // Schedule state updates to avoid synchronous setState in effect
-      Promise.resolve().then(() => {
-        setIsOpen(true);
-        setHasNewMessages(true);
-      });
+      setIsOpen(true);
+      setHasNewMessages(true);
       hasSeenFirstMessageRef.current = true;
     }
   }, [
@@ -189,6 +186,7 @@ export function ConvoTextStream({
             <button
               onClick={toggleChat}
               className="inline-flex items-center justify-center rounded-md p-2 transition-colors hover:bg-white/10"
+              aria-label="Close transcription"
             >
               <X className="h-4 w-4" />
             </button>
@@ -266,6 +264,8 @@ export function ConvoTextStream({
             "border-white bg-[#333333] hover:bg-white active:bg-white",
             hasNewMessages && "animate-chat-pulse",
           )}
+          aria-label="Open transcription"
+          aria-expanded={false}
         >
           <MessageCircle className="h-6 w-6 text-white transition-colors duration-300 ease-in-out group-hover:text-black group-active:text-black" />
         </button>

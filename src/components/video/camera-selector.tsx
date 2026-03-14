@@ -4,6 +4,11 @@ import * as React from "react";
 import { Video, VideoOff, Check, ChevronDown } from "lucide-react";
 
 import { cn } from "../../lib/utils";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "../primitives/popover";
 
 export interface CameraDevice {
   deviceId: string;
@@ -89,6 +94,7 @@ export const CameraSelector = React.forwardRef<
         {/* Toggle camera button */}
         <button
           onClick={handleToggleCamera}
+          aria-label="Toggle camera"
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-full transition-colors",
             hasError
@@ -107,9 +113,9 @@ export const CameraSelector = React.forwardRef<
 
         {/* Device selector dropdown */}
         {devices.length > 0 && (
-          <div className="relative">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger
+              aria-label="Select camera device"
               className="flex items-center gap-2 text-sm hover:text-foreground/80"
               disabled={disabled || hasError}
             >
@@ -122,38 +128,30 @@ export const CameraSelector = React.forwardRef<
                   isOpen && "rotate-180",
                 )}
               />
-            </button>
+            </PopoverTrigger>
 
-            {/* Dropdown menu */}
-            {isOpen && (
-              <>
-                {/* Backdrop */}
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setIsOpen(false)}
-                />
-
-                {/* Menu */}
-                <div className="absolute top-full left-0 z-50 mt-2 w-64 rounded-lg border bg-popover p-1 shadow-lg">
-                  {devices.map((device) => (
-                    <button
-                      key={device.deviceId}
-                      onClick={() => handleSelectDevice(device.deviceId)}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded px-3 py-2 text-sm hover:bg-accent",
-                        device.deviceId === value && "bg-accent",
-                      )}
-                    >
-                      <span className="truncate">{device.label}</span>
-                      {device.deviceId === value && (
-                        <Check className="h-4 w-4 flex-shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+            <PopoverContent
+              align="start"
+              sideOffset={8}
+              className="w-64 p-1"
+            >
+              {devices.map((device) => (
+                <button
+                  key={device.deviceId}
+                  onClick={() => handleSelectDevice(device.deviceId)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded px-3 py-2 text-sm hover:bg-accent",
+                    device.deviceId === value && "bg-accent",
+                  )}
+                >
+                  <span className="truncate">{device.label}</span>
+                  {device.deviceId === value && (
+                    <Check className="h-4 w-4 flex-shrink-0" />
+                  )}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
         )}
 
         {/* No devices message */}

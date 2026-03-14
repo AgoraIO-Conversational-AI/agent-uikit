@@ -30,6 +30,8 @@ export function SimpleVisualizer({
     <div
       className={cn("flex items-center justify-start", className)}
       style={{ gap: `${barGap}px`, height: `${barHeight * 2}px` }}
+      role="img"
+      aria-label="Audio level indicator"
     >
       {data.map((value, i) => (
         <div

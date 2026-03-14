@@ -36,16 +36,29 @@ export const Conversation = React.forwardRef<HTMLDivElement, ConversationProps>(
       userName = "User",
       ...props
     },
-    _ref,
+    ref,
   ) => {
     const scrollRef = React.useRef<HTMLDivElement>(null);
     const [showScrollButton, setShowScrollButton] = React.useState(false);
 
-    const scrollToBottom = () => {
+    // Merge forwarded ref with internal scroll ref
+    const setRefs = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        (scrollRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+        }
+      },
+      [ref],
+    );
+
+    const scrollToBottom = React.useCallback(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
-    };
+    }, []);
 
     React.useEffect(() => {
       const scrollElement = scrollRef.current;
@@ -58,8 +71,11 @@ export const Conversation = React.forwardRef<HTMLDivElement, ConversationProps>(
         }
       };
 
+      // Debounce MutationObserver scroll to avoid hundreds of calls during streaming
+      let rafId: number | null = null;
       const observer = new MutationObserver(() => {
-        setTimeout(scrollToBottom, 0);
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(scrollToBottom);
       });
 
       if (scrollElement) {
@@ -69,16 +85,17 @@ export const Conversation = React.forwardRef<HTMLDivElement, ConversationProps>(
 
       return () => {
         observer.disconnect();
+        if (rafId) cancelAnimationFrame(rafId);
         if (scrollElement) {
           scrollElement.removeEventListener("scroll", handleScroll);
         }
       };
-    }, []);
+    }, [scrollToBottom]);
 
     return (
       <ConversationContext.Provider value={{ scrollRef, agentName, userName }}>
         <div
-          ref={scrollRef}
+          ref={setRefs}
           className={cn(
             "relative flex flex-col overflow-scroll",
             height,

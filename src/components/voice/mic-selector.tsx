@@ -85,6 +85,7 @@ export function MicSelector({
           variant="standard"
           size={"sm"}
           disabled={isError}
+          aria-label={isError ? "Microphone error" : isMuted ? "Unmute microphone" : "Mute microphone"}
         >
           {isError ? (
             <MicOff className={`size-4`} />
@@ -112,7 +113,7 @@ export function MicSelector({
         />
       </div>
       <DropdownMenu onOpenChange={handleDropdownOpenChange}>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild aria-label="Select microphone device">
           <ChevronDown className="size-6 flex-shrink-0" />
         </DropdownMenuTrigger>
 

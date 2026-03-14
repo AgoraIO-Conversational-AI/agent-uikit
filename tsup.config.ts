@@ -5,6 +5,7 @@ export default defineConfig({
     index: "src/index.ts",
     "session/index": "src/session/index.ts",
     "rtc/index": "src/rtc/index.ts",
+    "thymia/index": "src/thymia/index.ts",
   },
   format: ["cjs", "esm"],
   dts: true,

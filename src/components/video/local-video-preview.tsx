@@ -1,16 +1,16 @@
 "use client";
 
 import * as React from "react";
-import type { ICameraVideoTrack } from "agora-rtc-sdk-ng";
+import { Video, VideoOff } from "lucide-react";
 
-import { debug } from "../../lib/debug";
+import { useVideoPlayback, type PlayableVideoTrack } from "../../hooks/use-video-playback";
 import { cn } from "../../lib/utils";
 
 export interface LocalVideoPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * Local camera video track from Agora RTC
    */
-  videoTrack?: ICameraVideoTrack | null;
+  videoTrack?: PlayableVideoTrack | null;
 
   /**
    * Mirror the video horizontally (like a mirror)
@@ -82,64 +82,15 @@ export const LocalVideoPreview = React.forwardRef<
   ) => {
     const videoContainerRef = React.useRef<HTMLDivElement>(null);
     const videoElementRef = React.useRef<HTMLVideoElement>(null);
-    const [isPlaying, setIsPlaying] = React.useState(false);
     const [isHovering, setIsHovering] = React.useState(false);
 
-    // MediaStream mode - use native video element
-    React.useEffect(() => {
-      if (!useMediaStream || !videoTrack || !videoElementRef.current) {
-        if (useMediaStream) setIsPlaying(false);
-        return;
-      }
-
-      try {
-        const mediaStreamTrack = videoTrack.getMediaStreamTrack();
-        const stream = new MediaStream([mediaStreamTrack]);
-        videoElementRef.current.srcObject = stream;
-        videoElementRef.current.play().catch((error) => {
-          // Ignore AbortError — happens when play is interrupted by a track change
-          if ((error as DOMException).name !== "AbortError") {
-            debug.error("LocalVideoPreview: MediaStream playback failed", error);
-          }
-        });
-        setIsPlaying(true);
-      } catch (error) {
-        debug.error("LocalVideoPreview: failed to attach MediaStream", error);
-        setIsPlaying(false);
-      }
-
-      return () => {
-        if (videoElementRef.current) {
-          videoElementRef.current.srcObject = null;
-        }
-        setIsPlaying(false);
-      };
-    }, [videoTrack, useMediaStream]);
-
-    // Agora play() mode - use container div
-    React.useEffect(() => {
-      if (useMediaStream || !videoTrack || !videoContainerRef.current) {
-        if (!useMediaStream) setIsPlaying(false);
-        return;
-      }
-
-      try {
-        videoTrack.play(videoContainerRef.current);
-        setIsPlaying(true);
-      } catch (error) {
-        debug.error("LocalVideoPreview: failed to play video track", error);
-        setIsPlaying(false);
-      }
-
-      return () => {
-        try {
-          videoTrack.stop();
-          setIsPlaying(false);
-        } catch (error) {
-          debug.error("LocalVideoPreview: failed to stop video track", error);
-        }
-      };
-    }, [videoTrack, useMediaStream]);
+    const { isPlaying } = useVideoPlayback({
+      videoTrack: videoTrack ?? null,
+      useMediaStream,
+      videoContainerRef,
+      videoElementRef,
+      debugLabel: "LocalVideoPreview",
+    });
 
     const showPlaceholder = !isPlaying;
 
@@ -188,19 +139,7 @@ export const LocalVideoPreview = React.forwardRef<
             {placeholder || (
               <div className="flex flex-col items-center gap-2">
                 <div className="h-12 w-12 rounded-full bg-slate-600/50 flex items-center justify-center">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
-                    />
-                  </svg>
+                  <Video className="h-6 w-6" />
                 </div>
                 <p className="text-xs">Camera off</p>
               </div>
@@ -231,33 +170,9 @@ export const LocalVideoPreview = React.forwardRef<
               aria-label={isVideoMuted ? "Unmute video" : "Mute video"}
             >
               {isVideoMuted ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 01-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.407-.407.659-.97.659-1.591v-9a2.25 2.25 0 00-2.25-2.25h-9c-.621 0-1.184.252-1.591.659m12.182 12.182L2.909 5.909M1.5 4.5l1.409 1.409"
-                  />
-                </svg>
+                <VideoOff className="h-6 w-6" />
               ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
-                  />
-                </svg>
+                <Video className="h-6 w-6" />
               )}
             </button>
           </div>

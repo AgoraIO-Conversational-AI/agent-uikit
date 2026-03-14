@@ -199,9 +199,13 @@ export const LiveWaveform = ({
     };
   }, [active, deviceId, fftSize, smoothingTimeConstant, sensitivity, onError]);
 
-  // Update data from external source if provided (removed useEffect to avoid setState in effect)
+  // Store data in a ref so the canvas render loop can read it without re-triggering the effect
+  const dataRef = useRef<number[]>(data);
+  dataRef.current = data;
+  const externalDataRef = useRef<number[] | undefined>(externalData);
+  externalDataRef.current = externalData;
 
-  // Canvas rendering
+  // Canvas rendering — runs a single persistent RAF loop, reads data from refs
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -211,26 +215,24 @@ export const LiveWaveform = ({
 
     let rafId: number;
 
+    const computedBarColor =
+      barColor ||
+      (() => {
+        const style = getComputedStyle(canvas);
+        return style.color || "#000";
+      })();
+
     const animate = () => {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
-
-      const computedBarColor =
-        barColor ||
-        (() => {
-          const style = getComputedStyle(canvas);
-          const color = style.color;
-          return color || "#000";
-        })();
 
       const step = barWidth + barGap;
       const barCount = Math.floor(rect.width / step);
       const centerY = rect.height / 2;
 
-      // Use external data if available, otherwise use internal data
-      const displayData = externalData || data;
+      // Read from refs — no effect dependency needed
+      const displayData = externalDataRef.current || dataRef.current;
 
-      // Render bars from data
       for (let i = 0; i < barCount && i < displayData.length; i++) {
         const value = displayData[i] || 0.05;
         const x = i * step;
@@ -238,8 +240,6 @@ export const LiveWaveform = ({
         const y = centerY - barHeight / 2;
 
         ctx.fillStyle = computedBarColor;
-        // Calculate alpha based on configuration
-        // If minAlpha is null, use value directly. Otherwise use minAlpha + (value * alphaRange)
         ctx.globalAlpha =
           minAlpha !== null ? minAlpha + value * alphaRange : value;
 
@@ -252,7 +252,6 @@ export const LiveWaveform = ({
         }
       }
 
-      // Apply edge fading
       if (fadeEdges && fadeWidth > 0 && rect.width > 0) {
         const gradient = ctx.createLinearGradient(0, 0, rect.width, 0);
         const fadePercent = Math.min(0.3, fadeWidth / rect.width);
@@ -279,18 +278,7 @@ export const LiveWaveform = ({
         cancelAnimationFrame(rafId);
       }
     };
-  }, [
-    data,
-    externalData,
-    barWidth,
-    barGap,
-    barRadius,
-    barColor,
-    fadeEdges,
-    fadeWidth,
-    minAlpha,
-    alphaRange,
-  ]);
+  }, [barWidth, barGap, barRadius, barColor, fadeEdges, fadeWidth, minAlpha, alphaRange]);
 
   return (
     <div

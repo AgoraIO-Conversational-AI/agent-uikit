@@ -79,6 +79,14 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
     const startVisualizer = async () => {
       try {
+        // Close previous AudioContext to prevent leaking (browsers cap at ~6-8)
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+        }
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+
         audioContextRef.current = new AudioContext();
         analyserRef.current = audioContextRef.current.createAnalyser();
         analyserRef.current.fftSize = 64;
@@ -128,6 +136,8 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   return (
     <div
       className={`relative flex h-40 w-full items-center justify-center overflow-hidden rounded-lg ${className}`}
+      role="img"
+      aria-label="Audio frequency visualizer"
     >
       <div className="relative z-10 flex h-[100px] items-center space-x-2">
         {[...Array(9)].map((_, index) => (
