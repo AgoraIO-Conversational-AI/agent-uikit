@@ -70,7 +70,7 @@ applications consume it as a workspace package:
 ```json
 {
   "dependencies": {
-    "@agora/ui-kit": "workspace:*"
+    "@agora/agent-ui-kit": "github:AgoraIO-Conversational-AI/agent-ui-kit#main"
   }
 }
 ```
@@ -78,7 +78,10 @@ applications consume it as a workspace package:
 Import components in your application:
 
 ```typescript
-import { MicButton, AgentVisualizer, Conversation } from "@agora/ui-kit";
+import { AgentVisualizer, Conversation, cn } from "@agora/agent-ui-kit";
+
+// Extended exports (primitives, advanced components, utilities)
+import { MicButton, Button, MessageEngine } from "@agora/agent-ui-kit/extended";
 ```
 
 ---
@@ -86,11 +89,12 @@ import { MicButton, AgentVisualizer, Conversation } from "@agora/ui-kit";
 ## Architecture
 
 ```
-/client-ui-kit
-├── index.ts                         # Main exports
-├── README.md                        # This file
+src/
+├── index.ts                         # Main exports (18 commonly-used items)
+├── extended.ts                      # Extended exports (28 additional items)
 ├── lib/
-│   └── utils.ts                     # cn() utility
+│   ├── utils.ts                     # cn(), renderMarkdownToHtml, decodeStreamMessage
+│   └── message-engine.ts            # MessageEngine (available via extended)
 └── components/
     ├── voice/                       # Voice AI components
     │   ├── mic-button.tsx
@@ -155,6 +159,38 @@ This installs all dependencies and links workspace packages automatically.
 
 ```bash
 pnpm add lucide-react class-variance-authority clsx tailwind-merge @lottiefiles/dotlottie-react
+```
+
+---
+
+## Export Structure
+
+The package has two entry points to keep the main import lean:
+
+**Main export** (`@agora/agent-ui-kit`) — 18 commonly-used items:
+
+`IconButton`, `AgentVisualizer`, `AgentVisualizerState`, `Conversation`, `ConversationContent`, `Message`, `MessageContent`, `Response`, `AvatarVideoDisplay`, `LocalVideoPreview`, `VideoGrid`, `MobileTabs`, `AgoraLogo`, `SettingsDialog`, `ThymiaPanel`, `useThymia`, `RTMEventSource`, `MicButtonState`, `cn`
+
+**Extended export** (`@agora/agent-ui-kit/extended`) — 28 additional items:
+
+| Category | Exports |
+|----------|---------|
+| Voice | `MicButton`, `AudioVisualizer`, `SimpleVisualizer`, `LiveWaveform`, `MicButtonWithVisualizer`, `MicSelector` |
+| Chat | `ConvoTextStream` |
+| Video | `Avatar`, `CameraSelector` |
+| Layout | `VideoGridWithControls` |
+| Primitives | `Button`, `Card`, `Chip`, `ValuePicker`, `DropdownMenu`, `Command`, `Popover` |
+| Settings | `AgentSettings`, `SessionPanel` |
+| Demo | `HelloWorld` |
+| Hooks | `useRTMSubscription` |
+| Utilities | `MessageEngine`, `IMessageListItem`, `EMessageStatus`, `renderMarkdownToHtml`, `decodeStreamMessage` |
+
+```typescript
+// Main imports
+import { AgentVisualizer, Conversation, cn } from "@agora/agent-ui-kit";
+
+// Extended imports
+import { MicButton, Button, MessageEngine } from "@agora/agent-ui-kit/extended";
 ```
 
 ---
@@ -231,7 +267,7 @@ interface MicButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 **Usage:**
 
 ```typescript
-import { MicButton } from '@agora/ui-kit'
+import { MicButton } from '@agora/agent-ui-kit'
 import { Mic, MicOff } from 'lucide-react'
 
 <MicButton
@@ -276,7 +312,7 @@ interface AgentVisualizerProps {
 **Usage:**
 
 ```typescript
-import { AgentVisualizer } from '@agora/ui-kit'
+import { AgentVisualizer } from '@agora/agent-ui-kit'
 
 <AgentVisualizer
   state={isAgentSpeaking ? 'talking' : 'listening'}
@@ -320,7 +356,7 @@ interface AudioVisualizerProps {
 **Usage:**
 
 ```typescript
-import { AudioVisualizer } from '@agora/ui-kit'
+import { AudioVisualizer } from '@agora/agent-ui-kit'
 
 <AudioVisualizer
   data={frequencyData}
@@ -357,7 +393,7 @@ interface SimpleVisualizerProps {
 **Usage:**
 
 ```typescript
-import { SimpleVisualizer } from '@agora/ui-kit'
+import { SimpleVisualizer } from '@agora/agent-ui-kit'
 
 <SimpleVisualizer
   data={frequencyData}
@@ -393,7 +429,7 @@ interface LiveWaveformProps {
 **Usage:**
 
 ```typescript
-import { LiveWaveform } from '@agora/ui-kit'
+import { LiveWaveform } from '@agora/agent-ui-kit'
 
 <LiveWaveform
   audioData={waveformData}
@@ -431,7 +467,7 @@ interface MicButtonWithVisualizerProps {
 **Usage:**
 
 ```typescript
-import { MicButtonWithVisualizer } from '@agora/ui-kit'
+import { MicButtonWithVisualizer } from '@agora/agent-ui-kit'
 
 <MicButtonWithVisualizer
   isActive={isConnected}
@@ -468,7 +504,7 @@ interface MicSelectorProps {
 **Usage:**
 
 ```typescript
-import { MicSelector } from '@agora/ui-kit'
+import { MicSelector } from '@agora/agent-ui-kit'
 
 <MicSelector
   devices={microphoneDevices}
@@ -510,7 +546,7 @@ interface ConversationContentProps {
 **Usage:**
 
 ```typescript
-import { Conversation, ConversationContent } from '@agora/ui-kit'
+import { Conversation, ConversationContent } from '@agora/agent-ui-kit'
 
 <Conversation height="500px" className="flex-1">
   <ConversationContent>
@@ -551,7 +587,7 @@ interface MessageContentProps {
 **Usage:**
 
 ```typescript
-import { Message, MessageContent, Response } from '@agora/ui-kit'
+import { Message, MessageContent, Response } from '@agora/agent-ui-kit'
 
 <Message
   from="assistant"
@@ -596,7 +632,7 @@ interface ResponseProps {
 **Usage:**
 
 ```typescript
-import { Response } from '@agora/ui-kit'
+import { Response } from '@agora/agent-ui-kit'
 
 <Response>This is the message text</Response>
 ```
@@ -627,7 +663,7 @@ interface ConvoTextStreamProps {
 **Usage:**
 
 ```typescript
-import { ConvoTextStream } from '@agora/ui-kit'
+import { ConvoTextStream } from '@agora/agent-ui-kit'
 
 <ConvoTextStream
   text="This text will stream in character by character"
@@ -667,7 +703,7 @@ interface LocalVideoPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
 **Usage:**
 
 ```typescript
-import { LocalVideoPreview } from '@agora/ui-kit'
+import { LocalVideoPreview } from '@agora/agent-ui-kit'
 import { useLocalVideo } from '@agora/conversational-ai-react'
 
 const { videoTrack } = useLocalVideo()
@@ -720,7 +756,7 @@ interface AvatarVideoDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
 **Usage:**
 
 ```typescript
-import { AvatarVideoDisplay } from '@agora/ui-kit'
+import { AvatarVideoDisplay } from '@agora/agent-ui-kit'
 import { useRemoteVideo } from '@agora/conversational-ai-react'
 
 const { remoteVideoUsersArray } = useRemoteVideo({ client })
@@ -782,7 +818,7 @@ interface AvatarProps {
 **Usage:**
 
 ```typescript
-import { Avatar } from '@agora/ui-kit'
+import { Avatar } from '@agora/agent-ui-kit'
 
 {/* Image avatar */}
 <Avatar src="/avatar.jpg" alt="User" size="sm" />
@@ -827,7 +863,7 @@ interface CameraDevice {
 **Usage:**
 
 ```typescript
-import { CameraSelector } from '@agora/ui-kit'
+import { CameraSelector } from '@agora/agent-ui-kit'
 
 <CameraSelector
   devices={cameraDevices}
@@ -1040,7 +1076,7 @@ interface VideoGridProps extends React.HTMLAttributes<HTMLDivElement> {
 **Usage:**
 
 ```typescript
-import { VideoGrid } from '@agora/ui-kit'
+import { VideoGrid } from '@agora/agent-ui-kit'
 
 <VideoGrid
   avatar={<AvatarVideoDisplay videoTrack={avatarTrack} />}
@@ -1084,7 +1120,7 @@ interface Tab {
 **Usage:**
 
 ```typescript
-import { MobileTabs } from '@agora/ui-kit'
+import { MobileTabs } from '@agora/agent-ui-kit'
 import { Video, MessageSquare } from 'lucide-react'
 
 <MobileTabs
@@ -1137,7 +1173,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 **Usage:**
 
 ```typescript
-import { Button } from '@agora/ui-kit'
+import { Button } from '@agora/agent-ui-kit'
 
 <Button variant="default" size="md" onClick={handleClick}>
   Click Me
@@ -1175,7 +1211,7 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 **Usage:**
 
 ```typescript
-import { IconButton } from '@agora/ui-kit'
+import { IconButton } from '@agora/agent-ui-kit'
 import { Settings } from 'lucide-react'
 
 <IconButton
@@ -1209,7 +1245,7 @@ interface CardProps {
 **Usage:**
 
 ```typescript
-import { Card } from '@agora/ui-kit'
+import { Card } from '@agora/agent-ui-kit'
 
 <Card className="p-6">
   <h3>Card Title</h3>
@@ -1236,7 +1272,7 @@ interface ChipProps {
 **Usage:**
 
 ```typescript
-import { Chip } from '@agora/ui-kit'
+import { Chip } from '@agora/agent-ui-kit'
 
 <Chip variant="success">Active</Chip>
 <Chip variant="error">Offline</Chip>
@@ -1265,7 +1301,7 @@ interface ValuePickerProps {
 **Usage:**
 
 ```typescript
-import { ValuePicker } from '@agora/ui-kit'
+import { ValuePicker } from '@agora/agent-ui-kit'
 
 <ValuePicker
   value={volume}
@@ -1293,7 +1329,7 @@ import {
   MessageContent,
   Response,
   Avatar
-} from '@agora/ui-kit'
+} from '@agora/agent-ui-kit'
 
 function VoiceChat() {
   const { transcript, isAgentSpeaking, isMuted, toggleMute } = useVoiceAI()
@@ -1388,7 +1424,7 @@ function MobileVoiceChat() {
 ### Audio Visualization
 
 ```typescript
-import { AudioVisualizer, SimpleVisualizer, LiveWaveform } from '@agora/ui-kit'
+import { AudioVisualizer, SimpleVisualizer, LiveWaveform } from '@agora/agent-ui-kit'
 
 function AudioViz() {
   const frequencyData = useAudioVisualization(audioTrack, isConnected)
@@ -1425,7 +1461,7 @@ All components use Tailwind CSS and support the `cn()` utility for custom
 styling:
 
 ```typescript
-import { cn } from '@/lib/utils'
+import { cn } from '@agora/agent-ui-kit'
 
 <MicButton
   className={cn(

@@ -6,7 +6,8 @@
   "types": "src/index.ts",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./extended": "./src/extended.ts"
   },
   "scripts": {
     "test": "vitest run",
