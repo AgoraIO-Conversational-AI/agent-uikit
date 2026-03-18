@@ -15,6 +15,17 @@ function isPlainObject(val: unknown): val is Record<string, unknown> {
   return typeof val === "object" && val !== null && !Array.isArray(val);
 }
 
+function isProgressRecord(val: unknown): val is ThymiaState["progress"] {
+  if (!isPlainObject(val)) return false;
+  return Object.values(val).every(
+    (v) =>
+      isPlainObject(v) &&
+      typeof v.speech_seconds === "number" &&
+      typeof v.trigger_seconds === "number" &&
+      typeof v.processing === "boolean",
+  );
+}
+
 export interface ThymiaState {
   biomarkers: Record<string, number | null>;
   wellness: Record<string, number | null>;
@@ -60,8 +71,8 @@ export function useThymia(
   }, []);
 
   const handleProgress = useCallback((msg: Record<string, unknown>) => {
-    if (isPlainObject(msg.progress)) {
-      setProgress(msg.progress as ThymiaState["progress"]);
+    if (isProgressRecord(msg.progress)) {
+      setProgress(msg.progress);
     }
   }, []);
 

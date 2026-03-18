@@ -36,10 +36,9 @@
     "build": "tsup",
     "build:watch": "tsup --watch",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test": "TMPDIR=/private/tmp vitest run",
+    "test:watch": "TMPDIR=/private/tmp vitest",
+    "test:coverage": "TMPDIR=/private/tmp vitest run --coverage"
   },
   "keywords": [
     "agora",
@@ -66,8 +65,8 @@
     "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
-    "agora-agent-client-toolkit": ">=0.1.0",
-    "agora-agent-client-toolkit-react": ">=0.1.0",
+    "agora-agent-client-toolkit": "^1.1.0",
+    "agora-agent-client-toolkit-react": "^1.1.0",
     "agora-rtc-react": ">=2.0.0",
     "agora-rtm-sdk": ">=2.0.0",
     "react": ">=18.0.0",
@@ -103,8 +102,7 @@
     "@types/react-dom": "19.1.2",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
-    "@vitest/coverage-v8": "^1.6.1",
-    "@vitest/ui": "^1.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
     "agora-agent-client-toolkit": "workspace:*",
     "agora-agent-client-toolkit-react": "workspace:*",
     "agora-rtc-react": "^2.5.1",
@@ -121,7 +119,7 @@
     "tailwind-merge": "^3.4.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^2.0.0"
   },
   "license": "MIT"
 }

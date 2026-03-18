@@ -96,4 +96,13 @@ describe("AgentStateVisualizer", () => {
     const { container } = render(<AgentStateVisualizer size="lg" />);
     expect(container).toBeInTheDocument();
   });
+
+  it("warns and falls back to 'ambient' for an unknown AgentState value", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockUseAgentState.mockReturnValue({ agentState: "unknown-future-state" as any, stateEvent: null, agentUserId: null });
+    const { getByText } = render(<AgentStateVisualizer />);
+    expect(getByText("Ambient")).toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("unknown-future-state"));
+    warnSpy.mockRestore();
+  });
 });

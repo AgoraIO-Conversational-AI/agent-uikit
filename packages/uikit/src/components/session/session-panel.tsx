@@ -15,12 +15,28 @@ export interface SessionPanelProps extends React.HTMLAttributes<HTMLDivElement> 
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = React.useState(false);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear pending timeout on unmount to avoid state update on unmounted component
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const scheduleClear = () => {
+    if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setCopied(false);
+      timeoutRef.current = null;
+    }, 2000);
+  };
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      scheduleClear();
     } catch {
       // Fallback for non-secure contexts (http://)
       try {
@@ -33,7 +49,7 @@ function CopyButton({ text }: { text: string }) {
         document.execCommand("copy");
         document.body.removeChild(textarea);
         setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        scheduleClear();
       } catch {
         // Copy not supported in this context
       }

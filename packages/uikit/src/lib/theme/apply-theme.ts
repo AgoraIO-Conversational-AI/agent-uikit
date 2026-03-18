@@ -139,6 +139,7 @@ export function hexToRgbString(hex: string): string | null {
  * Useful for debugging or displaying current theme
  */
 export function getCurrentTheme(): Record<string, string> {
+  if (typeof window === "undefined") return {}
   const root = document.documentElement
   const computed = getComputedStyle(root)
   const theme: Record<string, string> = {}

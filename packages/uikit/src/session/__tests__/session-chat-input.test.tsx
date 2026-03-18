@@ -139,6 +139,15 @@ describe("SessionChatInput", () => {
     expect(useConversationalAIContext).toHaveBeenCalled();
   });
 
+  it("logs a dev warning when instance is null (no provider)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(<SessionChatInput agentUid="agent-1" />);
+    await waitFor(() => {
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("ConversationalAIProvider"));
+    });
+    warnSpy.mockRestore();
+  });
+
   it("accepts numeric agentUid", async () => {
     const { getByRole } = render(<SessionChatInput agentUid={42} />);
     const input = getByRole("textbox");
