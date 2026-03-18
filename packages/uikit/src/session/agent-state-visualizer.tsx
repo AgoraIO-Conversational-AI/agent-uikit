@@ -34,7 +34,7 @@ function mapAgentState(agentState: AgentState | null): AgentVisualizerState {
   if (agentState === null) return "ambient";
   const mapped = AGENT_STATE_MAP[agentState];
   if (mapped === undefined) {
-    if (process.env.NODE_ENV !== "production") {
+    if (typeof process !== "undefined" && process.env.NODE_ENV !== "production") {
       console.warn(
         `[AgentStateVisualizer] Unknown AgentState value "${agentState}". Falling back to "ambient". Update AGENT_STATE_MAP if this is a new toolkit state.`,
       );

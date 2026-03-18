@@ -9,7 +9,7 @@ const PREFIX = "[agora-agent-uikit]";
 const isVerbose = (): boolean =>
   (typeof process !== "undefined" && process.env.NODE_ENV !== "production") ||
   (typeof window !== "undefined" &&
-    !!(window as Record<string, unknown>).__AGORA_UIKIT_DEBUG__);
+    !!(window as unknown as Record<string, unknown>).__AGORA_UIKIT_DEBUG__);
 
 export const debug = {
   log: (...args: unknown[]): void => {
