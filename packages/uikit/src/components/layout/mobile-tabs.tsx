@@ -60,7 +60,6 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
       controlledActiveTab !== undefined
         ? controlledActiveTab
         : internalActiveTab;
-    const activeTabContent = tabs.find((tab) => tab.id === activeTab)?.content;
 
     const handleTabChange = (tabId: string) => {
       if (controlledActiveTab === undefined) {
@@ -102,8 +101,20 @@ export const MobileTabs = React.forwardRef<HTMLDivElement, MobileTabsProps>(
         {/* Top tabs */}
         {tabPosition === "top" && tabButtons}
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden" role="tabpanel">{activeTabContent}</div>
+        {/* Content — render all tabs but only show the active one.
+            This keeps elements like canvases mounted in the DOM. */}
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            role="tabpanel"
+            className={cn(
+              "flex-1 overflow-hidden",
+              tab.id === activeTab ? "" : "hidden",
+            )}
+          >
+            {tab.content}
+          </div>
+        ))}
 
         {/* Bottom tabs */}
         {tabPosition === "bottom" && tabButtons}
