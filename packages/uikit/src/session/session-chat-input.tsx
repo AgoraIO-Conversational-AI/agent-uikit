@@ -51,7 +51,7 @@ export function SessionChatInput({
   const { sendMessage, interrupt, instance } = useConversationalAIContext();
 
   React.useEffect(() => {
-    if (instance === null && process.env.NODE_ENV !== "production") {
+    if (instance === null && typeof process !== "undefined" && process.env.NODE_ENV !== "production") {
       console.warn(
         "[SessionChatInput] No ConversationalAIProvider found. sendMessage and interrupt will have no effect. Wrap this component in <ConversationalAIProvider>.",
       );
