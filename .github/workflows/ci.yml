@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: AgoraIO-Conversational-AI/agent-client-toolkit-ts
+          path: agent-client-toolkit-ts
+
+      # pnpm-workspace.yaml references ../agent-client-toolkit-ts — symlink so
+      # the path resolves correctly without changing workspace config.
+      - name: Link toolkit to expected sibling path
+        run: ln -s "$GITHUB_WORKSPACE/agent-client-toolkit-ts" "$GITHUB_WORKSPACE/../agent-client-toolkit-ts"
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install toolkit deps & build
+        run: |
+          cd agent-client-toolkit-ts
+          pnpm install
+          pnpm --filter agora-agent-client-toolkit build
+          pnpm --filter agora-agent-client-toolkit-react build
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Typecheck
+        run: pnpm --filter agora-agent-uikit typecheck
+
+      - name: Test
+        run: pnpm --filter agora-agent-uikit test
+
+      - name: Build library
+        run: pnpm --filter agora-agent-uikit build
+
+      - name: Build playground
+        run: pnpm --filter www build
