@@ -1,7 +1,7 @@
 {
   "name": "agora-agent-uikit",
   "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit-ts",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "React component library for building voice AI user interfaces with Agora",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
