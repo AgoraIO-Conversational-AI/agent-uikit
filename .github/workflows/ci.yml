@@ -15,7 +15,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: AgoraIO-Conversational-AI/agent-client-toolkit-ts
-          path: ../agent-client-toolkit-ts
+          path: agent-client-toolkit-ts
+
+      # pnpm-workspace.yaml references ../agent-client-toolkit-ts — symlink so
+      # the path resolves correctly without changing workspace config.
+      - name: Link toolkit to expected sibling path
+        run: ln -s "$GITHUB_WORKSPACE/agent-client-toolkit-ts" "$GITHUB_WORKSPACE/../agent-client-toolkit-ts"
 
       - uses: pnpm/action-setup@v4
         with:
@@ -28,7 +33,7 @@ jobs:
 
       - name: Install toolkit deps & build
         run: |
-          cd ../agent-client-toolkit-ts
+          cd agent-client-toolkit-ts
           pnpm install
           pnpm --filter agora-agent-client-toolkit build
           pnpm --filter agora-agent-client-toolkit-react build
