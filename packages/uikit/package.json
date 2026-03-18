@@ -1,0 +1,125 @@
+{
+  "name": "agora-agent-uikit",
+  "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit-ts",
+  "version": "1.0.0",
+  "description": "React component library for building voice AI user interfaces with Agora",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./session": {
+      "import": "./dist/session/index.mjs",
+      "require": "./dist/session/index.js",
+      "types": "./dist/session/index.d.ts"
+    },
+    "./rtc": {
+      "import": "./dist/rtc/index.mjs",
+      "require": "./dist/rtc/index.js",
+      "types": "./dist/rtc/index.d.ts"
+    },
+    "./thymia": {
+      "import": "./dist/thymia/index.mjs",
+      "require": "./dist/thymia/index.js",
+      "types": "./dist/thymia/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "TMPDIR=/tmp vitest run",
+    "test:watch": "TMPDIR=/tmp vitest",
+    "test:coverage": "TMPDIR=/tmp vitest run --coverage"
+  },
+  "keywords": [
+    "agora",
+    "voice-ai",
+    "react",
+    "ui-components",
+    "conversational-ai",
+    "chat",
+    "audio-visualization"
+  ],
+  "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.17.13",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "dompurify": "^3.3.3",
+    "lucide-react": ">=0.263.0",
+    "tailwind-merge": "^3.4.0"
+  },
+  "peerDependencies": {
+    "agora-agent-client-toolkit": "^1.1.0",
+    "agora-agent-client-toolkit-react": "^1.1.0",
+    "agora-rtc-react": ">=2.0.0",
+    "agora-rtm-sdk": ">=2.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "agora-rtc-react": {
+      "optional": true
+    },
+    "agora-rtm-sdk": {
+      "optional": true
+    },
+    "agora-agent-client-toolkit": {
+      "optional": true
+    },
+    "agora-agent-client-toolkit-react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@lottiefiles/dotlottie-react": "^0.17.13",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@types/dompurify": "^3.0.5",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "agora-agent-client-toolkit": "workspace:*",
+    "agora-agent-client-toolkit-react": "workspace:*",
+    "agora-rtc-react": "^2.5.1",
+    "agora-rtm-sdk": "^2.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "eslint": "^9.39.2",
+    "jsdom": "^23.0.0",
+    "lucide-react": "^0.562.0",
+    "prettier": "^3.7.4",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "tailwind-merge": "^3.4.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  },
+  "license": "MIT"
+}
