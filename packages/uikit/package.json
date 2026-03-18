@@ -12,24 +12,24 @@
   "sideEffects": false,
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./session": {
+      "types": "./dist/session/index.d.ts",
       "import": "./dist/session/index.mjs",
-      "require": "./dist/session/index.js",
-      "types": "./dist/session/index.d.ts"
+      "require": "./dist/session/index.js"
     },
     "./rtc": {
+      "types": "./dist/rtc/index.d.ts",
       "import": "./dist/rtc/index.mjs",
-      "require": "./dist/rtc/index.js",
-      "types": "./dist/rtc/index.d.ts"
+      "require": "./dist/rtc/index.js"
     },
     "./thymia": {
+      "types": "./dist/thymia/index.d.ts",
       "import": "./dist/thymia/index.mjs",
-      "require": "./dist/thymia/index.js",
-      "types": "./dist/thymia/index.d.ts"
+      "require": "./dist/thymia/index.js"
     }
   },
   "scripts": {

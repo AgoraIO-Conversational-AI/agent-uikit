@@ -58,6 +58,8 @@ export function useRTMSubscription(
   useEffect(() => {
     if (!enabled || !rtmSource) return;
 
+    debug.log(`useRTMSubscription: subscribing to "${messageType}"`);
+
     const handler = (event: { message: string | Uint8Array }) => {
       try {
         const messageData = event.message;
@@ -72,6 +74,7 @@ export function useRTMSubscription(
 
         const parsed = JSON.parse(msgStr) as RTMMessage;
         if (parsed.object === messageType) {
+          debug.log(`useRTMSubscription: received "${messageType}" (${msgStr.length} bytes)`);
           callbackRef.current(parsed);
         }
       } catch (error) {

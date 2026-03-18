@@ -3,12 +3,25 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRTMSubscription } from "./use-rtm-subscription";
 import type { RTMEventSource } from "./use-rtm-subscription";
+import { debug } from "../lib/debug";
 
-function isNumberRecord(val: unknown): val is Record<string, number | null> {
-  if (typeof val !== "object" || val === null || Array.isArray(val)) return false;
-  return Object.values(val as Record<string, unknown>).every(
-    (v) => typeof v === "number" || v === null,
-  );
+/**
+ * Extract only numeric (or null) entries from a plain object.
+ * Returns null if the input isn't an object or has no numeric values.
+ */
+function extractNumberRecord(
+  val: unknown,
+): Record<string, number | null> | null {
+  if (typeof val !== "object" || val === null || Array.isArray(val)) return null;
+  const result: Record<string, number | null> = {};
+  let count = 0;
+  for (const [k, v] of Object.entries(val as Record<string, unknown>)) {
+    if (typeof v === "number" || v === null) {
+      result[k] = v as number | null;
+      count++;
+    }
+  }
+  return count > 0 ? result : null;
 }
 
 function isPlainObject(val: unknown): val is Record<string, unknown> {
@@ -64,9 +77,13 @@ export function useThymia(
   const [progress, setProgress] = useState<ThymiaState["progress"]>({});
 
   const handleBiomarkers = useCallback((msg: Record<string, unknown>) => {
-    if (isNumberRecord(msg.biomarkers)) setBiomarkers(msg.biomarkers);
-    if (isNumberRecord(msg.wellness)) setWellness(msg.wellness);
-    if (isNumberRecord(msg.clinical)) setClinical(msg.clinical);
+    const bio = extractNumberRecord(msg.biomarkers);
+    debug.log(`useThymia: biomarkers received, extracted ${bio ? Object.keys(bio).length : 0} scores`);
+    if (bio) setBiomarkers(bio);
+    const well = extractNumberRecord(msg.wellness);
+    if (well) setWellness(well);
+    const clin = extractNumberRecord(msg.clinical);
+    if (clin) setClinical(clin);
     if (isPlainObject(msg.safety)) setSafety(msg.safety);
   }, []);
 
