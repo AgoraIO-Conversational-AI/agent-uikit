@@ -120,6 +120,15 @@ export type { AgoraLogoProps } from "./components/branding/agora-logo";
 // ThymiaPanel, useThymia, and useRTMSubscription require agora-rtm-sdk
 // at runtime. Import them from "agora-agent-uikit/thymia" instead.
 
+// Shen.AI Components (no SDK dependency — just renders state)
+export { ShenPanel } from "./components/shen/shen-panel";
+export type {
+  ShenPanelProps,
+  ShenState,
+  ShenMeasurementResults,
+  RTMPublish,
+} from "./components/shen/shen-panel";
+
 // Utilities
 export { cn, renderMarkdownToHtml, decodeStreamMessage } from "./lib/utils";
 
