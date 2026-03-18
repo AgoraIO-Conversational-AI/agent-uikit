@@ -1,1453 +1,225 @@
-# Agora Conversational AI UI Kit
+# agora-agent-uikit
 
-React component library for building voice AI user interfaces with Agora.
-
----
-
-## Table of Contents
-
-- [Features](#features)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Running Tests](#running-tests)
-- [Voice Components](#voice-components)
-  - [MicButton](#micbutton)
-  - [AgentVisualizer](#agentvisualizer)
-  - [AudioVisualizer](#audiovisualizer)
-  - [SimpleVisualizer](#simplevisualizer)
-  - [LiveWaveform](#livewaveform)
-  - [MicButtonWithVisualizer](#micbuttonwithvisualizer)
-  - [MicSelector](#micselector)
-- [Chat Components](#chat-components)
-  - [Conversation](#conversation)
-  - [Message](#message)
-  - [Response](#response)
-  - [ConvoTextStream](#convotextstream)
-- [Video Components](#video-components)
-  - [LocalVideoPreview](#localvideopreview)
-  - [AvatarVideoDisplay](#avatarvideodisplay)
-  - [Avatar](#avatar)
-  - [CameraSelector](#cameraselector)
-- [Settings Components](#settings-components)
-  - [AgentSettings](#agentsettings)
-  - [SettingsDialog](#settingsdialog)
-- [Layout Components](#layout-components)
-  - [VideoGrid](#videogrid)
-  - [MobileTabs](#mobiletabs)
-- [UI Primitives](#ui-primitives)
-  - [Button](#button)
-  - [IconButton](#iconbutton)
-  - [Card](#card)
-  - [Chip](#chip)
-  - [ValuePicker](#valuepicker)
-- [Usage Patterns](#usage-patterns)
-  - [Voice Chat Interface](#voice-chat-interface)
-  - [Mobile-Responsive Layout](#mobile-responsive-layout)
-  - [Audio Visualization](#audio-visualization)
-- [Theming](#theming)
-- [Accessibility](#accessibility)
-- [Performance](#performance)
+React component library for building voice and video AI interfaces with Agora.
 
 ---
 
-## Features
+## Quick Start
 
-- **Voice AI Components** - MicButton, AgentVisualizer, audio visualizations
-- **Conversation UI** - Message bubbles, avatars, streaming text
-- **Audio Visualizations** - Waveforms, frequency bars, PTS-synced animations
-- **Tailwind CSS** - Full Tailwind support with customization via cn() utility
-- **TypeScript** - Comprehensive type definitions
-- **Accessible** - ARIA attributes and keyboard navigation
-- **Mobile-Responsive** - Touch-friendly sizing and layouts
+### 1. Install
 
----
+```bash
+npm install agora-agent-uikit
+# or
+pnpm add agora-agent-uikit
+# or
+yarn add agora-agent-uikit
+```
 
-## Usage in Sample Projects
+### 2. Configure Tailwind
 
-This UI Kit is part of the agora-convoai-samples pnpm workspace. Sample
-applications consume it as a workspace package:
+Add the package to your Tailwind `content` paths so its classes are included in your build:
 
-```json
-{
-  "dependencies": {
-    "@agora/ui-kit": "workspace:*"
-  }
+```js
+// tailwind.config.js
+export default {
+  content: [
+    './src/**/*.{ts,tsx}',
+    './node_modules/agora-agent-uikit/dist/**/*.{js,mjs}',
+  ],
+};
+```
+
+### 3. Basic voice UI
+
+No toolkit required — works with any Agora RTC integration:
+
+```tsx
+import { useState } from 'react';
+import { MicButton, AgentVisualizer } from 'agora-agent-uikit';
+import type { AgentVisualizerState, MicButtonState } from 'agora-agent-uikit';
+
+export function VoiceUI() {
+  const [agentState] = useState<AgentVisualizerState>('ambient');
+  const [micState, setMicState] = useState<MicButtonState>('idle');
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <AgentVisualizer state={agentState} size="md" />
+      <MicButton
+        state={micState}
+        onClick={() =>
+          setMicState((s) => (s === 'idle' ? 'listening' : 'idle'))
+        }
+      />
+    </div>
+  );
 }
 ```
 
-Import components in your application:
+### 4. RTC-connected components (requires agora-rtc-react)
 
-```typescript
-import { MicButton, AgentVisualizer, Conversation } from "@agora/ui-kit";
+Install the optional RTC package:
+
+```bash
+npm install agora-rtc-react
 ```
+
+Import components that call Agora RTC hooks from the `/rtc` entry:
+
+```tsx
+import { useState } from 'react';
+import type { IMicrophoneAudioTrack } from 'agora-rtc-react';
+import { MicButtonWithVisualizer, MicSelector } from 'agora-agent-uikit/rtc';
+
+export function RTCControls() {
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [selectedMicId, setSelectedMicId] = useState<string>('');
+  const [track] = useState<IMicrophoneAudioTrack | null>(null);
+
+  return (
+    <div className="flex items-center gap-4">
+      <MicSelector value={selectedMicId} onValueChange={setSelectedMicId} />
+      <MicButtonWithVisualizer
+        isEnabled={isMicOn}
+        setIsEnabled={setIsMicOn}
+        track={track}
+      />
+    </div>
+  );
+}
+```
+
+Consumers that don't import from `agora-agent-uikit/rtc` get zero RTC code in their bundle.
+
+### 5. Session-connected UI (requires toolkit)
+
+Install the optional toolkit packages:
+
+```bash
+npm install agora-agent-client-toolkit agora-agent-client-toolkit-react
+```
+
+Wrap your app with `ConversationalAIProvider` and import session components from the `/session` entry:
+
+```tsx
+import { ConversationalAIProvider } from 'agora-agent-client-toolkit-react';
+import {
+  SessionTranscript,
+  AgentStateVisualizer,
+  SessionChatInput,
+} from 'agora-agent-uikit/session';
+
+interface SessionUIProps {
+  channel: string;
+  agentUid: string | number;
+}
+
+export function SessionUI({ channel, agentUid }: SessionUIProps) {
+  return (
+    <ConversationalAIProvider config={{ channel }}>
+      <div className="flex flex-col gap-4">
+        <AgentStateVisualizer size="md" />
+        <SessionTranscript
+          agentUid={agentUid}
+          agentName="Agent"
+          userName="You"
+        />
+        <SessionChatInput
+          agentUid={agentUid}
+          showInterrupt
+          placeholder="Type a message…"
+        />
+      </div>
+    </ConversationalAIProvider>
+  );
+}
+```
+
+Consumers that only import from `agora-agent-uikit` get zero toolkit code in their bundle — the `/session` entry and its toolkit dependencies are fully tree-shaken.
 
 ---
 
 ## Architecture
 
-```
-/client-ui-kit
-├── index.ts                         # Main exports
-├── README.md                        # This file
-├── lib/
-│   └── utils.ts                     # cn() utility
-└── components/
-    ├── voice/                       # Voice AI components
-    │   ├── mic-button.tsx
-    │   ├── agent-visualizer.tsx
-    │   ├── audio-visualizer.tsx
-    │   ├── simple-visualizer.tsx
-    │   ├── live-waveform.tsx
-    │   ├── mic-button-with-visualizer.tsx
-    │   └── mic-selector.tsx
-    ├── chat/                        # Chat components
-    │   ├── conversation.tsx
-    │   ├── message.tsx
-    │   ├── response.tsx
-    │   └── convo-text-stream.tsx
-    ├── video/                       # Video components
-    │   ├── avatar.tsx
-    │   ├── avatar-video-display.tsx
-    │   ├── local-video-preview.tsx
-    │   └── camera-selector.tsx
-    ├── layout/                      # Layout components
-    │   ├── video-grid.tsx
-    │   └── mobile-tabs.tsx
-    ├── branding/                    # Branding
-    │   └── agora-logo.tsx
-    └── primitives/                  # UI primitives
-        ├── button.tsx
-        ├── icon-button.tsx
-        ├── card.tsx
-        ├── chip.tsx
-        ├── value-picker.tsx
-        ├── dropdown-menu.tsx
-        ├── command.tsx
-        └── popover.tsx
-```
+The library has three entry points:
 
-**Component Organization:**
+| Entry   | Import                      | Extra install needed                                              |
+| ------- | --------------------------- | ----------------------------------------------------------------- |
+| Base    | `agora-agent-uikit`         | None                                                              |
+| RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                 |
+| Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react` |
 
-Components are organized into category subfolders:
+The base entry contains all visual components: voice, chat, video, layout, settings, and primitives. These have no dependency on `agora-rtc-react` or the conversational AI toolkit.
 
-- **voice/** - Audio controls, visualizations, agent state
-- **chat/** - Conversation, messages, text streaming
-- **video/** - Avatar display, local/remote video preview, camera controls
-- **layout/** - Grid layouts, mobile tabs for responsive designs
-- **branding/** - Agora logo and branding elements
-- **primitives/** - Buttons, cards, form controls
+The RTC entry adds components that call Agora RTC hooks at runtime (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
+
+The session entry adds three components that connect directly to `ConversationalAIProvider`. They call toolkit hooks internally and require both toolkit packages.
 
 ---
 
-## Installation
+## Peer Dependencies
 
-### Workspace Setup
+All peer dependencies are required unless marked optional.
 
-From the repository root:
+| Package                            | Version  | Notes                         |
+| ---------------------------------- | -------- | ----------------------------- |
+| `react`                            | ≥ 18.0.0 | Required                      |
+| `react-dom`                        | ≥ 18.0.0 | Required                      |
+| `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry only     |
+| `agora-agent-client-toolkit`       | ≥ 0.1.0  | Optional — session entry only |
+| `agora-agent-client-toolkit-react` | ≥ 0.1.0  | Optional — session entry only |
 
-```bash
-pnpm install
-```
-
-This installs all dependencies and links workspace packages automatically.
-
-### Dependencies
-
-```bash
-pnpm add lucide-react class-variance-authority clsx tailwind-merge @lottiefiles/dotlottie-react
-```
+Everything else (`lucide-react`, `@radix-ui/*`, `@lottiefiles/dotlottie-react`, `cmdk`, `clsx`, `tailwind-merge`, `class-variance-authority`) is bundled as a regular dependency — no separate install needed.
 
 ---
 
-## Running Tests
+## Component Reference
 
-The UI Kit includes a comprehensive test suite using Vitest and React Testing
-Library.
+Full props, usage examples, and notes for every component are in **[docs/components.md](docs/components.md)**.
 
-**Run all tests:**
+**Base entry** (`agora-agent-uikit`):
 
-```bash
-pnpm test
-```
+- Voice — `MicButton`, `AgentVisualizer`, `AudioVisualizer`, `SimpleVisualizer`, `LiveWaveform`
+- Chat — `Conversation`, `Message`, `Response`, `ConvoTextStream`
+- Video — `LocalVideoPreview`, `AvatarVideoDisplay`, `Avatar`, `CameraSelector`
+- Settings — `AgentSettings`, `SettingsDialog`
+- Layout — `VideoGrid`, `MobileTabs`
+- Primitives — `Button`, `IconButton`, `Card`, `Chip`, `ValuePicker`
 
-**Run tests in watch mode:**
+**RTC entry** (`agora-agent-uikit/rtc`):
 
-```bash
-pnpm test:watch
-```
+- `MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`
 
-**Run tests with UI:**
+**Session entry** (`agora-agent-uikit/session`):
 
-```bash
-pnpm test:ui
-```
-
-**Run with coverage:**
-
-```bash
-pnpm test:coverage
-```
-
-**Test Structure:**
-
-The test suite focuses on component API contract validation, verifying that
-components accept documented props and export correct types.
-
-```
-components/
-├── chat/
-│   └── __tests__/
-│       ├── conversation.test.tsx  # Conversation component tests
-│       ├── message.test.tsx       # Message component tests
-│       └── response.test.tsx      # Response component tests
-└── voice/
-    └── __tests__/
-        ├── agent-visualizer.test.tsx  # AgentVisualizer tests
-        ├── audio-visualizer.test.tsx  # AudioVisualizer tests
-        └── mic-button.test.tsx        # MicButton tests
-```
-
-**Test Coverage:** 29 tests covering all major chat and voice components.
-
----
-
-## Voice Components
-
-### MicButton
-
-Microphone button with built-in audio visualization and state management.
-
-**Props:**
-
-```typescript
-interface MicButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  state?: "idle" | "listening" | "processing" | "error";
-  icon?: React.ReactNode;
-  showErrorBadge?: boolean;
-  audioData?: number[]; // 0-1 normalized frequency data
-}
-```
-
-**Usage:**
-
-```typescript
-import { MicButton } from '@agora/ui-kit'
-import { Mic, MicOff } from 'lucide-react'
-
-<MicButton
-  state={isListening ? 'listening' : 'idle'}
-  icon={isMuted ? <MicOff /> : <Mic />}
-  audioData={frequencyData}
-  onClick={toggleMute}
-  className="flex-1"
-/>
-```
-
-**States:**
-
-- `idle` - Default state
-- `listening` - Actively listening
-- `processing` - Processing audio
-- `error` - Error state (permission denied, etc.)
-
-**Features:**
-
-- Automatic state styling
-- Integrated audio visualization (SimpleVisualizer)
-- Error badge support
-- Keeps visualizer visible when muted (icon changes only)
-
----
-
-### AgentVisualizer
-
-Animated agent state visualizer with pulsing circles.
-
-**Props:**
-
-```typescript
-interface AgentVisualizerProps {
-  state: "not-joined" | "listening" | "talking" | "thinking";
-  size?: "sm" | "md" | "lg";
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { AgentVisualizer } from '@agora/ui-kit'
-
-<AgentVisualizer
-  state={isAgentSpeaking ? 'talking' : 'listening'}
-  size="sm"
-/>
-```
-
-**States:**
-
-- `not-joined` - Gray, no animation
-- `listening` - Blue, gentle pulse
-- `talking` - Green, active animation
-- `thinking` - Purple, processing animation
-
-**Sizes:**
-
-- `sm` - 128px (mobile/compact)
-- `md` - 192px (default)
-- `lg` - 256px (full screen)
-
----
-
-### AudioVisualizer
-
-Full-featured frequency bar visualizer.
-
-**Props:**
-
-```typescript
-interface AudioVisualizerProps {
-  data: number[]; // 0-1 normalized frequency data
-  barCount?: number; // Number of bars (default: 32)
-  barWidth?: number; // Bar width in px (default: 4)
-  barGap?: number; // Gap between bars (default: 2)
-  height?: number; // Height in px (default: 100)
-  color?: string; // Bar color (default: 'rgb(59, 130, 246)')
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { AudioVisualizer } from '@agora/ui-kit'
-
-<AudioVisualizer
-  data={frequencyData}
-  barCount={64}
-  barWidth={3}
-  barGap={1}
-  height={120}
-  color="rgb(34, 197, 94)"
-/>
-```
-
-**Features:**
-
-- Configurable bar count and sizing
-- Custom colors
-- Canvas-based rendering
-- High-performance animations
-
----
-
-### SimpleVisualizer
-
-Compact horizontal bar visualizer for MicButton.
-
-**Props:**
-
-```typescript
-interface SimpleVisualizerProps {
-  data: number[];
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { SimpleVisualizer } from '@agora/ui-kit'
-
-<SimpleVisualizer
-  data={frequencyData}
-  className="text-blue-500"
-/>
-```
-
-**Features:**
-
-- 8 vertical bars
-- Smooth animations
-- Customizable color via className
-- Fixed width (64px)
-
----
-
-### LiveWaveform
-
-Animated waveform with PTS synchronization support.
-
-**Props:**
-
-```typescript
-interface LiveWaveformProps {
-  audioData: number[];
-  isActive?: boolean;
-  color?: string;
-  height?: number;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { LiveWaveform } from '@agora/ui-kit'
-
-<LiveWaveform
-  audioData={waveformData}
-  isActive={isAgentSpeaking}
-  color="#10b981"
-  height={80}
-/>
-```
-
-**Features:**
-
-- Smooth waveform rendering
-- Active/inactive states
-- SVG-based for scalability
-- Supports PTS-based timing
-
----
-
-### MicButtonWithVisualizer
-
-Combined mic button and full audio visualizer (alternative to MicButton).
-
-**Props:**
-
-```typescript
-interface MicButtonWithVisualizerProps {
-  isActive: boolean;
-  isMuted: boolean;
-  onClick: () => void;
-  audioData?: number[];
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { MicButtonWithVisualizer } from '@agora/ui-kit'
-
-<MicButtonWithVisualizer
-  isActive={isConnected}
-  isMuted={isMuted}
-  onClick={toggleMute}
-  audioData={frequencyData}
-/>
-```
-
-**Features:**
-
-- Large mic icon with surrounding visualizer
-- Active/inactive states
-- Mute indicator
-- Integrated frequency bars
-
----
-
-### MicSelector
-
-Microphone device selector dropdown.
-
-**Props:**
-
-```typescript
-interface MicSelectorProps {
-  devices: MediaDeviceInfo[];
-  selectedDeviceId: string;
-  onDeviceChange: (deviceId: string) => void;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { MicSelector } from '@agora/ui-kit'
-
-<MicSelector
-  devices={microphoneDevices}
-  selectedDeviceId={currentMicId}
-  onDeviceChange={handleMicChange}
-/>
-```
-
-**Features:**
-
-- Lists available microphones
-- Shows current selection
-- Device switching
-- Integrated with Agora audio track API
-
----
-
-## Chat Components
-
-### Conversation
-
-Container for chat messages with auto-scroll and styling.
-
-**Props:**
-
-```typescript
-interface ConversationProps {
-  children: React.ReactNode;
-  height?: string;
-  className?: string;
-}
-
-interface ConversationContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Conversation, ConversationContent } from '@agora/ui-kit'
-
-<Conversation height="500px" className="flex-1">
-  <ConversationContent>
-    {/* Messages go here */}
-  </ConversationContent>
-</Conversation>
-```
-
-**Features:**
-
-- Auto-scrolls to bottom on new messages
-- Smooth scroll behavior
-- Styled scrollbar
-- Flexible height control
-
----
-
-### Message
-
-Individual message bubble for user or agent with optional name label.
-
-**Props:**
-
-```typescript
-interface MessageProps {
-  from: "user" | "assistant";
-  name?: string; // Name to display above message (e.g., "Agent" or "User")
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface MessageContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Message, MessageContent, Response } from '@agora/ui-kit'
-
-<Message
-  from="assistant"
-  name="Agent"
->
-  <MessageContent>
-    <Response>Hello! How can I help you?</Response>
-  </MessageContent>
-</Message>
-
-<Message
-  from="user"
-  name="User"
->
-  <MessageContent>
-    <Response>I need help with my account.</Response>
-  </MessageContent>
-</Message>
-```
-
-**Layout:**
-
-- `from="assistant"` - Name and message aligned left
-- `from="user"` - Name and message aligned right
-- Name displays above message with minimal spacing
-
----
-
-### Response
-
-Text content wrapper for messages.
-
-**Props:**
-
-```typescript
-interface ResponseProps {
-  children: React.ReactNode;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Response } from '@agora/ui-kit'
-
-<Response>This is the message text</Response>
-```
-
-**Features:**
-
-- Pre-styled text formatting
-- Supports markdown-style text
-- Proper spacing and line height
-
----
-
-### ConvoTextStream
-
-Streaming text component with typewriter effect.
-
-**Props:**
-
-```typescript
-interface ConvoTextStreamProps {
-  text: string;
-  speed?: number;
-  onComplete?: () => void;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { ConvoTextStream } from '@agora/ui-kit'
-
-<ConvoTextStream
-  text="This text will stream in character by character"
-  speed={30}
-  onComplete={() => console.log('Done!')}
-/>
-```
-
-**Features:**
-
-- Smooth character-by-character streaming
-- Configurable speed
-- Completion callback
-- Supports markdown
-
----
-
-## Video Components
-
-### LocalVideoPreview
-
-Display local camera video with mirror effect and optional label.
-
-**Props:**
-
-```typescript
-interface LocalVideoPreviewProps extends React.HTMLAttributes<HTMLDivElement> {
-  videoTrack?: ICameraVideoTrack | null;
-  isMirrored?: boolean; // Default: true
-  showLabel?: boolean; // Default: false
-  label?: string; // Default: "You"
-  placeholder?: React.ReactNode;
-  useMediaStream?: boolean; // Default: false
-}
-```
-
-**Usage:**
-
-```typescript
-import { LocalVideoPreview } from '@agora/ui-kit'
-import { useLocalVideo } from '@agora/conversational-ai-react'
-
-const { videoTrack } = useLocalVideo()
-
-{/* Basic usage */}
-<LocalVideoPreview videoTrack={videoTrack} />
-
-{/* With label */}
-<LocalVideoPreview
-  videoTrack={videoTrack}
-  showLabel={true}
-  label="You"
-/>
-
-{/* Multiple instances (responsive layouts) */}
-<LocalVideoPreview
-  videoTrack={videoTrack}
-  useMediaStream={true}  // Enables MediaStream rendering
-/>
-```
-
-**Rendering Modes:**
-
-- `useMediaStream={false}` (default) - Uses Agora's `play()` method. Use for
-  single instance.
-- `useMediaStream={true}` - Uses MediaStream API. Use when displaying the same
-  track in multiple locations (e.g., responsive layouts with desktop and mobile
-  views).
-
----
-
-### AvatarVideoDisplay
-
-Display remote avatar video with connection status and placeholder.
-
-**Props:**
-
-```typescript
-type AvatarVideoState = "connected" | "loading" | "disconnected";
-
-interface AvatarVideoDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
-  videoTrack?: IRemoteVideoTrack | null;
-  state?: AvatarVideoState; // Default: "disconnected"
-  showStatus?: boolean; // Default: false
-  placeholder?: React.ReactNode;
-  useMediaStream?: boolean; // Default: false
-}
-```
-
-**Usage:**
-
-```typescript
-import { AvatarVideoDisplay } from '@agora/ui-kit'
-import { useRemoteVideo } from '@agora/conversational-ai-react'
-
-const { remoteVideoUsersArray } = useRemoteVideo({ client })
-const avatarVideoTrack = remoteVideoUsersArray[0]?.videoTrack
-
-{/* Basic usage */}
-<AvatarVideoDisplay
-  videoTrack={avatarVideoTrack}
-  state={avatarVideoTrack ? "connected" : "disconnected"}
-/>
-
-{/* With status indicator */}
-<AvatarVideoDisplay
-  videoTrack={avatarVideoTrack}
-  state="connected"
-  showStatus={true}
-/>
-
-{/* Multiple instances (responsive layouts) */}
-<AvatarVideoDisplay
-  videoTrack={avatarVideoTrack}
-  state="connected"
-  useMediaStream={true}
-/>
-```
-
-**States:**
-
-- `connected` - Video is playing
-- `loading` - Connecting to video
-- `disconnected` - No video (shows placeholder)
-
-**Rendering Modes:**
-
-- `useMediaStream={false}` (default) - Uses Agora's `play()` method. Use for
-  single instance.
-- `useMediaStream={true}` - Uses MediaStream API. Use when displaying the same
-  track in multiple locations (e.g., responsive layouts with desktop and mobile
-  views).
-
----
-
-### Avatar
-
-User/agent avatar with customizable size and colors.
-
-**Props:**
-
-```typescript
-interface AvatarProps {
-  src?: string;
-  alt?: string;
-  initials?: string;
-  size?: "sm" | "md" | "lg";
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Avatar } from '@agora/ui-kit'
-
-{/* Image avatar */}
-<Avatar src="/avatar.jpg" alt="User" size="sm" />
-
-{/* Initials fallback */}
-<Avatar initials="A" size="sm" />
-<Avatar initials="U" size="sm" />
-```
-
-**Sizes:**
-
-- `sm` - 32px
-- `md` - 40px
-- `lg` - 48px
-
----
-
-### CameraSelector
-
-Camera device selector dropdown with enable/disable toggle.
-
-**Props:**
-
-```typescript
-interface CameraSelectorProps {
-  devices?: CameraDevice[];
-  value?: string;
-  onValueChange?: (deviceId: string) => void;
-  disabled?: boolean;
-  onDisabledChange?: (disabled: boolean) => void;
-  hasError?: boolean;
-  className?: string;
-}
-
-interface CameraDevice {
-  deviceId: string;
-  label: string;
-  groupId?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { CameraSelector } from '@agora/ui-kit'
-
-<CameraSelector
-  devices={cameraDevices}
-  value={selectedCameraId}
-  onValueChange={handleCameraChange}
-  disabled={isCameraOff}
-  onDisabledChange={setIsCameraOff}
-/>
-```
-
-**Features:**
-
-- Lists available camera devices
-- Shows current selection with checkmark
-- Toggle camera on/off with video icon
-- Error state support
-- Dropdown menu for device selection
-
----
-
-## Settings Components
-
-### AgentSettings
-
-UI controls for configuring Agora Conversational AI agent settings before starting a conversation.
-
-**Props:**
-
-```typescript
-interface AgentSettingsProps {
-  enableAivad: boolean; // Whether AIVAD (TURN) is enabled
-  onEnableAivadChange: (enabled: boolean) => void;
-  language: string; // STT language code (e.g., "en-US")
-  onLanguageChange: (language: string) => void;
-  prompt?: string; // System prompt for the agent
-  onPromptChange?: (prompt: string) => void;
-  greeting?: string; // Greeting message when joining
-  onGreetingChange?: (greeting: string) => void;
-  languages?: Item[]; // Optional custom language list
-  disabled?: boolean; // Disable when connected
-  className?: string;
-}
-```
-
-**Usage:**
-
-```tsx
-import { AgentSettings } from "@agora/agent-ui-kit";
-
-function App() {
-  const [enableAivad, setEnableAivad] = useState(true);
-  const [language, setLanguage] = useState("en-US");
-  const [prompt, setPrompt] = useState("You are a helpful AI assistant...");
-  const [greeting, setGreeting] = useState("Hello! How can I help you today?");
-  const [isConnected, setIsConnected] = useState(false);
-
-  const handleStart = async () => {
-    // Pass settings as query params to backend
-    const params = new URLSearchParams({
-      enable_aivad: enableAivad.toString(),
-      asr_language: language,
-    });
-    if (prompt.trim()) params.append("prompt", prompt.trim());
-    if (greeting.trim()) params.append("greeting", greeting.trim());
-
-    const response = await fetch(`${backendUrl}/start-agent?${params}`);
-    // ... rest of connection logic
-  };
-
-  return (
-    <>
-      <AgentSettings
-        enableAivad={enableAivad}
-        onEnableAivadChange={setEnableAivad}
-        language={language}
-        onLanguageChange={setLanguage}
-        prompt={prompt}
-        onPromptChange={setPrompt}
-        greeting={greeting}
-        onGreetingChange={setGreeting}
-        disabled={isConnected}
-      />
-      <button onClick={handleStart} disabled={isConnected}>
-        Start Conversation
-      </button>
-    </>
-  );
-}
-```
-
-**Features:**
-
-- AIVAD (AI Voice Activity Detection / TURN) toggle
-- STT language selection dropdown
-- System prompt configuration (optional, shows textarea when onPromptChange provided)
-- Greeting message configuration (optional, shows input when onGreetingChange provided)
-- Default languages: en-US, en-GB, es-ES, es-MX, fr-FR, de-DE, it-IT, pt-BR, ja-JP, ko-KR, zh-CN, zh-TW
-- Custom language list support
-- Disabled state when connected
-- Accessible with proper labels
-
-**Backend Integration:**
-
-The settings map to Agora Conversational AI REST API parameters:
-
-- `enableAivad` → `?enable_aivad=true` → `properties.advanced_features.enable_aivad`
-- `language` → `?asr_language=en-US` → `properties.asr.language`
-- `prompt` → `?prompt=...` → `properties.chat.context.content`
-- `greeting` → `?greeting=...` → `properties.chat.greeting_message`
-
-### SettingsDialog
-
-Modal dialog wrapper for AgentSettings component with open/close state management.
-
-**Props:**
-
-```typescript
-interface SettingsDialogProps extends Omit<AgentSettingsProps, "className"> {
-  open: boolean; // Whether dialog is open
-  onOpenChange: (open: boolean) => void; // Dialog open state callback
-  title?: string; // Dialog title (default: "Agent Settings")
-  description?: string; // Optional dialog description
-}
-```
-
-**Usage:**
-
-```tsx
-import { SettingsDialog } from "@agora/agent-ui-kit";
-import { Settings } from "lucide-react";
-
-function App() {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [enableAivad, setEnableAivad] = useState(true);
-  const [language, setLanguage] = useState("en-US");
-  const [prompt, setPrompt] = useState("You are a helpful AI assistant...");
-  const [greeting, setGreeting] = useState("Hello! How can I help you?");
-  const [isConnected, setIsConnected] = useState(false);
-
-  return (
-    <>
-      {/* Settings Icon Button */}
-      <button
-        onClick={() => setIsSettingsOpen(true)}
-        aria-label="Open settings"
-      >
-        <Settings className="h-5 w-5" />
-      </button>
-
-      {/* Settings Dialog */}
-      <SettingsDialog
-        open={isSettingsOpen}
-        onOpenChange={setIsSettingsOpen}
-        title="Agent Settings"
-        description="Configure your AI agent before starting"
-        enableAivad={enableAivad}
-        onEnableAivadChange={setEnableAivad}
-        language={language}
-        onLanguageChange={setLanguage}
-        prompt={prompt}
-        onPromptChange={setPrompt}
-        greeting={greeting}
-        onGreetingChange={setGreeting}
-        disabled={isConnected}
-      />
-    </>
-  );
-}
-```
-
-**Features:**
-
-- Modal dialog overlay with backdrop
-- Accessible with proper ARIA attributes
-- Close on escape key or backdrop click
-- Includes all AgentSettings features
-- Customizable title and description
-
----
-
-## Layout Components
-
-### VideoGrid
-
-Desktop 2x2 grid layout for video chat applications with dedicated areas for avatar, chat, local video, and controls.
-
-**Props:**
-
-```typescript
-interface VideoGridProps extends React.HTMLAttributes<HTMLDivElement> {
-  avatar?: React.ReactNode;
-  chat?: React.ReactNode;
-  localVideo?: React.ReactNode;
-  controls?: React.ReactNode;
-}
-```
-
-**Layout:**
-
-```
-┌─────────────┬─────────────┐
-│ Chat        │ Avatar      │
-│ (40%)       │ (60%)       │
-├─────────────┼─────────────┤
-│ Local Video │ Controls    │
-│ (40%)       │ (60%)       │
-└─────────────┴─────────────┘
-```
-
-**Usage:**
-
-```typescript
-import { VideoGrid } from '@agora/ui-kit'
-
-<VideoGrid
-  avatar={<AvatarVideoDisplay videoTrack={avatarTrack} />}
-  chat={<Conversation>...</Conversation>}
-  localVideo={<LocalVideoPreview videoTrack={localTrack} />}
-  controls={<div>Control buttons here</div>}
-/>
-```
-
-**Features:**
-
-- Responsive 2x2 grid layout
-- Fixed proportions (40/60 split)
-- 1rem gap between areas
-- Optimized for desktop use
-
----
-
-### MobileTabs
-
-Mobile tab switcher for video chat layouts with icon support and flexible positioning.
-
-**Props:**
-
-```typescript
-interface MobileTabsProps extends React.HTMLAttributes<HTMLDivElement> {
-  tabs: Tab[];
-  activeTab?: string;
-  onTabChange?: (tabId: string) => void;
-  tabPosition?: "top" | "bottom";
-}
-
-interface Tab {
-  id: string;
-  label: string;
-  icon?: React.ReactNode;
-  content: React.ReactNode;
-}
-```
-
-**Usage:**
-
-```typescript
-import { MobileTabs } from '@agora/ui-kit'
-import { Video, MessageSquare } from 'lucide-react'
-
-<MobileTabs
-  tabs={[
-    {
-      id: 'video',
-      label: 'Video',
-      icon: <Video />,
-      content: <div>Avatar + Local Video</div>
-    },
-    {
-      id: 'chat',
-      label: 'Chat',
-      icon: <MessageSquare />,
-      content: <Conversation>...</Conversation>
-    }
-  ]}
-  activeTab={currentTab}
-  onTabChange={setCurrentTab}
-  tabPosition="bottom"
-/>
-```
-
-**Features:**
-
-- Tab buttons with optional icons
-- Controlled or uncontrolled mode
-- Configurable tab position (top/bottom)
-- Smooth content switching
-- Mobile-optimized touch targets
-
----
-
-## UI Primitives
-
-### Button
-
-Standard button with variant support.
-
-**Props:**
-
-```typescript
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost" | "destructive";
-  size?: "sm" | "md" | "lg";
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Button } from '@agora/ui-kit'
-
-<Button variant="default" size="md" onClick={handleClick}>
-  Click Me
-</Button>
-
-<Button variant="destructive" size="lg">
-  Delete
-</Button>
-```
-
-**Variants:**
-
-- `default` - Primary blue background
-- `outline` - Border only, transparent background
-- `ghost` - No border, hover background
-- `destructive` - Red background for dangerous actions
-
----
-
-### IconButton
-
-Circular icon button for actions.
-
-**Props:**
-
-```typescript
-interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: React.ReactNode;
-  size?: "sm" | "md" | "lg";
-  variant?: "default" | "ghost";
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { IconButton } from '@agora/ui-kit'
-import { Settings } from 'lucide-react'
-
-<IconButton
-  icon={<Settings />}
-  size="md"
-  onClick={openSettings}
-/>
-```
-
-**Sizes:**
-
-- `sm` - 32px
-- `md` - 40px
-- `lg` - 48px
-
----
-
-### Card
-
-Simple card container.
-
-**Props:**
-
-```typescript
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Card } from '@agora/ui-kit'
-
-<Card className="p-6">
-  <h3>Card Title</h3>
-  <p>Card content</p>
-</Card>
-```
-
----
-
-### Chip
-
-Small label/tag component.
-
-**Props:**
-
-```typescript
-interface ChipProps {
-  children: React.ReactNode;
-  variant?: "default" | "success" | "warning" | "error";
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { Chip } from '@agora/ui-kit'
-
-<Chip variant="success">Active</Chip>
-<Chip variant="error">Offline</Chip>
-```
-
----
-
-### ValuePicker
-
-Value selector with increment/decrement buttons.
-
-**Props:**
-
-```typescript
-interface ValuePickerProps {
-  value: number;
-  onChange: (value: number) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  label?: string;
-  className?: string;
-}
-```
-
-**Usage:**
-
-```typescript
-import { ValuePicker } from '@agora/ui-kit'
-
-<ValuePicker
-  value={volume}
-  onChange={setVolume}
-  min={0}
-  max={100}
-  step={5}
-  label="Volume"
-/>
-```
-
----
-
-## Usage Patterns
-
-### Voice Chat Interface
-
-```typescript
-import {
-  MicButton,
-  AgentVisualizer,
-  Conversation,
-  ConversationContent,
-  Message,
-  MessageContent,
-  Response,
-  Avatar
-} from '@agora/ui-kit'
-
-function VoiceChat() {
-  const { transcript, isAgentSpeaking, isMuted, toggleMute } = useVoiceAI()
-
-  return (
-    <div className="flex h-screen">
-      {/* Left: Agent Status */}
-      <div className="w-96 p-6">
-        <AgentVisualizer
-          state={isAgentSpeaking ? 'talking' : 'listening'}
-          size="md"
-        />
-
-        <MicButton
-          state={isMuted ? 'idle' : 'listening'}
-          icon={isMuted ? <MicOff /> : <Mic />}
-          audioData={frequencyData}
-          onClick={toggleMute}
-          className="mt-6 w-full"
-        />
-      </div>
-
-      {/* Right: Conversation */}
-      <div className="flex-1">
-        <Conversation className="flex-1">
-          <ConversationContent>
-            {transcript.map((msg, idx) => (
-              <Message
-                key={idx}
-                from={msg.uid === 0 ? 'assistant' : 'user'}
-                avatar={<Avatar initials={msg.uid === 0 ? 'A' : 'U'} />}
-              >
-                <MessageContent>
-                  <Response>{msg.text}</Response>
-                </MessageContent>
-              </Message>
-            ))}
-          </ConversationContent>
-        </Conversation>
-      </div>
-    </div>
-  )
-}
-```
-
----
-
-### Mobile-Responsive Layout
-
-```typescript
-function MobileVoiceChat() {
-  return (
-    <div className="flex flex-col h-screen">
-      {/* Mobile: Status Bar */}
-      <div className="md:hidden flex items-center p-3 border-b">
-        <div className={cn(
-          "w-3 h-3 rounded-full",
-          isAgentSpeaking ? "bg-green-500" : "bg-blue-500"
-        )} />
-        <span className="ml-3">
-          {isAgentSpeaking ? 'Agent Speaking' : 'Listening'}
-        </span>
-      </div>
-
-      {/* Conversation */}
-      <Conversation className="flex-1">
-        <ConversationContent>
-          {/* Messages */}
-        </ConversationContent>
-      </Conversation>
-
-      {/* Mobile: Bottom Controls */}
-      <div className="md:hidden flex gap-3 p-4 border-t">
-        <MicButton
-          state={micState}
-          icon={isMuted ? <MicOff /> : <Mic />}
-          audioData={frequencyData}
-          onClick={toggleMute}
-          className="flex-1 min-h-[48px]"
-        />
-        <button className="flex-1 min-h-[48px]">
-          End Call
-        </button>
-      </div>
-    </div>
-  )
-}
-```
-
----
-
-### Audio Visualization
-
-```typescript
-import { AudioVisualizer, SimpleVisualizer, LiveWaveform } from '@agora/ui-kit'
-
-function AudioViz() {
-  const frequencyData = useAudioVisualization(audioTrack, isConnected)
-
-  return (
-    <div>
-      {/* Simple bars in button */}
-      <SimpleVisualizer data={frequencyData} className="text-blue-500" />
-
-      {/* Full frequency visualizer */}
-      <AudioVisualizer
-        data={frequencyData}
-        barCount={64}
-        height={120}
-        color="rgb(34, 197, 94)"
-      />
-
-      {/* Waveform */}
-      <LiveWaveform
-        audioData={frequencyData}
-        isActive={isPlaying}
-        height={80}
-      />
-    </div>
-  )
-}
-```
+- `AgentStateVisualizer`, `SessionTranscript`, `SessionChatInput`
 
 ---
 
 ## Theming
 
-All components use Tailwind CSS and support the `cn()` utility for custom
-styling:
+All components accept `className` and compose with Tailwind via the `cn()` utility:
 
-```typescript
-import { cn } from '@/lib/utils'
+```tsx
+import { MicButton, cn } from 'agora-agent-uikit';
 
 <MicButton
-  className={cn(
-    "custom-class",
-    isActive && "active-state"
-  )}
-/>
+  className={cn('w-full', isActive && 'ring-2 ring-blue-500')}
+  state={micState}
+/>;
 ```
 
-**Custom Colors:**
+Override default colours via Tailwind config:
 
-Override default colors via Tailwind config or inline styles:
-
-```javascript
+```js
 // tailwind.config.js
-module.exports = {
+export default {
   theme: {
     extend: {
       colors: {
-        primary: "#0066ff",
-        "agent-active": "#10b981",
-        "agent-idle": "#3b82f6",
+        'agent-active': '#A0FAFF',
+        'agent-idle': '#333333',
       },
     },
   },
@@ -1456,38 +228,14 @@ module.exports = {
 
 ---
 
-## Accessibility
+## Running Tests
 
-All components follow accessibility best practices:
-
-- **Keyboard Navigation** - All interactive components support Tab, Enter, Space
-- **ARIA Attributes** - Proper roles, labels, and descriptions
-- **Focus Management** - Visible focus indicators
-- **Screen Reader Support** - Semantic HTML and ARIA labels
-- **Touch Targets** - Minimum 48px touch targets on mobile
-
----
-
-## Performance
-
-**Optimization Tips:**
-
-1. **Audio Visualization** - Throttle updates to 100ms for smooth 10fps
-   rendering
-2. **Conversation Scrolling** - Use `will-change: scroll-position` for smooth
-   scroll
-3. **Message List** - Use `key` prop with unique IDs for efficient React
-   reconciliation
-4. **Memoization** - Wrap expensive components in `React.memo()` when needed
-
-**Example:**
-
-```typescript
-const MemoizedMessage = React.memo(Message)
-
-{transcript.map((msg) => (
-  <MemoizedMessage key={msg.turn_id} {...msg} />
-))}
+```bash
+npm test              # run all tests once
+npm run test:watch    # watch mode
+npm run test:ui       # Vitest browser UI
+npm run test:coverage # coverage report
+npm run typecheck     # TypeScript type check (no emit)
 ```
 
 ---

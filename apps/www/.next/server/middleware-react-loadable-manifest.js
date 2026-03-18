@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST='{"../../packages/uikit/dist/chunk-PGN4AQHD.mjs -> agora-rtc-react":{"id":9911,"files":["static/chunks/02a20c26.e3c2e6ff819b1b74.js","static/chunks/240.306be23306dba551.js"]}}';
