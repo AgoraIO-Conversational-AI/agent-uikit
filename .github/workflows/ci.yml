@@ -23,8 +23,6 @@ jobs:
         run: ln -s "$GITHUB_WORKSPACE/agent-client-toolkit-ts" "$GITHUB_WORKSPACE/../agent-client-toolkit-ts"
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
