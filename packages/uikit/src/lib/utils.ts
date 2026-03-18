@@ -38,14 +38,11 @@ export function renderMarkdownToHtml(text: string): string {
   );
 
   // Handle inline numbered lists (when items appear on same line)
-  // Match pattern: "1. Item 2. Item 3. Item" and split them
+  // Match pattern: "1. Item 2. Item 3. Item" and split them onto separate lines.
+  // Uses a simple greedy match up to the next "N. " marker to avoid ReDoS.
   processed = processed.replace(
-    /(\d+)\.\s+([^0-9]+?)(?=\s+\d+\.|$)/g,
-    (match, num, content) => {
-      // Trim the content and check if it should be on new line
-      const trimmedContent = content.trim();
-      return `${num}. ${trimmedContent}\n`;
-    },
+    /(\d+)\.\s+(.+?)(?=\s+\d+\.\s|\n|$)/g,
+    (match, num, content) => `${num}. ${content.trim()}\n`,
   );
 
   // Process line by line to handle different list formats

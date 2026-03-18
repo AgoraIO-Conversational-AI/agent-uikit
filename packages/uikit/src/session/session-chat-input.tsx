@@ -48,9 +48,17 @@ export function SessionChatInput({
   const [inFlight, setInFlight] = React.useState(false);
   const inFlightRef = React.useRef(false);
 
-  const { sendMessage, interrupt } = useConversationalAIContext();
+  const { sendMessage, interrupt, instance } = useConversationalAIContext();
 
-  const handleSend = async () => {
+  React.useEffect(() => {
+    if (instance === null && process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[SessionChatInput] No ConversationalAIProvider found. sendMessage and interrupt will have no effect. Wrap this component in <ConversationalAIProvider>.",
+      );
+    }
+  }, [instance]);
+
+  const handleSend = React.useCallback(async () => {
     const trimmed = text.trim();
     if (!trimmed || inFlightRef.current) return;
 
@@ -65,9 +73,9 @@ export function SessionChatInput({
       inFlightRef.current = false;
       setInFlight(false);
     }
-  };
+  }, [text, agentUid, sendMessage, onRTMError]);
 
-  const handleInterrupt = async () => {
+  const handleInterrupt = React.useCallback(async () => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
     setInFlight(true);
@@ -79,14 +87,17 @@ export function SessionChatInput({
       inFlightRef.current = false;
       setInFlight(false);
     }
-  };
+  }, [agentUid, interrupt, onRTMError]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    },
+    [handleSend],
+  );
 
   return (
     <div className={cn("flex items-center gap-2", className)}>

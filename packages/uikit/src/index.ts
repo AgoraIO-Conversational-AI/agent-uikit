@@ -49,6 +49,7 @@ export type { ResponseProps } from "./components/chat/response";
 
 export { ConvoTextStream, EMessageStatus } from "./components/chat/convo-text-stream";
 export type { ConvoTextStreamProps, IMessageListItem } from "./components/chat/convo-text-stream";
+export { transcriptToMessageList } from "./lib/message-types";
 
 // Video Components
 export type { PlayableVideoTrack } from "./hooks/use-video-playback";
