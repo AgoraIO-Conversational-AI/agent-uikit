@@ -122,12 +122,8 @@ export type { AgoraLogoProps } from "./components/branding/agora-logo";
 
 // Shen.AI Components (no SDK dependency — just renders state)
 export { ShenPanel } from "./components/shen/shen-panel";
-export type {
-  ShenPanelProps,
-  ShenState,
-  ShenMeasurementResults,
-  RTMPublish,
-} from "./components/shen/shen-panel";
+export type { ShenPanelProps } from "./components/shen/shen-panel";
+export type { ShenState, ShenMeasurementResults, RTMPublish } from "./shen/types";
 
 // Utilities
 export { cn, renderMarkdownToHtml, decodeStreamMessage } from "./lib/utils";
