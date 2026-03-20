@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Send, StopCircle } from "lucide-react";
-import { useConversationalAIContext } from "agora-agent-client-toolkit-react";
 
 import { cn } from "../lib/utils";
 import { Button } from "../components/primitives/button";
@@ -11,6 +10,10 @@ import { IconButton } from "../components/primitives/icon-button";
 export interface SessionChatInputProps {
   /** UID of the agent to send messages to */
   agentUid: string | number;
+  /** Send a plain-text message to the agent. Obtain from useConversationalAI(config). */
+  sendMessage: (agentUserId: string, text: string) => Promise<void>;
+  /** Send an interrupt signal to the agent. Obtain from useConversationalAI(config). */
+  interrupt: (agentUserId: string) => Promise<void>;
   /** Placeholder text for the input field */
   placeholder?: string;
   /** Whether to show the interrupt button alongside send */
@@ -28,16 +31,27 @@ export interface SessionChatInputProps {
  *
  * @example
  * ```tsx
- * import { ConversationalAIProvider } from 'agora-agent-client-toolkit-react'
+ * import { useConversationalAI } from 'agora-agent-client-toolkit-react'
  * import { SessionChatInput } from 'agora-agent-uikit/session'
  *
- * <ConversationalAIProvider config={config}>
- *   <SessionChatInput agentUid={agentUid} showInterrupt placeholder="Type a message..." />
- * </ConversationalAIProvider>
+ * function Chat({ config }) {
+ *   const { sendMessage, interrupt } = useConversationalAI(config);
+ *   return (
+ *     <SessionChatInput
+ *       agentUid={agentUid}
+ *       sendMessage={sendMessage}
+ *       interrupt={interrupt}
+ *       showInterrupt
+ *       placeholder="Type a message..."
+ *     />
+ *   );
+ * }
  * ```
  */
 export function SessionChatInput({
   agentUid,
+  sendMessage,
+  interrupt,
   placeholder = "Type a message…",
   showInterrupt = false,
   interruptLabel = "Interrupt agent",
@@ -47,16 +61,6 @@ export function SessionChatInput({
   const [text, setText] = React.useState("");
   const [inFlight, setInFlight] = React.useState(false);
   const inFlightRef = React.useRef(false);
-
-  const { sendMessage, interrupt, instance } = useConversationalAIContext();
-
-  React.useEffect(() => {
-    if (instance === null && typeof process !== "undefined" && process.env.NODE_ENV !== "production") {
-      console.warn(
-        "[SessionChatInput] No ConversationalAIProvider found. sendMessage and interrupt will have no effect. Wrap this component in <ConversationalAIProvider>.",
-      );
-    }
-  }, [instance]);
 
   const handleSend = React.useCallback(async () => {
     const trimmed = text.trim();
