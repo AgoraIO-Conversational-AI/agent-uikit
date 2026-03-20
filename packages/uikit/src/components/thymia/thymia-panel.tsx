@@ -68,13 +68,13 @@ function ScoreRow({ name, value }: { name: string; value: number | null }) {
   const valid = isValidScore(value);
   const pct = valid ? Math.round(value * 100) : null;
   return (
-    <div className="flex items-center justify-between py-px">
-      <span className="text-[11px] text-muted-foreground leading-none">
+    <div className="flex items-center justify-between py-0.5">
+      <span className="text-sm text-muted-foreground">
         {formatName(name)}
       </span>
       <span
         className={cn(
-          "text-[11px] font-bold tabular-nums ml-2 shrink-0 leading-none",
+          "text-sm font-bold tabular-nums ml-2 shrink-0",
           pct !== null ? scoreColorText(pct) : "text-muted-foreground",
         )}
       >
@@ -100,10 +100,10 @@ function ScoreSection({
     const col2 = entries.slice(mid);
     return (
       <div>
-        <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
           {title}
         </h3>
-        <div className="rounded border bg-background px-2.5 py-1">
+        <div className="rounded border bg-background px-3 py-1.5">
           <div className="grid grid-cols-2 gap-x-3">
             <div>
               {col1.map(([n, v]) => (
@@ -122,10 +122,10 @@ function ScoreSection({
   }
   return (
     <div>
-      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
         {title}
       </h3>
-      <div className="rounded border bg-background px-2.5 py-1">
+      <div className="rounded border bg-background px-3 py-1.5">
         {entries.map(([name, value]) => (
           <ScoreRow key={name} name={name} value={value} />
         ))}
@@ -171,13 +171,13 @@ function SafetySection({ safety }: { safety: SafetyData }) {
 
   return (
     <div>
-      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
         Safety Analysis
       </h3>
       <div className={cn("rounded border px-2.5 py-1.5 space-y-1.5", alertBg)}>
         {/* Level + Alert */}
         <div className="flex items-center justify-between">
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Level {level} —{" "}
             <span className={cn("font-semibold", alertColor)}>
               {formatName(alert)}
@@ -187,25 +187,25 @@ function SafetySection({ safety }: { safety: SafetyData }) {
 
         {/* Concerns */}
         {concerns.length > 0 && (
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             <span className="font-medium">Concerns:</span> {concerns.join(", ")}
           </div>
         )}
 
         {/* Recommended actions */}
         {actions?.for_agent && (
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             <span className="font-medium">Guidance:</span> {actions.for_agent}
           </div>
         )}
         {actions?.for_human_reviewer && (
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             <span className="font-medium">Reviewer:</span>{" "}
             {actions.for_human_reviewer}
           </div>
         )}
         {actions?.urgency && (
-          <div className="text-[11px]">
+          <div className="text-sm">
             <span className="text-muted-foreground font-medium">Urgency:</span>{" "}
             <span
               className={
@@ -276,15 +276,15 @@ export function ThymiaPanel({
   }
 
   return (
-    <div className="flex h-full flex-col overflow-auto p-3 gap-2">
+    <div className="flex h-full flex-col overflow-auto p-4 gap-3">
       {/* Progress Section — compact inline */}
       {progressEntries.length > 0 && (
-        <div className="rounded border bg-background px-2.5 py-1.5">
+        <div className="rounded border bg-background px-3 py-1.5">
           <div className="flex flex-wrap gap-x-4 gap-y-0.5">
             {progressEntries.map(([name, info]) => (
               <span
                 key={name}
-                className="text-[11px] text-muted-foreground leading-snug"
+                className="text-sm text-muted-foreground leading-snug"
               >
                 <span className="font-medium text-foreground">
                   {formatName(name)}
