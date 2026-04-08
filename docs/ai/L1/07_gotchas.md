@@ -1,0 +1,87 @@
+# 07 — Gotchas
+
+## Workspace Dependency Trap
+
+`pnpm-workspace.yaml` references `../agent-client-toolkit-ts/packages/*`. A clean checkout of this repo alone is not enough for a full install. CI checks out the toolkit repo and symlinks it to the expected sibling path. Clone it locally before running `pnpm install`.
+
+## Base Entry Purity Matters
+
+Do not let `agora-rtc-react`, toolkit hooks, or RTM-specific imports leak into `src/index.ts`. Even type-only or convenience imports can collapse the intended optional-dependency split if handled carelessly. Type-only imports can silently become runtime imports after refactors.
+
+## AudioContext Browser Limits
+
+Browsers cap concurrent `AudioContext` instances at ~6–8. `AudioVisualizer` creates and closes contexts on mount/unmount. Mounting many instances simultaneously (e.g., in a list) will silently fail. Use `SimpleVisualizer` with pre-computed data for bulk rendering.
+
+## Lottie Animations Are Data URLs
+
+All `.lottie` files are inlined as data URLs at build time via tsup's esbuild loader. This eliminates CDN dependencies but increases bundle size. The `lottiePaths` prop on `AgentVisualizer` allows CDN overrides for production optimization. A bundler refactor can break visualizers without touching component code.
+
+## Dual Video Playback Modes
+
+`LocalVideoPreview` and `AvatarVideoDisplay` support two modes:
+- **Agora play()** (default) — calls `track.play(containerRef)`, mutates the DOM
+- **MediaStream** (`useMediaStream={true}`) — sets `srcObject` on a `<video>` element
+
+Use MediaStream mode when the same track needs multiple DOM renderers (Agora play() can only target one element at a time).
+
+## SSR Hydration Failures
+
+`agora-rtc-react` accesses browser globals at import time. All RTC entry components use dynamic `import()` to defer loading until client-side. Never statically import from `agora-agent-uikit/rtc` in SSR-rendered code paths. Guard new browser-only code with `typeof window` checks.
+
+## Demo App Is Not A Full Quality Gate
+
+`apps/www/next.config.mjs` sets `typescript.ignoreBuildErrors = true`. CI builds the app, but the build is not a substitute for typechecking. Root `typecheck` only targets the package unless you explicitly run `pnpm --filter www typecheck`.
+
+## EMessageStatus Must Stay in Sync with Toolkit
+
+`EMessageStatus` enum values (0, 1, 2) are numerically aligned with the toolkit's `TurnStatus`. There is a dedicated test (`message-types.test.ts`) that guards this. Do not renumber without verifying toolkit compatibility.
+
+## Markdown Rendering is Limited
+
+`renderMarkdownToHtml()` supports: `**bold**`, markdown links, `## headers`, numbered lists, bullet lists, and indented sub-bullets. It does **not** support: code blocks, images, tables, or nested formatting. Output is sanitized with DOMPurify (browser) or regex tag stripping (SSR). Any richer rendering feature should be reviewed as a security change, not just a UI enhancement.
+
+## Tailwind Content Path Required
+
+Consumers must add `node_modules/agora-agent-uikit/dist/**/*.{js,mjs}` to their Tailwind `content` array. Without this, component classes are purged and styling breaks silently.
+
+## Static Export Assumptions
+
+The demo app is configured with `output: "export"`. Asset URLs and routing depend on `NEXT_PUBLIC_BASE_PATH`. Broken base-path configuration often shows up only after static export/deployment, not during `pnpm dev`.
+
+## React Version Mismatch
+
+The package peers target React 18+. The demo app currently uses React 19 and Next 15. If a change only breaks in the demo app, check whether it is using a newer React behavior than library consumers will have.
+
+## `"use client"` Banner
+
+tsup injects `"use client"` at the top of every output file for Next.js RSC compatibility. This is intentional — all components use client-side React features (refs, effects, context). If you change bundler settings, confirm client components still behave correctly.
+
+## Canvas DPI Scaling
+
+`LiveWaveform` uses `window.devicePixelRatio` to scale its canvas for retina displays. The canvas CSS size and buffer size differ. Modifying dimensions without accounting for DPI will produce blurry output.
+
+## MicButtonWithVisualizer Auto-Publishes
+
+When `onToggle` is not provided, `MicButtonWithVisualizer` calls `client.publish(track)` / `client.unpublish(track)` directly via the Agora RTC client. Provide a custom `onToggle` to override this behavior.
+
+## Theme Helper Duplication
+
+Theme helper logic exists in both `packages/uikit/src/lib/theme/apply-theme.ts` and `apps/www/lib/theme/apply-theme.ts`. If theme token behavior changes, update both copies or document why they should diverge.
+
+## Theme CSS Variables vs Tailwind
+
+`applyCustomTheme()` sets CSS custom properties on `:root`. These are separate from Tailwind's theme config. Both systems work — CSS variables for runtime theming (API-driven), Tailwind config for build-time theming.
+
+## SessionPanel Naming Can Mislead
+
+`SessionPanel` is exported from the **base** entry even though its name sounds toolkit-bound. It is a plain metadata display component and does not require the session subpath or toolkit packages.
+
+## Public API Drift Risk
+
+`packages/uikit/src/index.ts` is long and manually maintained. It is easy to add a component file and forget to export it. It is also easy to export a symbol from the wrong entry and accidentally expand the base surface.
+
+## Related Deep Dives
+
+- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
+- [Demo App And CI Workspace](deep_dives/demo_app_and_ci_workspace.md)
+- [Realtime Integrations](deep_dives/realtime_integrations.md)
