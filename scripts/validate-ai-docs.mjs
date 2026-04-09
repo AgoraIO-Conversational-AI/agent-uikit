@@ -8,7 +8,7 @@ const repoRoot = resolve(__dirname, "..");
 const docsRoot = join(repoRoot, "docs", "ai");
 const l1Root = join(docsRoot, "L1");
 const deepDiveRoot = join(l1Root, "deep_dives");
-const rootFiles = ["AGENTS.md", "docs/ai/L0_repo_card.md"];
+const rootFiles = ["AGENTS.md", "CLAUDE.md", "docs/ai/L0_repo_card.md"];
 const requiredL1 = [
   "01_setup.md",
   "02_architecture.md",
