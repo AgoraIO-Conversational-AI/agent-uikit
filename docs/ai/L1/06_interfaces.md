@@ -99,7 +99,7 @@ Session components depend on hooks from `agora-agent-client-toolkit-react`:
 | `useTranscript()`            | SessionTranscript        | `TranscriptHelperItem[]`       |
 | `useAgentState()`            | AgentStateVisualizer     | toolkit agent state string     |
 | `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null`      |
-| `useConversationalAIContext()`| SessionChatInput        | `sendMessage()`, `interrupt()` |
+| _(props-driven)_             | SessionChatInput        | `sendMessage`, `interrupt` passed as props |
 
 State mapping from toolkit → visualizer:
 

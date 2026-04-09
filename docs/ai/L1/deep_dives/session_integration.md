@@ -36,8 +36,10 @@ ConversationalAIProvider
   -> toolkit hooks/context
      -> SessionTranscript
      -> AgentStateVisualizer
-     -> SessionChatInput
      -> SessionErrorDisplay
+
+SessionChatInput (props-driven, no internal hook)
+  -> consumer passes sendMessage/interrupt from their own hook call
 ```
 
 ## Component → Toolkit Hook Mapping
@@ -46,7 +48,7 @@ ConversationalAIProvider
 | ---------------------- | ------------------------------ | ----------------------------------- |
 | `SessionTranscript`    | `useTranscript()`              | `TranscriptHelperItem[]`            |
 | `AgentStateVisualizer` | `useAgentState()`              | agent state string                  |
-| `SessionChatInput`     | `useConversationalAIContext()` | `sendMessage()`, `interrupt()`      |
+| `SessionChatInput`     | none (props-driven)            | `sendMessage`, `interrupt` as props |
 | `SessionErrorDisplay`  | `useAgentError()`              | `AgentErrorEvent \| null`           |
 
 ## AgentStateVisualizer
@@ -98,6 +100,8 @@ interface SessionTranscriptProps {
 ```typescript
 interface SessionChatInputProps {
   agentUid: string | number;
+  sendMessage: (agentUserId: string, text: string) => Promise<void>;
+  interrupt: (agentUserId: string) => Promise<void>;
   placeholder?: string;          // default: "Type a message…"
   showInterrupt?: boolean;       // default: false
   interruptLabel?: string;       // default: "Interrupt agent"
@@ -110,14 +114,14 @@ Behavior:
 
 1. text input captures message text
 2. Enter sends unless modifier handling prevents it
-3. `sendMessage(String(agentUid), trimmedText)` is called through toolkit context
-4. optional interrupt button calls `interrupt(String(agentUid))`
+3. `sendMessage(String(agentUid), trimmedText)` is called via the prop passed by the consumer
+4. optional interrupt button calls `interrupt(String(agentUid))` via the prop
 5. failures are forwarded through `onRTMError`
 
 Operational notes:
 
 - component tracks `inFlight` state to prevent overlapping send/interrupt calls
-- development warning appears if no provider instance is present
+- consumer obtains `sendMessage`/`interrupt` from their own `useConversationalAI(config)` call and passes them as props
 
 ## SessionErrorDisplay
 
