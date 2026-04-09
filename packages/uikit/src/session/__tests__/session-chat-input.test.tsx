@@ -6,16 +6,29 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, fireEvent, waitFor } from "@testing-library/react";
 
-const mockSendMessage = vi.fn();
-const mockInterrupt = vi.fn();
-
-// Mock the toolkit react package — provides the context hook
-vi.mock("agora-agent-client-toolkit-react", () => ({
-  useConversationalAIContext: vi.fn(() => ({
+const {
+  mockInterrupt,
+  mockSendMessage,
+  mockUseConversationalAIContext,
+} = vi.hoisted(() => {
+  const mockSendMessage = vi.fn();
+  const mockInterrupt = vi.fn();
+  const mockUseConversationalAIContext = vi.fn(() => ({
     interrupt: mockInterrupt,
     sendMessage: mockSendMessage,
     instance: null,
-  })),
+  }));
+
+  return {
+    mockInterrupt,
+    mockSendMessage,
+    mockUseConversationalAIContext,
+  };
+});
+
+// Mock the toolkit react package — provides the context hook
+vi.mock("agora-agent-client-toolkit-react", () => ({
+  useConversationalAIContext: mockUseConversationalAIContext,
 }));
 
 import { SessionChatInput } from "../session-chat-input";
@@ -24,6 +37,11 @@ describe("SessionChatInput", () => {
   beforeEach(() => {
     mockSendMessage.mockReset().mockResolvedValue(undefined);
     mockInterrupt.mockReset().mockResolvedValue(undefined);
+    mockUseConversationalAIContext.mockReset().mockReturnValue({
+      interrupt: mockInterrupt,
+      sendMessage: mockSendMessage,
+      instance: null,
+    });
   });
 
   it("renders without crashing", () => {
@@ -106,6 +124,19 @@ describe("SessionChatInput", () => {
     expect(getByText("Stop")).toBeInTheDocument();
   });
 
+  it("does not render the interrupt button when no interrupt handler is available", () => {
+    mockUseConversationalAIContext.mockReturnValue({
+      interrupt: undefined,
+      sendMessage: mockSendMessage,
+      instance: null,
+    });
+
+    const { queryByText } = render(
+      <SessionChatInput agentUid="agent-1" showInterrupt />,
+    );
+    expect(queryByText("Stop")).not.toBeInTheDocument();
+  });
+
   it("calls interrupt with agentUid when Stop button is clicked", async () => {
     const { getByText } = render(
       <SessionChatInput agentUid="agent-1" showInterrupt />,
@@ -157,5 +188,19 @@ describe("SessionChatInput", () => {
     await waitFor(() => {
       expect(mockSendMessage).toHaveBeenCalledWith("42", "Hello");
     });
+  });
+
+  it("disables send when no provider or sendMessage override is available", () => {
+    mockUseConversationalAIContext.mockReturnValue({
+      interrupt: undefined,
+      sendMessage: undefined,
+      instance: null,
+    });
+
+    const { getByRole } = render(<SessionChatInput agentUid="agent-1" />);
+    const input = getByRole("textbox");
+    fireEvent.change(input, { target: { value: "Hello" } });
+
+    expect(getByRole("button", { name: /send/i })).toBeDisabled();
   });
 });

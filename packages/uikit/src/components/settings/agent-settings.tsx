@@ -116,7 +116,9 @@ export const AgentSettings = React.forwardRef<
     },
     ref,
   ) => {
-    const { devices: audioDevices } = useAudioDevices();
+    const { devices: audioDevices } = useAudioDevices({
+      enabled: Boolean(onMicChange),
+    });
 
     const SYSTEM_DEFAULT_MIC = "system-default";
 

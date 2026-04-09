@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Send, StopCircle } from "lucide-react";
+import { useConversationalAIContext } from "agora-agent-client-toolkit-react";
 
 import { cn } from "../lib/utils";
 import { Button } from "../components/primitives/button";
@@ -10,10 +11,10 @@ import { IconButton } from "../components/primitives/icon-button";
 export interface SessionChatInputProps {
   /** UID of the agent to send messages to */
   agentUid: string | number;
-  /** Send a plain-text message to the agent. Obtain from useConversationalAI(config). */
-  sendMessage: (agentUserId: string, text: string) => Promise<void>;
-  /** Send an interrupt signal to the agent. Obtain from useConversationalAI(config). */
-  interrupt: (agentUserId: string) => Promise<void>;
+  /** Optional override for plain-text send. Defaults to the nearest ConversationalAIProvider context. */
+  sendMessage?: (agentUserId: string, text: string) => Promise<void>;
+  /** Optional override for interrupt. Defaults to the nearest ConversationalAIProvider context. */
+  interrupt?: (agentUserId: string) => Promise<void>;
   /** Placeholder text for the input field */
   placeholder?: string;
   /** Whether to show the interrupt button alongside send */
@@ -27,7 +28,8 @@ export interface SessionChatInputProps {
 
 /**
  * Session-connected chat input for sending messages to the agent and interrupting it.
- * Must be used inside a ConversationalAIProvider.
+ * Uses the nearest ConversationalAIProvider by default, but can also be wired
+ * directly via sendMessage/interrupt props.
  *
  * @example
  * ```tsx
@@ -58,18 +60,41 @@ export function SessionChatInput({
   onRTMError,
   className,
 }: SessionChatInputProps) {
+  const { sendMessage: contextSendMessage, interrupt: contextInterrupt, instance } =
+    useConversationalAIContext();
   const [text, setText] = React.useState("");
   const [inFlight, setInFlight] = React.useState(false);
   const inFlightRef = React.useRef(false);
+  const hasWarnedMissingProviderRef = React.useRef(false);
+
+  const sendMessageFn = sendMessage ?? contextSendMessage;
+  const interruptFn = interrupt ?? contextInterrupt;
+  const canSend = Boolean(sendMessageFn);
+  const canInterrupt = Boolean(interruptFn);
+
+  React.useEffect(() => {
+    if (
+      process.env.NODE_ENV !== "production" &&
+      !sendMessage &&
+      !interrupt &&
+      !instance &&
+      !hasWarnedMissingProviderRef.current
+    ) {
+      hasWarnedMissingProviderRef.current = true;
+      console.warn(
+        "[agora-agent-uikit] SessionChatInput expected to run inside a ConversationalAIProvider or receive sendMessage/interrupt props.",
+      );
+    }
+  }, [instance, interrupt, sendMessage]);
 
   const handleSend = React.useCallback(async () => {
     const trimmed = text.trim();
-    if (!trimmed || inFlightRef.current) return;
+    if (!sendMessageFn || !trimmed || inFlightRef.current) return;
 
     inFlightRef.current = true;
     setInFlight(true);
     try {
-      await sendMessage(String(agentUid), trimmed);
+      await sendMessageFn(String(agentUid), trimmed);
       setText("");
     } catch (err) {
       onRTMError?.(err instanceof Error ? err : new Error(String(err)));
@@ -77,21 +102,21 @@ export function SessionChatInput({
       inFlightRef.current = false;
       setInFlight(false);
     }
-  }, [text, agentUid, sendMessage, onRTMError]);
+  }, [text, agentUid, sendMessageFn, onRTMError]);
 
   const handleInterrupt = React.useCallback(async () => {
-    if (inFlightRef.current) return;
+    if (!interruptFn || inFlightRef.current) return;
     inFlightRef.current = true;
     setInFlight(true);
     try {
-      await interrupt(String(agentUid));
+      await interruptFn(String(agentUid));
     } catch (err) {
       onRTMError?.(err instanceof Error ? err : new Error(String(err)));
     } finally {
       inFlightRef.current = false;
       setInFlight(false);
     }
-  }, [agentUid, interrupt, onRTMError]);
+  }, [agentUid, interruptFn, onRTMError]);
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -121,7 +146,7 @@ export function SessionChatInput({
       />
       <IconButton
         onClick={handleSend}
-        disabled={!text.trim() || inFlight}
+        disabled={!canSend || !text.trim() || inFlight}
         aria-label="Send message"
         shape="round"
         variant="filled"
@@ -129,7 +154,7 @@ export function SessionChatInput({
       >
         <Send className="size-4" />
       </IconButton>
-      {showInterrupt && (
+      {showInterrupt && canInterrupt && (
         <Button
           onClick={handleInterrupt}
           disabled={inFlight}

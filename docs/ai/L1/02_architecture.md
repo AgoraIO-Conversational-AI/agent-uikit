@@ -11,7 +11,7 @@ The library uses a **multi-entry-point architecture** to enable zero-cost tree-s
 ## Entry Points
 
 ```
-agora-agent-uikit            ← base: 50+ components, zero Agora deps
+agora-agent-uikit            ← base: main UI surface, Agora-first but selectively usable
 agora-agent-uikit/rtc        ← requires agora-rtc-react at runtime
 agora-agent-uikit/session    ← requires agora-agent-client-toolkit-react at runtime
 agora-agent-uikit/thymia     ← requires agora-rtm-sdk at runtime
@@ -80,14 +80,14 @@ ConversationalAIProvider (toolkit)
 
 ## Build And Validation Flow (CI)
 
-1. CI checks out this repo and the sibling toolkit repo.
-2. Toolkit packages build first because this workspace depends on them.
+1. CI checks out this repo.
+2. `pnpm install` resolves toolkit dependencies from the registry.
 3. Library typecheck, tests, and bundle build run.
 4. Demo app static build runs last.
 
 ## Architecture Constraints
 
-- Keep optional integrations out of the base entry — even type-only imports can break the split.
+- Keep direct RTC hook usage concentrated in `/rtc` where practical, but prefer product clarity over artificial purity rules.
 - Keep public exports centralized in entry-point index files.
 - Preserve static-export compatibility in `apps/www`.
 - Treat `packages/uikit/src/lib` as shared infrastructure, not a dumping ground for app-only code.

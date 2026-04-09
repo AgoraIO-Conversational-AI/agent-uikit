@@ -67,7 +67,7 @@ export const SettingsDialog = React.forwardRef<
       open,
       onOpenChange,
       title = "Agent Settings",
-      description,
+      description = "Configure your agent settings and session preferences.",
       children,
       ...agentSettingsProps
     },
@@ -78,9 +78,7 @@ export const SettingsDialog = React.forwardRef<
         <DialogContent ref={ref}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            {description && (
-              <DialogDescription>{description}</DialogDescription>
-            )}
+            <DialogDescription>{description}</DialogDescription>
             <DialogClose className="cursor-pointer absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

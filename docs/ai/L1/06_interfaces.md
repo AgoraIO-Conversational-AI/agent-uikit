@@ -6,7 +6,7 @@ Purpose: document the public contracts at the edges of the package, including su
 
 | Entry point                  | Import path                  | Components / Hooks                                              | Extra runtime dep |
 | ---------------------------- | ---------------------------- | --------------------------------------------------------------- | ----------------- |
-| Base                         | `agora-agent-uikit`         | 50+ components, utilities, types                                | none beyond React |
+| Base                         | `agora-agent-uikit`         | 50+ components, utilities, types                                | none required; some components integrate more deeply with optional Agora peers |
 | RTC                          | `agora-agent-uikit/rtc`     | `MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`     | `agora-rtc-react` |
 | Session                      | `agora-agent-uikit/session` | `SessionTranscript`, `AgentStateVisualizer`, `SessionChatInput`, `SessionErrorDisplay` | `agora-agent-client-toolkit`, `agora-agent-client-toolkit-react` |
 | Thymia                       | `agora-agent-uikit/thymia`  | `ThymiaPanel`, `useRTMSubscription`, `useThymia`                | `agora-rtm-sdk` |
@@ -99,7 +99,7 @@ Session components depend on hooks from `agora-agent-client-toolkit-react`:
 | `useTranscript()`            | SessionTranscript        | `TranscriptHelperItem[]`       |
 | `useAgentState()`            | AgentStateVisualizer     | toolkit agent state string     |
 | `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null`      |
-| _(props-driven)_             | SessionChatInput        | `sendMessage`, `interrupt` passed as props |
+| `useConversationalAIContext()` or props | SessionChatInput | provider actions or explicit `sendMessage` / `interrupt` overrides |
 
 State mapping from toolkit → visualizer:
 

@@ -703,7 +703,7 @@ import { Video, MessageSquare } from "lucide-react";
 
 ## Session Components
 
-Session components read from `ConversationalAIProvider` context via toolkit hooks. They must be rendered inside a `ConversationalAIProvider`. Import from `agora-agent-uikit/session`.
+Session components read from `ConversationalAIProvider` context via toolkit hooks by default. Import from `agora-agent-uikit/session`.
 
 ### AgentStateVisualizer
 
@@ -770,11 +770,13 @@ Messages are attributed to the agent when `item.uid` matches `agentUid` (compare
 
 ### SessionChatInput
 
-Text input and optional interrupt button wired to `sendMessage` and `interrupt` from `ConversationalAIProvider` context.
+Text input and optional interrupt button wired to `sendMessage` and `interrupt` from `ConversationalAIProvider` context by default. You can also pass `sendMessage` and `interrupt` props directly.
 
 ```typescript
 interface SessionChatInputProps {
   agentUid: string | number;
+  sendMessage?: (agentUserId: string, text: string) => Promise<void>;
+  interrupt?: (agentUserId: string) => Promise<void>;
   placeholder?: string;       // default: "Type a message…"
   showInterrupt?: boolean;    // default: false
   interruptLabel?: string;    // accessible label for interrupt button; default: "Interrupt agent"
@@ -794,7 +796,7 @@ import { SessionChatInput } from "agora-agent-uikit/session";
 />
 ```
 
-Submit with Enter or the send button. Shift+Enter does not submit. Numeric `agentUid` values are coerced to string before toolkit calls.
+Submit with Enter or the send button. Shift+Enter does not submit. Numeric `agentUid` values are coerced to string before toolkit calls. If neither provider context nor direct action props are available, send stays disabled and the interrupt button is not rendered.
 
 ---
 

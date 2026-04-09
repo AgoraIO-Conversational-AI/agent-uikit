@@ -18,7 +18,7 @@
 
 - Git repo: `AgoraIO-Conversational-AI/agent-uikit`
 - Published package: `agora-agent-uikit`
-- `packages/uikit/package.json` `repository` field points at `agent-uikit-ts`; treat that as package metadata/history, not the checked-out repo identifier.
+- `packages/uikit/package.json` should point at the canonical repo: `AgoraIO-Conversational-AI/agent-uikit`.
 
 ## L1 Index
 

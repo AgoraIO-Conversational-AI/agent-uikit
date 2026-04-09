@@ -90,14 +90,14 @@ export function RTCControls() {
 }
 ```
 
-Consumers that don't import from `agora-agent-uikit/rtc` get zero RTC code in their bundle.
+Use the `/rtc` entry for components that call Agora RTC hooks directly. Other base components can still be composed with Agora client-side SDK state without importing that subpath.
 
 ### 5. Session-connected UI (requires toolkit)
 
 Install the optional toolkit packages:
 
 ```bash
-npm install agora-agent-client-toolkit agora-agent-client-toolkit-react
+npm install agora-agent-client-toolkit@^1.2.0 agora-agent-client-toolkit-react@^1.2.0
 ```
 
 Wrap your app with `ConversationalAIProvider` and import session components from the `/session` entry:
@@ -136,7 +136,7 @@ export function SessionUI({ channel, agentUid }: SessionUIProps) {
 }
 ```
 
-Consumers that only import from `agora-agent-uikit` get zero toolkit code in their bundle — the `/session` entry and its toolkit dependencies are fully tree-shaken.
+Use the `/session` entry for components that talk directly to `ConversationalAIProvider`. `SessionChatInput` can also be wired manually with `sendMessage` and `interrupt` overrides when you want to supply your own toolkit integration layer.
 
 ---
 
@@ -146,15 +146,15 @@ The library has three entry points:
 
 | Entry   | Import                      | Extra install needed                                              |
 | ------- | --------------------------- | ----------------------------------------------------------------- |
-| Base    | `agora-agent-uikit`         | None                                                              |
+| Base    | `agora-agent-uikit`         | None required; some components can integrate more deeply with optional Agora peers |
 | RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                 |
 | Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react` |
 
-The base entry contains all visual components: voice, chat, video, layout, settings, and primitives. These have no dependency on `agora-rtc-react` or the conversational AI toolkit.
+The base entry contains the main visual components: voice, chat, video, layout, settings, branding, and primitives. Many are pure presentation components; some are Agora-oriented convenience components that can integrate more deeply when the relevant peers are installed.
 
-The RTC entry adds components that call Agora RTC hooks at runtime (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
+The RTC entry adds components and hooks that call Agora RTC hooks directly (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
 
-The session entry adds three components that connect directly to `ConversationalAIProvider`. They call toolkit hooks internally and require both toolkit packages.
+The session entry adds components that connect directly to `ConversationalAIProvider`. They call toolkit hooks internally and require both toolkit packages unless you pass explicit action overrides where supported.
 
 ---
 
@@ -167,8 +167,8 @@ All peer dependencies are required unless marked optional.
 | `react`                            | ≥ 18.0.0 | Required                      |
 | `react-dom`                        | ≥ 18.0.0 | Required                      |
 | `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry only     |
-| `agora-agent-client-toolkit`       | ≥ 0.1.0  | Optional — session entry only |
-| `agora-agent-client-toolkit-react` | ≥ 0.1.0  | Optional — session entry only |
+| `agora-agent-client-toolkit`       | ≥ 1.2.0  | Optional — session entry only |
+| `agora-agent-client-toolkit-react` | ≥ 1.2.0  | Optional — session entry only |
 
 Everything else (`lucide-react`, `@radix-ui/*`, `@lottiefiles/dotlottie-react`, `cmdk`, `clsx`, `tailwind-merge`, `class-variance-authority`) is bundled as a regular dependency — no separate install needed.
 

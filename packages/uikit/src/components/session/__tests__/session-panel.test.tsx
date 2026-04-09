@@ -3,9 +3,13 @@
  */
 
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { act, render, screen } from "@testing-library/react";
 import { SessionPanel } from "../session-panel";
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("SessionPanel Component", () => {
   it("renders agent ID text", () => {
@@ -58,6 +62,7 @@ describe("SessionPanel Component", () => {
   });
 
   it("copy button copies agent ID to clipboard", async () => {
+    vi.useFakeTimers();
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {
       clipboard: { writeText },
@@ -65,7 +70,16 @@ describe("SessionPanel Component", () => {
 
     render(<SessionPanel agentId="agent-xyz" payload={null} />);
     const copyButton = screen.getByText("Copy");
-    copyButton.click();
+
+    await act(async () => {
+      copyButton.click();
+      await Promise.resolve();
+    });
+
     expect(writeText).toHaveBeenCalledWith("agent-xyz");
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
   });
 });

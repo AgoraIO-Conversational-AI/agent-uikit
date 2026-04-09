@@ -6,7 +6,7 @@ When to read this: before changing `exports`, peer dependencies, or any import p
 
 The package is intentionally split so consumers can import:
 
-- `agora-agent-uikit` for pure/base UI
+- `agora-agent-uikit` for the main Agora UI surface
 - `agora-agent-uikit/rtc` for RTC-aware helpers
 - `agora-agent-uikit/session` for toolkit-connected UI
 - `agora-agent-uikit/thymia` for RTM/Thymia helpers
@@ -26,7 +26,7 @@ This split is the main product boundary in the repo.
 
 ## Rules To Preserve
 
-1. Base entry must not require optional peers at runtime.
+1. Base entry should remain broadly usable on its own, but Agora-oriented convenience components are allowed when that improves the product API.
 2. Optional peers must remain listed in `peerDependenciesMeta` as optional when appropriate.
 3. Any new subpath export must be built by `tsup` and declared in `package.json`.
 4. Public APIs should be reachable from an entry-point index file, not by deep import paths.
@@ -51,7 +51,7 @@ This split is the main product boundary in the repo.
 
 ## Smells That Usually Mean The Boundary Is Breaking
 
-- A base component suddenly needs an Agora hook.
+- A base component starts hard-failing without an optional peer even though the peer-backed feature is not in use.
 - `src/index.ts` starts importing from `src/rtc`, `src/session`, or peer SDK packages.
 - Tree-shaking claims depend on helpers shared across base and optional entries without review.
 - Type-only convenience imports silently become runtime imports after refactors.
