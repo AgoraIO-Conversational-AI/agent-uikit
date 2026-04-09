@@ -1,33 +1,24 @@
 # 01 — Setup
 
-Purpose: get the monorepo installed, run the library/demo locally, and avoid workspace-specific setup traps.
+Purpose: get the monorepo installed, run the library/demo locally, and avoid local setup traps.
 
 ## Prerequisites
 
 | Tool   | Version   | Notes                              |
 | ------ | --------- | ---------------------------------- |
-| Node   | 20.x      | CI baseline; ≥ 18 works locally   |
+| Node   | 20.x      | CI baseline; toolkit session deps require 20+ |
 | pnpm   | 9.0.6     | declared package manager           |
 
 ## Workspace Shape
 
 - `packages/uikit` is the publishable package.
 - `apps/www` is the Next.js demo/docs app.
-- `pnpm-workspace.yaml` also includes `../agent-client-toolkit-ts/packages/*`.
-
-A sibling checkout of the toolkit repo is required for a full workspace install.
 
 ## First-Time Install
 
 ```bash
 pnpm install
 ```
-
-If install fails with missing workspace packages:
-
-1. Clone `agent-client-toolkit-ts` beside this repo.
-2. Ensure the path is exactly `../agent-client-toolkit-ts`.
-3. Re-run `pnpm install`.
 
 ## Common Commands
 
@@ -62,8 +53,8 @@ pnpm docs:validate                                    # check AI docs integrity
 | `react-dom`                        | ≥ 18.0.0 | always                 |
 | `agora-rtc-react`                  | ≥ 2.0.0  | `/rtc` entry only      |
 | `agora-rtm-sdk`                    | ≥ 2.0.0  | `/thymia` entry only   |
-| `agora-agent-client-toolkit`       | ≥ 1.1.0  | `/session` entry only  |
-| `agora-agent-client-toolkit-react` | ≥ 1.1.0  | `/session` entry only  |
+| `agora-agent-client-toolkit`       | ≥ 1.2.0  | `/session` entry only  |
+| `agora-agent-client-toolkit-react` | ≥ 1.2.0  | `/session` entry only  |
 
 ## Tailwind Configuration (consumer-side)
 
@@ -101,14 +92,13 @@ None required for the library itself.
 
 ## Setup Failures To Check First
 
-- Missing sibling toolkit repo prevents `pnpm install` and CI parity.
 - Browser permission denial breaks mic/camera demos but not package builds.
 - Static export paths break if `NEXT_PUBLIC_BASE_PATH` and asset hosting path disagree.
 - `apps/www` build intentionally ignores TypeScript build errors (`ignoreBuildErrors: true`); do not treat a green app build as a type-safety guarantee.
 
 ## Do Not
 
-- Add workspace packages without updating `pnpm-workspace.yaml` and CI checkout steps.
+- Add workspace packages without updating `pnpm-workspace.yaml` and CI install steps.
 - Remove `TMPDIR=/tmp` from test scripts — tests may write to temp paths that differ across OS.
 - Assume `pnpm dev` validates types — it only runs dev servers, not `tsc`.
 

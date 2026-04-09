@@ -8,13 +8,10 @@ Root workspace includes:
 
 - `apps/*`
 - `packages/*`
-- `../agent-client-toolkit-ts/packages/*`
-
-That sibling toolkit path is external to the repo checkout. CI recreates the expected layout by checking out the toolkit repo and symlinking it beside this repo.
 
 ## CI Sequence
 
-CI checks out both repos, symlinks the toolkit to `../agent-client-toolkit-ts`, builds toolkit first, then runs library typecheck → tests → build → demo build. Package validation happens before the demo app.
+CI installs this repo directly from the lockfile, then runs library typecheck → tests → build → demo build. Package validation happens before the demo app.
 
 ## Demo App Behavior
 
@@ -46,7 +43,7 @@ For demo-affecting work:
 pnpm --filter www build
 ```
 
-If the change involves toolkit/session behavior, ensure the sibling toolkit repo is present before trusting local results.
+If the change involves toolkit/session behavior, verify the declared toolkit versions in `packages/uikit/package.json` and confirm `pnpm install` resolved them from the registry.
 
 ## Important Caveat
 

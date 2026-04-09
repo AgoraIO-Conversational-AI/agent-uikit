@@ -1,6 +1,6 @@
 {
   "name": "agora-agent-uikit",
-  "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit-ts",
+  "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit",
   "version": "1.0.0",
   "description": "React component library for building voice AI user interfaces with Agora",
   "main": "./dist/index.js",
@@ -40,6 +40,9 @@
     "test:watch": "TMPDIR=/tmp vitest",
     "test:coverage": "TMPDIR=/tmp vitest run --coverage"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "keywords": [
     "agora",
     "voice-ai",
@@ -65,8 +68,8 @@
     "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
-    "agora-agent-client-toolkit": "^1.1.0",
-    "agora-agent-client-toolkit-react": "^1.1.0",
+    "agora-agent-client-toolkit": "^1.2.0",
+    "agora-agent-client-toolkit-react": "^1.2.0",
     "agora-rtc-react": ">=2.0.0",
     "agora-rtm-sdk": ">=2.0.0",
     "react": ">=18.0.0",
@@ -103,8 +106,8 @@
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
     "@vitest/coverage-v8": "^2.0.0",
-    "agora-agent-client-toolkit": "workspace:*",
-    "agora-agent-client-toolkit-react": "workspace:*",
+    "agora-agent-client-toolkit": "^1.2.0",
+    "agora-agent-client-toolkit-react": "^1.2.0",
     "agora-rtc-react": "^2.5.1",
     "agora-rtm-sdk": "^2.2.0",
     "class-variance-authority": "^0.7.1",

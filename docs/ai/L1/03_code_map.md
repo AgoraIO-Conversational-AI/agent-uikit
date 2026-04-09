@@ -4,7 +4,7 @@
 
 ```
 agent-uikit/
-├── .github/workflows/ci.yml      # CI install/build order and sibling repo dependency
+├── .github/workflows/ci.yml      # CI install/build order
 ├── packages/
 │   └── uikit/                     # published package: agora-agent-uikit
 │       ├── src/
@@ -55,7 +55,7 @@ agent-uikit/
 │       ├── lib/theme/apply-theme.ts  # app-local theme helper copy
 │       └── next.config.mjs        # static export config, base-path wiring
 ├── turbo.json                     # Turbo task definitions
-├── pnpm-workspace.yaml            # workspace: packages/*, apps/*, ../agent-client-toolkit-ts/packages/*
+├── pnpm-workspace.yaml            # workspace: packages/*, apps/*
 └── package.json                   # monorepo root, private
 ```
 
@@ -89,7 +89,7 @@ agent-uikit/
 | `packages/uikit/package.json`    | publish contract, exports, peer boundaries       |
 | `packages/uikit/vitest.config.ts`| test environment and asset mocking               |
 | `apps/www/next.config.mjs`       | static export config and base-path wiring        |
-| `.github/workflows/ci.yml`       | CI install/build order, sibling repo dependency  |
+| `.github/workflows/ci.yml`       | CI install/build order                            |
 
 ## Fast Navigation Hints
 

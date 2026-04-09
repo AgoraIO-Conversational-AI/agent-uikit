@@ -1,8 +1,8 @@
 # 07 — Gotchas
 
-## Workspace Dependency Trap
+## Standalone Dependency Reality
 
-`pnpm-workspace.yaml` references `../agent-client-toolkit-ts/packages/*`. A clean checkout of this repo alone is not enough for a full install. CI checks out the toolkit repo and symlinks it to the expected sibling path. Clone it locally before running `pnpm install`.
+This repo installs standalone. Session features still depend on published `agora-agent-client-toolkit` packages, but they resolve as normal package dependencies instead of a sibling workspace checkout. If install or CI fails, check registry access and version ranges before assuming a workspace issue.
 
 ## Base Entry Purity Matters
 

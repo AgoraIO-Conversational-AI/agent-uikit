@@ -9,6 +9,9 @@
     "typecheck": "turbo run typecheck",
     "docs:validate": "node scripts/validate-ai-docs.mjs"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "packageManager": "pnpm@9.0.6",
   "devDependencies": {
     "agora-rtc-sdk-ng": "^4.23.4",

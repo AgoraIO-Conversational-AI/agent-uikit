@@ -99,7 +99,7 @@ pnpm --filter www dev    # demo site only (faster)
 
 1. Re-read `pnpm-workspace.yaml`.
 2. Re-read `.github/workflows/ci.yml`.
-3. Confirm the sibling toolkit path assumption still holds.
+3. Confirm external toolkit dependencies still resolve from the registry.
 4. Confirm Turbo outputs still match the actual build products.
 
 ## Related Deep Dives
