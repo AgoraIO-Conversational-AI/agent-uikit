@@ -29,11 +29,13 @@ Props, usage examples, and behaviour notes for every component in `agora-agent-u
   - [SettingsDialog](#settingsdialog)
 - [Layout Components](#layout-components)
   - [VideoGrid](#videogrid)
+  - [VideoGridWithControls](#videogridwithcontrols)
   - [MobileTabs](#mobiletabs)
 - [Session Components](#session-components)
   - [AgentStateVisualizer](#agentstatevisualizer)
   - [SessionTranscript](#sessiontranscript)
   - [SessionChatInput](#sessionchatinput)
+  - [SessionErrorDisplay](#sessionerrordisplay)
 - [UI Primitives](#ui-primitives)
   - [Button](#button)
   - [IconButton](#iconbutton)
@@ -109,6 +111,8 @@ import { AgentVisualizer } from "agora-agent-uikit";
 // Override one state's animation with a custom URL
 <AgentVisualizer state={agentState} lottiePaths={{ talking: "/custom/talking.lottie" }} />
 ```
+
+Bundled animations are used for any state not included in `lottiePaths`, so consumers can override only the states they want to brand differently instead of supplying a full animation set each time.
 
 ---
 
@@ -555,6 +559,8 @@ Pre-session configuration panel for Agora Conversational AI agent parameters.
 
 ```typescript
 interface AgentSettingsProps {
+  selectedMicId?: string;                    // empty string = system default
+  onMicChange?: (deviceId: string) => void; // renders the mic picker and requires agora-rtc-react
   enableAivad: boolean;
   onEnableAivadChange: (enabled: boolean) => void;
   language: string;                         // STT language code, e.g. "en-US"
@@ -573,6 +579,8 @@ interface AgentSettingsProps {
 import { AgentSettings } from "agora-agent-uikit";
 
 <AgentSettings
+  selectedMicId={selectedMicId}
+  onMicChange={setSelectedMicId}
   enableAivad={enableAivad}
   onEnableAivadChange={setEnableAivad}
   language={language}
@@ -584,6 +592,8 @@ import { AgentSettings } from "agora-agent-uikit";
   disabled={isConnected}
 />
 ```
+
+`AgentSettings` works from the base entry without RTC when you omit microphone selection. If you pass `onMicChange`, the component enables its microphone picker path and requires `agora-rtc-react` so it can enumerate input devices.
 
 **Default languages:** en-US, en-GB, es-ES, es-MX, fr-FR, de-DE, it-IT, pt-BR, ja-JP, ko-KR, zh-CN, zh-TW.
 
@@ -664,6 +674,35 @@ import { VideoGrid } from "agora-agent-uikit";
 
 ---
 
+### VideoGridWithControls
+
+Same prop surface as `VideoGrid`, but renders `controls` in its own bottom-right cell instead of overlaying it on the avatar. Use this layout when controls need a dedicated panel rather than floating over the video.
+
+```
+┌─────────────┬─────────────┐
+│ Chat        │ Avatar      │
+│ (50%)       │ (50%)       │
+├─────────────┼─────────────┤
+│ Local Video │ Controls    │
+│ (50%)       │ (50%)       │
+└─────────────┴─────────────┘
+```
+
+```tsx
+import { VideoGridWithControls } from "agora-agent-uikit";
+
+<VideoGridWithControls
+  avatar={<AvatarVideoDisplay videoTrack={remoteTrack} state="connected" />}
+  chat={<Conversation>...</Conversation>}
+  localVideo={<LocalVideoPreview videoTrack={localTrack} />}
+  controls={<div className="flex gap-2">...</div>}
+/>
+```
+
+See [`VideoGrid`](#videogrid) for the shared `VideoGridProps` interface.
+
+---
+
 ### MobileTabs
 
 Tab switcher for mobile layouts with icon support and configurable position.
@@ -703,7 +742,7 @@ import { Video, MessageSquare } from "lucide-react";
 
 ## Session Components
 
-Session components read from `ConversationalAIProvider` context via toolkit hooks. They must be rendered inside a `ConversationalAIProvider`. Import from `agora-agent-uikit/session`.
+Session components read from `ConversationalAIProvider` context via toolkit hooks by default. Import from `agora-agent-uikit/session`.
 
 ### AgentStateVisualizer
 
@@ -719,7 +758,6 @@ interface AgentStateVisualizerProps {
   overrideState?: AgentVisualizerState;
   size?: "sm" | "md" | "lg";
   className?: string;
-  lottieBasePath?: string;
   lottiePaths?: Partial<Record<AgentVisualizerState, string>>;
 }
 ```
@@ -736,6 +774,8 @@ import { AgentStateVisualizer } from "agora-agent-uikit/session";
   overrideState={isConnected ? undefined : "not-joined"}
 />
 ```
+
+`AgentStateVisualizer` forwards `lottiePaths` to the underlying `AgentVisualizer`, so session-driven UIs can use the same partial animation override pattern.
 
 ---
 
@@ -770,11 +810,13 @@ Messages are attributed to the agent when `item.uid` matches `agentUid` (compare
 
 ### SessionChatInput
 
-Text input and optional interrupt button wired to `sendMessage` and `interrupt` from `ConversationalAIProvider` context.
+Text input and optional interrupt button wired to `sendMessage` and `interrupt` from `ConversationalAIProvider` context by default. You can also pass `sendMessage` and `interrupt` props directly.
 
 ```typescript
 interface SessionChatInputProps {
   agentUid: string | number;
+  sendMessage?: (agentUserId: string, text: string) => Promise<void>;
+  interrupt?: (agentUserId: string) => Promise<void>;
   placeholder?: string;       // default: "Type a message…"
   showInterrupt?: boolean;    // default: false
   interruptLabel?: string;    // accessible label for interrupt button; default: "Interrupt agent"
@@ -794,7 +836,43 @@ import { SessionChatInput } from "agora-agent-uikit/session";
 />
 ```
 
-Submit with Enter or the send button. Shift+Enter does not submit. Numeric `agentUid` values are coerced to string before toolkit calls.
+Submit with Enter or the send button. Shift+Enter does not submit. Numeric `agentUid` values are coerced to string before toolkit calls. If neither provider context nor direct action props are available, send stays disabled and the interrupt button is not rendered.
+
+---
+
+### SessionErrorDisplay
+
+Dismissible error banner driven by `useAgentError()` from the toolkit. Returns null when there is no active error — safe to render unconditionally. Must be used inside a `ConversationalAIProvider`.
+
+```typescript
+interface SessionErrorDisplayProps {
+  className?: string;
+  /**
+   * Custom render function for the error. Receives the current error event
+   * and a clearError callback. Return null to suppress rendering for specific errors.
+   */
+  children?: (error: AgentErrorEvent, clearError: () => void) => React.ReactNode;
+}
+```
+
+```tsx
+import { SessionErrorDisplay } from "agora-agent-uikit/session";
+
+// Default dismissible banner — renders nothing when there is no error
+<SessionErrorDisplay />
+
+// Custom rendering
+<SessionErrorDisplay>
+  {(error, clearError) => (
+    <div role="alert">
+      {error.error.message}
+      <button onClick={clearError}>Dismiss</button>
+    </div>
+  )}
+</SessionErrorDisplay>
+```
+
+The default banner shows the error message with an `×` dismiss button. The `children` render prop allows a fully custom error surface — return `null` from the function to suppress rendering for specific error types.
 
 ---
 

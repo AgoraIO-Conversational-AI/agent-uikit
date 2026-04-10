@@ -94,24 +94,36 @@ export default function ConversationDemo() {
           ) : (
             <>
               {messages.map((message) => (
-                <Message from={message.role} key={message.id}
-                  avatar={message.role === "assistant" ? (
+                <div
+                  key={message.id}
+                  className={`flex items-start gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {message.role === "assistant" && (
                     <Avatar size="md" icon={<MessageCircle className="h-5 w-5" />} bgColor="bg-gradient-to-br from-blue-500 to-blue-600" />
-                  ) : (
+                  )}
+                  <Message from={message.role}>
+                    <MessageContent><Response>{message.text}</Response></MessageContent>
+                  </Message>
+                  {message.role === "user" && (
                     <Avatar size="md" icon={<User className="h-5 w-5" />} bgColor="bg-gradient-to-br from-green-500 to-green-600" />
-                  )}>
-                  <MessageContent><Response>{message.text}</Response></MessageContent>
-                </Message>
+                  )}
+                </div>
               ))}
               {streamingMessageIndex !== null && (
-                <Message from={allMessages[streamingMessageIndex].role} key={`streaming-${streamingMessageIndex}`}
-                  avatar={allMessages[streamingMessageIndex].role === "assistant" ? (
+                <div
+                  key={`streaming-${streamingMessageIndex}`}
+                  className={`flex items-start gap-3 ${allMessages[streamingMessageIndex].role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  {allMessages[streamingMessageIndex].role === "assistant" && (
                     <Avatar size="md" icon={<MessageCircle className="h-5 w-5" />} bgColor="bg-gradient-to-br from-blue-500 to-blue-600" />
-                  ) : (
+                  )}
+                  <Message from={allMessages[streamingMessageIndex].role}>
+                    <MessageContent><Response>{streamingContent || "\u200B"}</Response></MessageContent>
+                  </Message>
+                  {allMessages[streamingMessageIndex].role === "user" && (
                     <Avatar size="md" icon={<User className="h-5 w-5" />} bgColor="bg-gradient-to-br from-green-500 to-green-600" />
-                  )}>
-                  <MessageContent><Response>{streamingContent || "\u200B"}</Response></MessageContent>
-                </Message>
+                  )}
+                </div>
               )}
             </>
           )}

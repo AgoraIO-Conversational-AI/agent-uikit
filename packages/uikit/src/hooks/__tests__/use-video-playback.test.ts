@@ -6,6 +6,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import React from "react";
 
+import { debug } from "../../lib/debug";
 import { useVideoPlayback, type PlayableVideoTrack } from "../use-video-playback";
 
 function createMockTrack(): PlayableVideoTrack {
@@ -105,6 +106,7 @@ describe("useVideoPlayback", () => {
 
   it("Agora mode: handles track.play() throwing an error gracefully", () => {
     const track = createMockTrack();
+    const errorSpy = vi.spyOn(debug, "error").mockImplementation(() => {});
     (track.play as ReturnType<typeof vi.fn>).mockImplementation(() => {
       throw new Error("play failed");
     });
@@ -120,6 +122,8 @@ describe("useVideoPlayback", () => {
 
     // Should not throw, and isPlaying should be false
     expect(result.current.isPlaying).toBe(false);
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 
   it("sets isPlaying=false when track is removed", () => {

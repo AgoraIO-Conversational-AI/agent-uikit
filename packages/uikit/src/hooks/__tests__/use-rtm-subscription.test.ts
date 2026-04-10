@@ -2,9 +2,10 @@
  * Tests for useRTMSubscription hook
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
+import { debug } from "../../lib/debug";
 import { useRTMSubscription, type RTMEventSource } from "../use-rtm-subscription";
 
 function createMockRTMSource(): RTMEventSource & { on: ReturnType<typeof vi.fn>; off: ReturnType<typeof vi.fn> } {
@@ -25,6 +26,11 @@ describe("useRTMSubscription", () => {
 
   beforeEach(() => {
     rtmSource = createMockRTMSource();
+    vi.spyOn(debug, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("calls onMessage when a matching string message arrives", () => {
@@ -87,6 +93,7 @@ describe("useRTMSubscription", () => {
 
   it("handles malformed JSON gracefully (no throw)", () => {
     const onMessage = vi.fn();
+    const warnSpy = vi.spyOn(debug, "warn").mockImplementation(() => {});
     renderHook(() => useRTMSubscription(rtmSource, "test.type", onMessage));
 
     const handler = captureHandler(rtmSource);
@@ -94,6 +101,8 @@ describe("useRTMSubscription", () => {
     // Should not throw
     expect(() => handler!({ message: "not valid json{{{" })).not.toThrow();
     expect(onMessage).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it("re-subscribes when messageType changes", () => {

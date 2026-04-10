@@ -16,6 +16,10 @@ export interface UseAudioDevicesReturn {
   loadDevices: () => Promise<void>;
 }
 
+export interface UseAudioDevicesOptions {
+  enabled?: boolean;
+}
+
 /**
  * Dynamically imports the AgoraRTC module. This avoids top-level evaluation
  * of agora-rtc-react during SSR, where `window` is not defined.
@@ -30,15 +34,17 @@ function importAgoraRTC(): Promise<any> {
   return agoraRTCPromise;
 }
 
-export function useAudioDevices(): UseAudioDevicesReturn {
+export function useAudioDevices({
+  enabled = true,
+}: UseAudioDevicesOptions = {}): UseAudioDevicesReturn {
   const [devices, setDevices] = useState<AudioDevice[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [hasPermission, setHasPermission] = useState(false);
   const agoraRTCRef = useRef<any>(null);
 
   const loadDevices = useCallback(async () => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
 
     try {
       setLoading(true);
@@ -70,14 +76,22 @@ export function useAudioDevices(): UseAudioDevicesReturn {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      setDevices([]);
+      setLoading(false);
+      setError(null);
+      setHasPermission(false);
+      return;
+    }
+
     loadDevices();
-  }, [loadDevices]);
+  }, [enabled, loadDevices]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
 
     let mounted = true;
     let cleanup = () => {};
@@ -99,7 +113,7 @@ export function useAudioDevices(): UseAudioDevicesReturn {
       mounted = false;
       cleanup();
     };
-  }, [loadDevices]);
+  }, [enabled, loadDevices]);
 
   return {
     devices,

@@ -1,4 +1,3 @@
 packages:
   - "apps/*"
   - "packages/*"
-  - "../agent-client-toolkit-ts/packages/*"

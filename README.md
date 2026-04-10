@@ -1,12 +1,14 @@
 # agora-agent-uikit
 
-React component library for building voice and video AI interfaces with Agora.
+[![CI](https://github.com/AgoraIO-Conversational-AI/agent-uikit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AgoraIO-Conversational-AI/agent-uikit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/agora-agent-uikit)](https://www.npmjs.com/package/agora-agent-uikit)
+[![npm downloads](https://img.shields.io/npm/dm/agora-agent-uikit)](https://www.npmjs.com/package/agora-agent-uikit)
+
+React component library for building conversational, voice, video, and biomarker AI interfaces with Agora.
 
 ---
 
-## Quick Start
-
-### 1. Install
+## Installation
 
 ```bash
 npm install agora-agent-uikit
@@ -16,7 +18,58 @@ pnpm add agora-agent-uikit
 yarn add agora-agent-uikit
 ```
 
-### 2. Configure Tailwind
+`react` and `react-dom` are peer dependencies and are expected to already be installed in your app.
+
+Install the optional Agora peers only for the entrypoints you use.
+
+## Overview
+
+`agora-agent-uikit` is an Agora-first React UI kit. The base package is the main UI surface for conversational, voice, video, settings, and biomarker UI. Subpath exports group deeper integrations by runtime dependency.
+
+## Entrypoint Guide
+
+| Use case                                                        | Import path                 | Extra packages                                                                 |
+| --------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------ |
+| Main UI components, primitives, chat, video, settings, branding | `agora-agent-uikit`         | none beyond `react` and `react-dom` by default; `AgentSettings` mic selection also needs `agora-rtc-react` |
+| Components and hooks that talk directly to Agora RTC            | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                              |
+| Components that connect directly to `ConversationalAIProvider`  | `agora-agent-uikit/session` | `agora-agent-client-toolkit`, `agora-agent-client-toolkit-react`               |
+| Thymia biomarker UI and RTM subscription helpers                | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                                |
+
+### Install by integration mode
+
+Base UI:
+
+```bash
+npm install agora-agent-uikit
+```
+
+Base UI with `AgentSettings` microphone selection enabled:
+
+```bash
+npm install agora-agent-uikit agora-rtc-react
+```
+
+Base UI plus RTC entry:
+
+```bash
+npm install agora-agent-uikit agora-rtc-react
+```
+
+Base UI plus Session entry:
+
+```bash
+npm install agora-agent-uikit agora-agent-client-toolkit@^1.2.0 agora-agent-client-toolkit-react@^1.2.0
+```
+
+Base UI plus Thymia entry:
+
+```bash
+npm install agora-agent-uikit agora-rtm-sdk
+```
+
+## Quick Start
+
+### 1. Configure Tailwind
 
 Add the package to your Tailwind `content` paths so its classes are included in your build:
 
@@ -30,9 +83,9 @@ export default {
 };
 ```
 
-### 3. Basic voice UI
+### 2. Basic visual voice UI
 
-No toolkit required — works with any Agora RTC integration:
+This example uses presentation components only, so no [toolkit](https://github.com/AgoraIO-Conversational-AI/agent-client-toolkit-ts) integration is required:
 
 ```tsx
 import { useState } from 'react';
@@ -57,7 +110,21 @@ export function VoiceUI() {
 }
 ```
 
-### 4. RTC-connected components (requires agora-rtc-react)
+`AgentVisualizer` uses built-in state-specific `.lottie` animations by default. To customize the visualizer without replacing every state, pass `lottiePaths` with only the states you want to override:
+
+```tsx
+<AgentVisualizer
+  state="talking"
+  lottiePaths={{
+    talking: '/brand/talking.lottie',
+    listening: '/brand/listening.lottie',
+  }}
+/>
+```
+
+For live agent state, transcript rendering, and session messaging, use the `/session` entry with [`agora-agent-client-toolkit`](https://github.com/AgoraIO-Conversational-AI/agent-client-toolkit-ts) and [`agora-agent-client-toolkit-react`](https://github.com/AgoraIO-Conversational-AI/agent-client-toolkit-ts).
+
+### 3. RTC-connected components (requires agora-rtc-react)
 
 Install the optional RTC package:
 
@@ -90,14 +157,14 @@ export function RTCControls() {
 }
 ```
 
-Consumers that don't import from `agora-agent-uikit/rtc` get zero RTC code in their bundle.
+Use the `/rtc` entry for components that call Agora RTC hooks directly. Other base components can still be composed with Agora client-side SDK state without importing that subpath.
 
-### 5. Session-connected UI (requires toolkit)
+### 4. Session-connected UI (requires toolkit)
 
 Install the optional toolkit packages:
 
 ```bash
-npm install agora-agent-client-toolkit agora-agent-client-toolkit-react
+npm install agora-agent-client-toolkit@^1.2.0 agora-agent-client-toolkit-react@^1.2.0
 ```
 
 Wrap your app with `ConversationalAIProvider` and import session components from the `/session` entry:
@@ -136,39 +203,62 @@ export function SessionUI({ channel, agentUid }: SessionUIProps) {
 }
 ```
 
-Consumers that only import from `agora-agent-uikit` get zero toolkit code in their bundle — the `/session` entry and its toolkit dependencies are fully tree-shaken.
+Use the `/session` entry for components that talk directly to `ConversationalAIProvider`. `SessionChatInput` can also be wired manually with `sendMessage` and `interrupt` overrides when you want to supply your own toolkit integration layer.
+
+### 5. RTM / Thymia UI (requires agora-rtm-sdk)
+
+```bash
+npm install agora-rtm-sdk
+```
+
+```tsx
+import { ThymiaPanel } from 'agora-agent-uikit/thymia';
+
+<ThymiaPanel
+  biomarkers={{ happy: 0.68, stress: 0.21 }}
+  wellness={{}}
+  clinical={{}}
+  progress={{}}
+  safety={{}}
+  isConnected
+/>;
+```
 
 ---
 
 ## Architecture
 
-The library has three entry points:
+The library has four entry points:
 
-| Entry   | Import                      | Extra install needed                                              |
-| ------- | --------------------------- | ----------------------------------------------------------------- |
-| Base    | `agora-agent-uikit`         | None                                                              |
-| RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                 |
-| Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react` |
+| Entry   | Import                      | Extra install needed                                                                                          |
+| ------- | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Base    | `agora-agent-uikit`         | None by default; `AgentSettings` microphone selection also requires `agora-rtc-react`                        |
+| RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                                                             |
+| Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react`                                             |
+| Thymia  | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                                                               |
 
-The base entry contains all visual components: voice, chat, video, layout, settings, and primitives. These have no dependency on `agora-rtc-react` or the conversational AI toolkit.
+The base entry contains the main visual components: voice, chat, video, layout, settings, branding, primitives, and selected biomarker surfaces. Many are pure presentation components; some are Agora-oriented convenience components that integrate more deeply when the relevant peers are installed. `AgentSettings` stays in the base entry, but its microphone picker path uses `agora-rtc-react` only when `onMicChange` is provided.
 
-The RTC entry adds components that call Agora RTC hooks at runtime (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
+The RTC entry adds components and hooks that call Agora RTC hooks directly (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
 
-The session entry adds three components that connect directly to `ConversationalAIProvider`. They call toolkit hooks internally and require both toolkit packages.
+The session entry adds components that connect directly to `ConversationalAIProvider`. They call toolkit hooks internally and require both toolkit packages unless you pass explicit action overrides where supported.
+
+The Thymia entry adds RTM-bound biomarker helpers and the `ThymiaPanel` UI surface.
 
 ---
 
 ## Peer Dependencies
 
-All peer dependencies are required unless marked optional.
+`react` and `react-dom` are required. All Agora-specific peers are optional and only needed for specific entry points.
 
 | Package                            | Version  | Notes                         |
 | ---------------------------------- | -------- | ----------------------------- |
 | `react`                            | ≥ 18.0.0 | Required                      |
 | `react-dom`                        | ≥ 18.0.0 | Required                      |
-| `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry only     |
-| `agora-agent-client-toolkit`       | ≥ 0.1.0  | Optional — session entry only |
-| `agora-agent-client-toolkit-react` | ≥ 0.1.0  | Optional — session entry only |
+| `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry and `AgentSettings` mic selection |
+| `agora-agent-client-toolkit`       | ≥ 1.2.0  | Optional — session entry only |
+| `agora-agent-client-toolkit-react` | ≥ 1.2.0  | Optional — session entry only |
+| `agora-rtm-sdk`                    | ≥ 2.0.0  | Optional — thymia entry only  |
 
 Everything else (`lucide-react`, `@radix-ui/*`, `@lottiefiles/dotlottie-react`, `cmdk`, `clsx`, `tailwind-merge`, `class-variance-authority`) is bundled as a regular dependency — no separate install needed.
 
@@ -176,15 +266,15 @@ Everything else (`lucide-react`, `@radix-ui/*`, `@lottiefiles/dotlottie-react`, 
 
 ## Component Reference
 
-Full props, usage examples, and notes for every component are in **[docs/components.md](docs/components.md)**.
+Full props, usage examples, and notes for every component are in **[packages/uikit/docs/components.md](packages/uikit/docs/components.md)**.
 
 **Base entry** (`agora-agent-uikit`):
 
 - Voice — `MicButton`, `AgentVisualizer`, `AudioVisualizer`, `SimpleVisualizer`, `LiveWaveform`
 - Chat — `Conversation`, `Message`, `Response`, `ConvoTextStream`
 - Video — `LocalVideoPreview`, `AvatarVideoDisplay`, `Avatar`, `CameraSelector`
-- Settings — `AgentSettings`, `SettingsDialog`
-- Layout — `VideoGrid`, `MobileTabs`
+- Settings — `AgentSettings`, `SettingsDialog`, `SessionPanel`
+- Layout — `VideoGrid`, `VideoGridWithControls`, `MobileTabs`
 - Primitives — `Button`, `IconButton`, `Card`, `Chip`, `ValuePicker`
 
 **RTC entry** (`agora-agent-uikit/rtc`):
@@ -193,7 +283,11 @@ Full props, usage examples, and notes for every component are in **[docs/compone
 
 **Session entry** (`agora-agent-uikit/session`):
 
-- `AgentStateVisualizer`, `SessionTranscript`, `SessionChatInput`
+- `AgentStateVisualizer`, `SessionTranscript`, `SessionChatInput`, `SessionErrorDisplay`
+
+**Thymia entry** (`agora-agent-uikit/thymia`):
+
+- `ThymiaPanel`, `useRTMSubscription`, `useThymia`
 
 ---
 
@@ -231,12 +325,17 @@ export default {
 ## Running Tests
 
 ```bash
-npm test              # run all tests once
-npm run test:watch    # watch mode
-npm run test:ui       # Vitest browser UI
-npm run test:coverage # coverage report
-npm run typecheck     # TypeScript type check (no emit)
+pnpm --filter agora-agent-uikit test
+pnpm --filter agora-agent-uikit test:contracts
+pnpm --filter agora-agent-uikit test:coverage
+pnpm --filter agora-agent-uikit typecheck
+pnpm --filter agora-agent-uikit build
+pnpm --filter www build
 ```
+
+## Demo Site
+
+The repo includes `apps/www`, a static-export Next.js demo and landing site for the UI kit. It is part of the repo’s validation path and should stay aligned with the published package surface.
 
 ---
 

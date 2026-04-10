@@ -271,20 +271,22 @@ export function MyComponent() {
   return (
     <Conversation>
       <ConversationContent>
-        <Message from="assistant" avatar={
+        <div className="flex items-start gap-3">
           <Avatar icon={<MessageCircle />} />
-        }>
-          <MessageContent>
-            <Response>Hello! How can I help?</Response>
-          </MessageContent>
-        </Message>
-        <Message from="user" avatar={
+          <Message from="assistant">
+            <MessageContent>
+              <Response>Hello! How can I help?</Response>
+            </MessageContent>
+          </Message>
+        </div>
+        <div className="flex items-start justify-end gap-3">
+          <Message from="user">
+            <MessageContent>
+              <Response>I need help with...</Response>
+            </MessageContent>
+          </Message>
           <Avatar icon={<User />} />
-        }>
-          <MessageContent>
-            <Response>I need help with...</Response>
-          </MessageContent>
-        </Message>
+        </div>
       </ConversationContent>
       <ConversationScrollButton />
     </Conversation>

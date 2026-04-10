@@ -1,13 +1,23 @@
 {
   "name": "agora-agent-uikit",
-  "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit-ts",
-  "version": "1.0.0",
-  "description": "React component library for building voice AI user interfaces with Agora",
+  "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit",
+  "homepage": "https://github.com/AgoraIO-Conversational-AI/agent-uikit#readme",
+  "bugs": {
+    "url": "https://github.com/AgoraIO-Conversational-AI/agent-uikit/issues"
+  },
+  "version": "1.1.0",
+  "description": "React component library for building conversational, voice, video, and biomarker AI interfaces with Agora",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "exports": {
@@ -37,8 +47,12 @@
     "build:watch": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "TMPDIR=/tmp vitest run",
+    "test:contracts": "TMPDIR=/tmp vitest run src/__tests__/exports.test.ts src/__tests__/entrypoint-contract.test.tsx",
     "test:watch": "TMPDIR=/tmp vitest",
     "test:coverage": "TMPDIR=/tmp vitest run --coverage"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "keywords": [
     "agora",
@@ -65,8 +79,8 @@
     "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
-    "agora-agent-client-toolkit": "^1.1.0",
-    "agora-agent-client-toolkit-react": "^1.1.0",
+    "agora-agent-client-toolkit": "^1.2.0",
+    "agora-agent-client-toolkit-react": "^1.2.0",
     "agora-rtc-react": ">=2.0.0",
     "agora-rtm-sdk": ">=2.0.0",
     "react": ">=18.0.0",
@@ -103,8 +117,8 @@
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
     "@vitest/coverage-v8": "^2.0.0",
-    "agora-agent-client-toolkit": "workspace:*",
-    "agora-agent-client-toolkit-react": "workspace:*",
+    "agora-agent-client-toolkit": "^1.2.0",
+    "agora-agent-client-toolkit-react": "^1.2.0",
     "agora-rtc-react": "^2.5.1",
     "agora-rtm-sdk": "^2.2.0",
     "class-variance-authority": "^0.7.1",

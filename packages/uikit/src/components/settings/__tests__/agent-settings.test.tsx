@@ -3,12 +3,30 @@
  */
 
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render } from "@testing-library/react";
 import { AgentSettings } from "../agent-settings";
 import type { AgentSettingsProps } from "../agent-settings";
 
+const { mockUseAudioDevices } = vi.hoisted(() => ({
+  mockUseAudioDevices: vi.fn(() => ({
+    devices: [],
+    loading: false,
+    error: null,
+    hasPermission: false,
+    loadDevices: vi.fn(),
+  })),
+}));
+
+vi.mock("../../../hooks/use-audio-devices", () => ({
+  useAudioDevices: mockUseAudioDevices,
+}));
+
 describe("AgentSettings Component", () => {
+  beforeEach(() => {
+    mockUseAudioDevices.mockClear();
+  });
+
   it("renders without crashing", () => {
     const { container } = render(
       <AgentSettings
@@ -120,5 +138,32 @@ describe("AgentSettings Component", () => {
       />,
     );
     expect(container).toBeInTheDocument();
+  });
+
+  it("does not enable microphone device loading when no mic picker is provided", () => {
+    render(
+      <AgentSettings
+        enableAivad={true}
+        onEnableAivadChange={() => {}}
+        language="en-US"
+        onLanguageChange={() => {}}
+      />,
+    );
+
+    expect(mockUseAudioDevices).toHaveBeenCalledWith({ enabled: false });
+  });
+
+  it("enables microphone device loading when mic selection is supported", () => {
+    render(
+      <AgentSettings
+        enableAivad={true}
+        onEnableAivadChange={() => {}}
+        language="en-US"
+        onLanguageChange={() => {}}
+        onMicChange={() => {}}
+      />,
+    );
+
+    expect(mockUseAudioDevices).toHaveBeenCalledWith({ enabled: true });
   });
 });

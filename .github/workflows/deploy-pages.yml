@@ -1,24 +1,30 @@
-name: CI
+name: Deploy Pages
 
 on:
   push:
     branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: pages-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
 
       - uses: pnpm/action-setup@v4
         with:
@@ -36,20 +42,28 @@ jobs:
       - name: Validate AI docs
         run: pnpm docs:validate
 
-      - name: Typecheck
-        run: pnpm --filter agora-agent-uikit typecheck
-
-      - name: Contract tests
-        run: pnpm --filter agora-agent-uikit test:contracts
-
-      - name: Test
-        run: pnpm --filter agora-agent-uikit test
-
       - name: Build library
         run: pnpm --filter agora-agent-uikit build
 
       - name: Typecheck demo app
         run: pnpm --filter www typecheck
 
-      - name: Build demo app
+      - name: Build static demo site
         run: pnpm --filter www build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/www/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,85 @@
+name: Publish npm
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: publish-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate tag version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./packages/uikit/package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)."
+            exit 1
+          fi
+
+      - name: Validate AI docs
+        run: pnpm docs:validate
+
+      - name: Typecheck package
+        run: pnpm --filter agora-agent-uikit typecheck
+
+      - name: Run contract tests
+        run: pnpm --filter agora-agent-uikit test:contracts
+
+      - name: Run package tests
+        run: pnpm --filter agora-agent-uikit test
+
+      - name: Build package
+        run: pnpm --filter agora-agent-uikit build
+
+      - name: Publish package
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          LOCAL_VERSION=$(node -p "require('./package.json').version")
+          REMOTE_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || echo "")
+          if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+            echo "Skipping $PACKAGE_NAME@$LOCAL_VERSION (already published)"
+          else
+            echo "Publishing $PACKAGE_NAME@$LOCAL_VERSION"
+            npm publish --provenance --access public
+          fi
+        working-directory: packages/uikit
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          make_latest: true
