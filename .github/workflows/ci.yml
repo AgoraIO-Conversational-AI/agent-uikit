@@ -5,25 +5,45 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.6
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate AI docs
+        run: pnpm docs:validate
 
       - name: Typecheck
         run: pnpm --filter agora-agent-uikit typecheck
+
+      - name: Typecheck demo app
+        run: pnpm --filter www typecheck
+
+      - name: Contract tests
+        run: pnpm --filter agora-agent-uikit test:contracts
 
       - name: Test
         run: pnpm --filter agora-agent-uikit test
@@ -31,5 +51,5 @@ jobs:
       - name: Build library
         run: pnpm --filter agora-agent-uikit build
 
-      - name: Build playground
+      - name: Build demo app
         run: pnpm --filter www build

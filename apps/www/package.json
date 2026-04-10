@@ -9,7 +9,7 @@
     "build:github": "next build",
     "start": "next start --port 4000",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "agora-agent-uikit": "workspace:*",

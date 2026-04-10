@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 
-import { getLottieBasePath } from "@/lib/basepath"
 import { AgentVisualizer, Button, ValuePicker, type Item } from "agora-agent-uikit"
 import {
   Tabs,
@@ -31,7 +30,6 @@ export default function AgentVisualizerDemo() {
   const [selectedState, setSelectedState] =
     useState<(typeof states)[number]>("listening")
   const [selectedSize, setSelectedSize] = useState<"sm" | "md" | "lg">("md")
-  const lottieBasePath = getLottieBasePath()
 
   return (
     <div className="w-full max-w-4xl space-y-6">
@@ -50,7 +48,6 @@ export default function AgentVisualizerDemo() {
               <AgentVisualizer
                 state={selectedState}
                 size={selectedSize}
-                lottieBasePath={lottieBasePath}
               />
             </div>
           </div>
@@ -98,7 +95,6 @@ export default function AgentVisualizerDemo() {
                 <AgentVisualizer
                   state={state}
                   size="md"
-                  lottieBasePath={lottieBasePath}
                 />
               </div>
             ))}
@@ -112,7 +108,6 @@ export default function AgentVisualizerDemo() {
                 <AgentVisualizer
                   state="listening"
                   size={size}
-                  lottieBasePath={lottieBasePath}
                 />
                 <span className="text-muted-foreground text-xs capitalize">{size === "sm" ? "Small" : size === "md" ? "Medium" : "Large"}</span>
               </div>
