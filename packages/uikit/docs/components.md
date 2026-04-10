@@ -29,11 +29,13 @@ Props, usage examples, and behaviour notes for every component in `agora-agent-u
   - [SettingsDialog](#settingsdialog)
 - [Layout Components](#layout-components)
   - [VideoGrid](#videogrid)
+  - [VideoGridWithControls](#videogridwithcontrols)
   - [MobileTabs](#mobiletabs)
 - [Session Components](#session-components)
   - [AgentStateVisualizer](#agentstatevisualizer)
   - [SessionTranscript](#sessiontranscript)
   - [SessionChatInput](#sessionchatinput)
+  - [SessionErrorDisplay](#sessionerrordisplay)
 - [UI Primitives](#ui-primitives)
   - [Button](#button)
   - [IconButton](#iconbutton)
@@ -672,6 +674,35 @@ import { VideoGrid } from "agora-agent-uikit";
 
 ---
 
+### VideoGridWithControls
+
+Same prop surface as `VideoGrid`, but renders `controls` in its own bottom-right cell instead of overlaying it on the avatar. Use this layout when controls need a dedicated panel rather than floating over the video.
+
+```
+┌─────────────┬─────────────┐
+│ Chat        │ Avatar      │
+│ (50%)       │ (50%)       │
+├─────────────┼─────────────┤
+│ Local Video │ Controls    │
+│ (50%)       │ (50%)       │
+└─────────────┴─────────────┘
+```
+
+```tsx
+import { VideoGridWithControls } from "agora-agent-uikit";
+
+<VideoGridWithControls
+  avatar={<AvatarVideoDisplay videoTrack={remoteTrack} state="connected" />}
+  chat={<Conversation>...</Conversation>}
+  localVideo={<LocalVideoPreview videoTrack={localTrack} />}
+  controls={<div className="flex gap-2">...</div>}
+/>
+```
+
+See [`VideoGrid`](#videogrid) for the shared `VideoGridProps` interface.
+
+---
+
 ### MobileTabs
 
 Tab switcher for mobile layouts with icon support and configurable position.
@@ -806,6 +837,42 @@ import { SessionChatInput } from "agora-agent-uikit/session";
 ```
 
 Submit with Enter or the send button. Shift+Enter does not submit. Numeric `agentUid` values are coerced to string before toolkit calls. If neither provider context nor direct action props are available, send stays disabled and the interrupt button is not rendered.
+
+---
+
+### SessionErrorDisplay
+
+Dismissible error banner driven by `useAgentError()` from the toolkit. Returns null when there is no active error — safe to render unconditionally. Must be used inside a `ConversationalAIProvider`.
+
+```typescript
+interface SessionErrorDisplayProps {
+  className?: string;
+  /**
+   * Custom render function for the error. Receives the current error event
+   * and a clearError callback. Return null to suppress rendering for specific errors.
+   */
+  children?: (error: AgentErrorEvent, clearError: () => void) => React.ReactNode;
+}
+```
+
+```tsx
+import { SessionErrorDisplay } from "agora-agent-uikit/session";
+
+// Default dismissible banner — renders nothing when there is no error
+<SessionErrorDisplay />
+
+// Custom rendering
+<SessionErrorDisplay>
+  {(error, clearError) => (
+    <div role="alert">
+      {error.error.message}
+      <button onClick={clearError}>Dismiss</button>
+    </div>
+  )}
+</SessionErrorDisplay>
+```
+
+The default banner shows the error message with an `×` dismiss button. The `children` render prop allows a fully custom error surface — return `null` from the function to suppress rendering for specific error types.
 
 ---
 

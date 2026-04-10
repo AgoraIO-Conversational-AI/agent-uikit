@@ -22,7 +22,7 @@ This file is normative for public entrypoints, peer dependency expectations, and
 | Voice             | `AgentVisualizer`, `MicButton`, `AudioVisualizer`, `LiveWaveform`, `SimpleVisualizer` |
 | Chat              | `Conversation`, `Message`, `Response`, `ConvoTextStream`, `transcriptToMessageList` |
 | Video             | `Avatar`, `AvatarVideoDisplay`, `LocalVideoPreview`, `CameraSelector`       |
-| Layout            | `VideoGrid`, `MobileTabs`                                                   |
+| Layout            | `VideoGrid`, `VideoGridWithControls`, `MobileTabs`                          |
 | Settings          | `SettingsDialog`, `AgentSettings`, `SessionPanel`                           |
 | Branding/utils    | `AgoraLogo`, `cn`, `renderMarkdownToHtml`, theme helpers                    |
 

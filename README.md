@@ -249,7 +249,7 @@ The Thymia entry adds RTM-bound biomarker helpers and the `ThymiaPanel` UI surfa
 
 ## Peer Dependencies
 
-All peer dependencies are required unless marked optional.
+`react` and `react-dom` are required. All Agora-specific peers are optional and only needed for specific entry points.
 
 | Package                            | Version  | Notes                         |
 | ---------------------------------- | -------- | ----------------------------- |
@@ -273,8 +273,8 @@ Full props, usage examples, and notes for every component are in **[packages/uik
 - Voice — `MicButton`, `AgentVisualizer`, `AudioVisualizer`, `SimpleVisualizer`, `LiveWaveform`
 - Chat — `Conversation`, `Message`, `Response`, `ConvoTextStream`
 - Video — `LocalVideoPreview`, `AvatarVideoDisplay`, `Avatar`, `CameraSelector`
-- Settings — `AgentSettings`, `SettingsDialog`
-- Layout — `VideoGrid`, `MobileTabs`
+- Settings — `AgentSettings`, `SettingsDialog`, `SessionPanel`
+- Layout — `VideoGrid`, `VideoGridWithControls`, `MobileTabs`
 - Primitives — `Button`, `IconButton`, `Card`, `Chip`, `ValuePicker`
 
 **RTC entry** (`agora-agent-uikit/rtc`):
@@ -283,7 +283,7 @@ Full props, usage examples, and notes for every component are in **[packages/uik
 
 **Session entry** (`agora-agent-uikit/session`):
 
-- `AgentStateVisualizer`, `SessionTranscript`, `SessionChatInput`
+- `AgentStateVisualizer`, `SessionTranscript`, `SessionChatInput`, `SessionErrorDisplay`
 
 **Thymia entry** (`agora-agent-uikit/thymia`):
 
