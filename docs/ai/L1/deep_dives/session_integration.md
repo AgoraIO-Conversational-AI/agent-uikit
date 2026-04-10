@@ -77,6 +77,7 @@ Notes:
 
 - `overrideState` wins over derived toolkit state
 - use `overrideState` for `not-joined`, `joining`, or `disconnected`
+- `lottiePaths` forwards directly to `AgentVisualizer`, so session UIs can partially override bundled animations without supplying a complete state map
 
 ## SessionTranscript
 

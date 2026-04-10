@@ -49,7 +49,13 @@ interface AgentVisualizerProps {
 }
 ```
 
-Override bundled animations with `lottiePaths` for CDN-hosted versions in production.
+The component uses bundled state-specific `.lottie` files by default. `lottiePaths` is a partial override map, so consumers can replace only selected states and fall back to bundled animations for the rest.
+
+Customization guidance:
+
+- use bundled defaults when you want the stock Agora visual language
+- pass `lottiePaths` when you want branded animations for one or more states
+- wrap `AgentVisualizer` in an app-local component if you want the same override set reused everywhere without repeating the prop
 
 ---
 

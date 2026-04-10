@@ -13,6 +13,8 @@ The package is intentionally split so consumers can import:
 
 This split is the main product boundary in the repo.
 
+This split is about integration intent and runtime dependency boundaries, not about claiming the base package is framework-agnostic or non-Agora.
+
 ## Files That Define The Split
 
 | File                             | Role                                          |
@@ -30,6 +32,7 @@ This split is the main product boundary in the repo.
 2. Optional peers must remain listed in `peerDependenciesMeta` as optional when appropriate.
 3. Any new subpath export must be built by `tsup` and declared in `package.json`.
 4. Public APIs should be reachable from an entry-point index file, not by deep import paths.
+5. README install guidance and contract tests must stay aligned with any boundary change.
 
 ## Existing Patterns
 
@@ -59,6 +62,8 @@ This split is the main product boundary in the repo.
 ## Validation Checklist
 
 ```bash
+pnpm docs:validate
+pnpm --filter agora-agent-uikit test:contracts
 pnpm --filter agora-agent-uikit build
 pnpm --filter agora-agent-uikit test
 ```

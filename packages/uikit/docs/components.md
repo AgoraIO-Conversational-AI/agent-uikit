@@ -110,6 +110,8 @@ import { AgentVisualizer } from "agora-agent-uikit";
 <AgentVisualizer state={agentState} lottiePaths={{ talking: "/custom/talking.lottie" }} />
 ```
 
+Bundled animations are used for any state not included in `lottiePaths`, so consumers can override only the states they want to brand differently instead of supplying a full animation set each time.
+
 ---
 
 ### AudioVisualizer
@@ -719,7 +721,6 @@ interface AgentStateVisualizerProps {
   overrideState?: AgentVisualizerState;
   size?: "sm" | "md" | "lg";
   className?: string;
-  lottieBasePath?: string;
   lottiePaths?: Partial<Record<AgentVisualizerState, string>>;
 }
 ```
@@ -736,6 +737,8 @@ import { AgentStateVisualizer } from "agora-agent-uikit/session";
   overrideState={isConnected ? undefined : "not-joined"}
 />
 ```
+
+`AgentStateVisualizer` forwards `lottiePaths` to the underlying `AgentVisualizer`, so session-driven UIs can use the same partial animation override pattern.
 
 ---
 

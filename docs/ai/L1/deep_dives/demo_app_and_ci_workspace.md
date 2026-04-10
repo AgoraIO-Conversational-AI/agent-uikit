@@ -11,7 +11,7 @@ Root workspace includes:
 
 ## CI Sequence
 
-CI installs this repo directly from the lockfile, then runs library typecheck → tests → build → demo build. Package validation happens before the demo app.
+CI installs this repo directly from the lockfile, then runs docs validation → package typecheck → app typecheck → contract tests → package tests → library build → demo build. Package validation happens before the demo app.
 
 ## Demo App Behavior
 
@@ -26,6 +26,7 @@ CI installs this repo directly from the lockfile, then runs library typecheck �
 - `NEXT_PUBLIC_BASE_PATH` drives both `basePath` and `assetPrefix`.
 - Lottie assets also rely on the computed base path helper.
 - A path bug can leave the app apparently fine in dev but broken in exported output.
+- `apps/www/out/` is generated export output and should not be committed; Pages deployment should upload it as a workflow artifact.
 
 ## Validation Advice
 
@@ -40,6 +41,7 @@ pnpm --filter agora-agent-uikit build
 For demo-affecting work:
 
 ```bash
+pnpm --filter www typecheck
 pnpm --filter www build
 ```
 

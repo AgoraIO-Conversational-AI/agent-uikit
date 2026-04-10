@@ -2,6 +2,10 @@
 
 Purpose: document the public contracts at the edges of the package, including subpath exports, optional peers, theme inputs, and RTM message expectations.
 
+## Normative Status
+
+This file is normative for public entrypoints, peer dependency expectations, and supported consumer-facing contracts.
+
 ## Package Exports
 
 | Entry point                  | Import path                  | Components / Hooks                                              | Extra runtime dep |
@@ -111,6 +115,12 @@ State mapping from toolkit → visualizer:
 | `speaking`    | `talking`        |
 | `silent`      | `ambient`        |
 | `null`        | `ambient`        |
+
+Supported `SessionChatInput` integration modes:
+
+- provider-backed: render inside `ConversationalAIProvider`
+- direct override: pass `sendMessage` and optionally `interrupt`
+- partial override is supported, but UI should only expose actions with handlers available
 
 ## RTM/Thymia Boundary
 

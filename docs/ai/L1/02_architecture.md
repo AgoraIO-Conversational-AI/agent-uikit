@@ -2,11 +2,17 @@
 
 Purpose: explain how the monorepo is split between the publishable UI kit, optional runtime integrations, and the demo/export app.
 
+## Normative Status
+
+This file is normative for package positioning and entrypoint intent. If code, README guidance, or examples disagree with this file, update them together in the same change.
+
 ## High-Level Design
 
 Monorepo with one published library (`packages/uikit`) and one demo site (`apps/www`).
 
 The library uses a **multi-entry-point architecture** to enable zero-cost tree-shaking of optional Agora SDK dependencies. Consumers only pay for the entry points they import.
+
+This is an **Agora-first UI kit**. The base package is the main product surface. Subpath exports exist to group deeper integrations by runtime dependency and workflow, not to define a separate non-Agora product.
 
 ## Entry Points
 
@@ -16,6 +22,14 @@ agora-agent-uikit/rtc        ← requires agora-rtc-react at runtime
 agora-agent-uikit/session    ← requires agora-agent-client-toolkit-react at runtime
 agora-agent-uikit/thymia     ← requires agora-rtm-sdk at runtime
 ```
+
+## Contract Summary
+
+- `agora-agent-uikit` is the main entry for voice, chat, video, settings, layout, branding, and shared biomarker UI.
+- `agora-agent-uikit/rtc` is for components and hooks that call Agora RTC bindings directly.
+- `agora-agent-uikit/session` is for toolkit-connected session UI.
+- `agora-agent-uikit/thymia` is for RTM-backed Thymia biomarker helpers.
+- Base components may still be Agora-oriented when that improves the product API, but they should keep direct side effects isolated to hooks or feature-specific paths.
 
 ## Dependency Hierarchy
 
@@ -92,6 +106,7 @@ ConversationalAIProvider (toolkit)
 - Preserve static-export compatibility in `apps/www`.
 - Treat `packages/uikit/src/lib` as shared infrastructure, not a dumping ground for app-only code.
 - Base components stay presentation-oriented; side effects move into hooks or integration entries.
+- Keep README install guidance, package metadata, and `docs/ai/L1/06_interfaces.md` aligned when entrypoint behavior changes.
 
 ## Do Not
 

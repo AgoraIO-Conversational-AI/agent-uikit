@@ -37,6 +37,7 @@ Targeted commands:
 pnpm --filter agora-agent-uikit build
 pnpm --filter agora-agent-uikit build:watch
 pnpm --filter agora-agent-uikit typecheck
+pnpm --filter agora-agent-uikit test:contracts
 pnpm --filter agora-agent-uikit test
 pnpm --filter agora-agent-uikit test -- --watch     # watch mode
 pnpm --filter agora-agent-uikit test -- --coverage   # with coverage
@@ -89,6 +90,7 @@ None required for the library itself.
 - For focused UI work, `pnpm --filter www dev` is faster than full `pnpm dev`.
 - For package work, use `pnpm --filter agora-agent-uikit build:watch` for bundle rebuilds only.
 - Library tests run under Vitest + jsdom. Test scripts force `TMPDIR=/tmp`; preserve that for CI parity.
+- `apps/www/out/` is generated build output and is gitignored; GitHub Pages deployment should publish generated artifacts, not committed export files.
 
 ## Setup Failures To Check First
 

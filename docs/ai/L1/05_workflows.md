@@ -68,8 +68,11 @@ ls packages/uikit/dist/  # expect index, session/, rtc/, thymia/ — each with .
 ## Validate A Typical PR
 
 ```bash
+pnpm docs:validate
 pnpm --filter agora-agent-uikit typecheck
+pnpm --filter agora-agent-uikit test:contracts
 pnpm --filter agora-agent-uikit test
+pnpm --filter www typecheck
 pnpm --filter agora-agent-uikit build
 pnpm --filter www build
 ```
@@ -80,6 +83,27 @@ Also check:
 - Optional peers are still optional.
 - No new browser-only code is evaluated on the server.
 - `pnpm docs:validate` still passes.
+
+## Public Contract Checklist
+
+Use this when a change affects exports, entrypoints, peer deps, install instructions, or README examples.
+
+1. Update the correct entry barrel.
+2. Update `packages/uikit/package.json` exports or peer deps if the package surface changed.
+3. Update README entrypoint guidance if the consumer decision path changed.
+4. Update `docs/ai/L1/02_architecture.md`, `docs/ai/L1/06_interfaces.md`, and `docs/ai/L1/07_gotchas.md` when the package contract changed.
+5. Add or update contract tests in `packages/uikit/src/__tests__/`.
+6. Rebuild the demo app if the user-facing surface changed.
+
+## Release Readiness Checklist
+
+Before publishing or merging a package-surface change:
+
+1. Verify install examples still match actual peer dependencies.
+2. Verify badges, metadata links, and repo references still point at canonical public targets.
+3. Verify contract tests cover the affected entrypoint behavior.
+4. Verify `apps/www` still reflects the current component/API surface.
+5. Verify `pnpm docs:validate` passes if any `docs/ai` file changed.
 
 ## Update Dependencies Safely
 
@@ -99,8 +123,10 @@ pnpm --filter www dev    # demo site only (faster)
 
 1. Re-read `pnpm-workspace.yaml`.
 2. Re-read `.github/workflows/ci.yml`.
-3. Confirm external toolkit dependencies still resolve from the registry.
-4. Confirm Turbo outputs still match the actual build products.
+3. Re-read `.github/workflows/deploy-pages.yml` if the change affects demo deployment.
+4. Confirm external toolkit dependencies still resolve from the registry.
+5. Confirm Turbo outputs still match the actual build products.
+6. Confirm `apps/www/out/` remains generated output rather than committed source.
 
 ## Related Deep Dives
 
