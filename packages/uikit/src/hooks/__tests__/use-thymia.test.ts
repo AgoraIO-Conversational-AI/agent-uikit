@@ -2,7 +2,7 @@
  * Tests for useThymia hook
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 // Mock useRTMSubscription to capture its arguments
@@ -13,6 +13,7 @@ vi.mock("../use-rtm-subscription", () => ({
 import { useRTMSubscription } from "../use-rtm-subscription";
 import { useThymia } from "../use-thymia";
 import type { RTMEventSource } from "../use-rtm-subscription";
+import { debug } from "../../lib/debug";
 
 const mockUseRTMSubscription = vi.mocked(useRTMSubscription);
 
@@ -23,6 +24,11 @@ function createMockRTMSource(): RTMEventSource {
 describe("useThymia", () => {
   beforeEach(() => {
     mockUseRTMSubscription.mockClear();
+    vi.spyOn(debug, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("returns initial empty state", () => {

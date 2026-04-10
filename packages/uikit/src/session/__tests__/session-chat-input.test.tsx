@@ -16,7 +16,7 @@ const {
   const mockUseConversationalAIContext = vi.fn(() => ({
     interrupt: mockInterrupt,
     sendMessage: mockSendMessage,
-    instance: null,
+    instance: { id: "provider-instance" },
   }));
 
   return {
@@ -40,7 +40,7 @@ describe("SessionChatInput", () => {
     mockUseConversationalAIContext.mockReset().mockReturnValue({
       interrupt: mockInterrupt,
       sendMessage: mockSendMessage,
-      instance: null,
+      instance: { id: "provider-instance" },
     });
   });
 
@@ -128,7 +128,7 @@ describe("SessionChatInput", () => {
     mockUseConversationalAIContext.mockReturnValue({
       interrupt: undefined,
       sendMessage: mockSendMessage,
-      instance: null,
+      instance: { id: "provider-instance" },
     });
 
     const { queryByText } = render(
@@ -172,6 +172,11 @@ describe("SessionChatInput", () => {
 
   it("logs a dev warning when instance is null (no provider)", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockUseConversationalAIContext.mockReturnValue({
+      interrupt: undefined,
+      sendMessage: undefined,
+      instance: null,
+    });
     render(<SessionChatInput agentUid="agent-1" />);
     await waitFor(() => {
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("ConversationalAIProvider"));
@@ -191,6 +196,7 @@ describe("SessionChatInput", () => {
   });
 
   it("disables send when no provider or sendMessage override is available", () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     mockUseConversationalAIContext.mockReturnValue({
       interrupt: undefined,
       sendMessage: undefined,
@@ -202,5 +208,6 @@ describe("SessionChatInput", () => {
     fireEvent.change(input, { target: { value: "Hello" } });
 
     expect(getByRole("button", { name: /send/i })).toBeDisabled();
+    warnSpy.mockRestore();
   });
 });

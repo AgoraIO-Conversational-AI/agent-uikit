@@ -1,8 +1,12 @@
 {
   "name": "agora-agent-uikit",
   "repository": "https://github.com/AgoraIO-Conversational-AI/agent-uikit",
+  "homepage": "https://github.com/AgoraIO-Conversational-AI/agent-uikit#readme",
+  "bugs": {
+    "url": "https://github.com/AgoraIO-Conversational-AI/agent-uikit/issues"
+  },
   "version": "1.0.0",
-  "description": "React component library for building voice AI user interfaces with Agora",
+  "description": "React component library for building conversational, voice, video, and biomarker AI interfaces with Agora",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -37,6 +41,7 @@
     "build:watch": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "TMPDIR=/tmp vitest run",
+    "test:contracts": "TMPDIR=/tmp vitest run src/__tests__/exports.test.ts src/__tests__/entrypoint-contract.test.tsx",
     "test:watch": "TMPDIR=/tmp vitest",
     "test:coverage": "TMPDIR=/tmp vitest run --coverage"
   },
