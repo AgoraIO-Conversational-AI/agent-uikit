@@ -28,12 +28,12 @@ Install the optional Agora peers only for the entrypoints you use.
 
 ## Entrypoint Guide
 
-| Use case                                                        | Import path                 | Extra packages                                                   |
-| --------------------------------------------------------------- | --------------------------- | ---------------------------------------------------------------- |
-| Main UI components, primitives, chat, video, settings, branding | `agora-agent-uikit`         | none beyond `react` and `react-dom`                              |
-| Components and hooks that talk directly to Agora RTC            | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                |
-| Components that connect directly to `ConversationalAIProvider`  | `agora-agent-uikit/session` | `agora-agent-client-toolkit`, `agora-agent-client-toolkit-react` |
-| Thymia biomarker UI and RTM subscription helpers                | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                  |
+| Use case                                                        | Import path                 | Extra packages                                                                 |
+| --------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------ |
+| Main UI components, primitives, chat, video, settings, branding | `agora-agent-uikit`         | none beyond `react` and `react-dom` by default; `AgentSettings` mic selection also needs `agora-rtc-react` |
+| Components and hooks that talk directly to Agora RTC            | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                              |
+| Components that connect directly to `ConversationalAIProvider`  | `agora-agent-uikit/session` | `agora-agent-client-toolkit`, `agora-agent-client-toolkit-react`               |
+| Thymia biomarker UI and RTM subscription helpers                | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                                |
 
 ### Install by integration mode
 
@@ -41,6 +41,12 @@ Base UI:
 
 ```bash
 npm install agora-agent-uikit
+```
+
+Base UI with `AgentSettings` microphone selection enabled:
+
+```bash
+npm install agora-agent-uikit agora-rtc-react
 ```
 
 Base UI plus RTC entry:
@@ -153,7 +159,7 @@ export function RTCControls() {
 
 Use the `/rtc` entry for components that call Agora RTC hooks directly. Other base components can still be composed with Agora client-side SDK state without importing that subpath.
 
-### 5. Session-connected UI (requires toolkit)
+### 4. Session-connected UI (requires toolkit)
 
 Install the optional toolkit packages:
 
@@ -199,7 +205,7 @@ export function SessionUI({ channel, agentUid }: SessionUIProps) {
 
 Use the `/session` entry for components that talk directly to `ConversationalAIProvider`. `SessionChatInput` can also be wired manually with `sendMessage` and `interrupt` overrides when you want to supply your own toolkit integration layer.
 
-### 6. RTM / Thymia UI (requires agora-rtm-sdk)
+### 5. RTM / Thymia UI (requires agora-rtm-sdk)
 
 ```bash
 npm install agora-rtm-sdk
@@ -224,14 +230,14 @@ import { ThymiaPanel } from 'agora-agent-uikit/thymia';
 
 The library has four entry points:
 
-| Entry   | Import                      | Extra install needed                                                               |
-| ------- | --------------------------- | ---------------------------------------------------------------------------------- |
-| Base    | `agora-agent-uikit`         | None required; some components can integrate more deeply with optional Agora peers |
-| RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                                  |
-| Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react`                  |
-| Thymia  | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                                    |
+| Entry   | Import                      | Extra install needed                                                                                          |
+| ------- | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Base    | `agora-agent-uikit`         | None by default; `AgentSettings` microphone selection also requires `agora-rtc-react`                        |
+| RTC     | `agora-agent-uikit/rtc`     | `agora-rtc-react`                                                                                             |
+| Session | `agora-agent-uikit/session` | `agora-agent-client-toolkit` + `agora-agent-client-toolkit-react`                                             |
+| Thymia  | `agora-agent-uikit/thymia`  | `agora-rtm-sdk`                                                                                               |
 
-The base entry contains the main visual components: voice, chat, video, layout, settings, branding, primitives, and selected biomarker surfaces. Many are pure presentation components; some are Agora-oriented convenience components that integrate more deeply when the relevant peers are installed.
+The base entry contains the main visual components: voice, chat, video, layout, settings, branding, primitives, and selected biomarker surfaces. Many are pure presentation components; some are Agora-oriented convenience components that integrate more deeply when the relevant peers are installed. `AgentSettings` stays in the base entry, but its microphone picker path uses `agora-rtc-react` only when `onMicChange` is provided.
 
 The RTC entry adds components and hooks that call Agora RTC hooks directly (`MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`). These require `agora-rtc-react` to be installed.
 
@@ -249,7 +255,7 @@ All peer dependencies are required unless marked optional.
 | ---------------------------------- | -------- | ----------------------------- |
 | `react`                            | ≥ 18.0.0 | Required                      |
 | `react-dom`                        | ≥ 18.0.0 | Required                      |
-| `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry only     |
+| `agora-rtc-react`                  | ≥ 2.0.0  | Optional — rtc entry and `AgentSettings` mic selection |
 | `agora-agent-client-toolkit`       | ≥ 1.2.0  | Optional — session entry only |
 | `agora-agent-client-toolkit-react` | ≥ 1.2.0  | Optional — session entry only |
 | `agora-rtm-sdk`                    | ≥ 2.0.0  | Optional — thymia entry only  |

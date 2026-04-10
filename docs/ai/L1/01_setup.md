@@ -52,7 +52,7 @@ pnpm docs:validate                                    # check AI docs integrity
 | ---------------------------------- | -------- | ---------------------- |
 | `react`                            | ≥ 18.0.0 | always                 |
 | `react-dom`                        | ≥ 18.0.0 | always                 |
-| `agora-rtc-react`                  | ≥ 2.0.0  | `/rtc` entry only      |
+| `agora-rtc-react`                  | ≥ 2.0.0  | `/rtc` entry and base `AgentSettings` mic selection |
 | `agora-rtm-sdk`                    | ≥ 2.0.0  | `/thymia` entry only   |
 | `agora-agent-client-toolkit`       | ≥ 1.2.0  | `/session` entry only  |
 | `agora-agent-client-toolkit-react` | ≥ 1.2.0  | `/session` entry only  |

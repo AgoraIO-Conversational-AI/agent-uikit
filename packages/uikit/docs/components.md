@@ -557,6 +557,8 @@ Pre-session configuration panel for Agora Conversational AI agent parameters.
 
 ```typescript
 interface AgentSettingsProps {
+  selectedMicId?: string;                    // empty string = system default
+  onMicChange?: (deviceId: string) => void; // renders the mic picker and requires agora-rtc-react
   enableAivad: boolean;
   onEnableAivadChange: (enabled: boolean) => void;
   language: string;                         // STT language code, e.g. "en-US"
@@ -575,6 +577,8 @@ interface AgentSettingsProps {
 import { AgentSettings } from "agora-agent-uikit";
 
 <AgentSettings
+  selectedMicId={selectedMicId}
+  onMicChange={setSelectedMicId}
   enableAivad={enableAivad}
   onEnableAivadChange={setEnableAivad}
   language={language}
@@ -586,6 +590,8 @@ import { AgentSettings } from "agora-agent-uikit";
   disabled={isConnected}
 />
 ```
+
+`AgentSettings` works from the base entry without RTC when you omit microphone selection. If you pass `onMicChange`, the component enables its microphone picker path and requires `agora-rtc-react` so it can enumerate input devices.
 
 **Default languages:** en-US, en-GB, es-ES, es-MX, fr-FR, de-DE, it-IT, pt-BR, ja-JP, ko-KR, zh-CN, zh-TW.
 

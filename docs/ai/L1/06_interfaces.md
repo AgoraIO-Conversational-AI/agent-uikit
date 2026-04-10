@@ -10,7 +10,7 @@ This file is normative for public entrypoints, peer dependency expectations, and
 
 | Entry point                  | Import path                  | Components / Hooks                                              | Extra runtime dep |
 | ---------------------------- | ---------------------------- | --------------------------------------------------------------- | ----------------- |
-| Base                         | `agora-agent-uikit`         | 50+ components, utilities, types                                | none required; some components integrate more deeply with optional Agora peers |
+| Base                         | `agora-agent-uikit`         | 50+ components, utilities, types                                | none required by default; `AgentSettings` mic selection adds `agora-rtc-react` |
 | RTC                          | `agora-agent-uikit/rtc`     | `MicButtonWithVisualizer`, `MicSelector`, `useAudioDevices`     | `agora-rtc-react` |
 | Session                      | `agora-agent-uikit/session` | `SessionTranscript`, `AgentStateVisualizer`, `SessionChatInput`, `SessionErrorDisplay` | `agora-agent-client-toolkit`, `agora-agent-client-toolkit-react` |
 | Thymia                       | `agora-agent-uikit/thymia`  | `ThymiaPanel`, `useRTMSubscription`, `useThymia`                | `agora-rtm-sdk` |
@@ -25,6 +25,8 @@ This file is normative for public entrypoints, peer dependency expectations, and
 | Layout            | `VideoGrid`, `MobileTabs`                                                   |
 | Settings          | `SettingsDialog`, `AgentSettings`, `SessionPanel`                           |
 | Branding/utils    | `AgoraLogo`, `cn`, `renderMarkdownToHtml`, theme helpers                    |
+
+`AgentSettings` stays in the base entry because its core language, AIVAD, prompt, and greeting controls do not require RTC. When `onMicChange` is provided, it enables microphone selection and dynamically imports `agora-rtc-react` to enumerate devices.
 
 ## Key Type Contracts
 
