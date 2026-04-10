@@ -5,7 +5,7 @@
   "bugs": {
     "url": "https://github.com/AgoraIO-Conversational-AI/agent-uikit/issues"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "React component library for building conversational, voice, video, and biomarker AI interfaces with Agora",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

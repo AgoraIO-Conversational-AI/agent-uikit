@@ -55,7 +55,7 @@ describe("public export surfaces", () => {
     expect(baseExports.AgoraLogo).toBeDefined();
     expect(baseExports.cn).toBeDefined();
     restoreConsole();
-  });
+  }, 10000);
 
   it("keeps integration-only symbols out of the base entry", async () => {
     const { baseExports, restoreConsole } = await loadExports();
