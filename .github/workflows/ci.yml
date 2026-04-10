@@ -39,9 +39,6 @@ jobs:
       - name: Typecheck
         run: pnpm --filter agora-agent-uikit typecheck
 
-      - name: Typecheck demo app
-        run: pnpm --filter www typecheck
-
       - name: Contract tests
         run: pnpm --filter agora-agent-uikit test:contracts
 
@@ -50,6 +47,9 @@ jobs:
 
       - name: Build library
         run: pnpm --filter agora-agent-uikit build
+
+      - name: Typecheck demo app
+        run: pnpm --filter www typecheck
 
       - name: Build demo app
         run: pnpm --filter www build
