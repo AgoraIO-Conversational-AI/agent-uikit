@@ -52,7 +52,7 @@ export default function AgentVisualizerDemo() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 pb-32">
             <div className="space-y-3">
               <label className="text-sm font-medium">Agent State</label>
               <div className="flex gap-1">
