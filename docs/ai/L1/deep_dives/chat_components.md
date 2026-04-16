@@ -1,6 +1,6 @@
 # Chat Components
 
-When to Read This: use this document when changing transcript views, conversation layout, message rendering, or markdown handling.
+> **When to Read This:** Use this document when changing transcript views, conversation layout, message rendering, or markdown handling.
 
 ## Main Files
 

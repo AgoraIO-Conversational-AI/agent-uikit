@@ -1,6 +1,6 @@
 # Biomarker Components
 
-When to Read This: use this document when editing Thymia RTM-driven features or Shen-based vitals UI.
+> **When to Read This:** Use this document when editing Thymia RTM-driven features or Shen-based vitals UI.
 
 ## Scope
 

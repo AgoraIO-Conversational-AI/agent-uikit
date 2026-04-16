@@ -1,6 +1,6 @@
 # Voice Components
 
-When to Read This: use this document when changing agent animations, microphone controls, or any component that visualizes live audio.
+> **When to Read This:** Use this document when changing agent animations, microphone controls, or any component that visualizes live audio.
 
 ## Main Files
 
