@@ -24,6 +24,7 @@ This file is normative for public entrypoints, peer dependency expectations, and
 | Video             | `Avatar`, `AvatarVideoDisplay`, `LocalVideoPreview`, `CameraSelector`       |
 | Layout            | `VideoGrid`, `VideoGridWithControls`, `MobileTabs`                          |
 | Settings          | `SettingsDialog`, `AgentSettings`, `SessionPanel`                           |
+| Biomarker/Vitals  | `ShenPanel` (camera-based vitals via Shen.AI — consumer passes `ShenState` as props, no SDK dependency in component) |
 | Branding/utils    | `AgoraLogo`, `cn`, `renderMarkdownToHtml`, theme helpers                    |
 
 `AgentSettings` stays in the base entry because its core language, AIVAD, prompt, and greeting controls do not require RTC. When `onMicChange` is provided, it enables microphone selection and dynamically imports `agora-rtc-react` to enumerate devices.
@@ -104,8 +105,28 @@ Session components depend on hooks from `agora-agent-client-toolkit-react`:
 | ---------------------------- | ------------------------ | ------------------------------ |
 | `useTranscript()`            | SessionTranscript        | `TranscriptHelperItem[]`       |
 | `useAgentState()`            | AgentStateVisualizer     | toolkit agent state string     |
-| `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null`      |
+| `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null` (see below) |
 | `useConversationalAIContext()` or props | SessionChatInput | provider actions or explicit `sendMessage` / `interrupt` overrides |
+
+### SessionErrorDisplay
+
+```typescript
+interface SessionErrorDisplayProps {
+  className?: string;
+  children?: (error: AgentErrorEvent, clearError: () => void) => React.ReactNode;
+}
+```
+
+Two error source types via `AgentErrorEvent`:
+
+| `error.source` | Meaning                                      | `error.error.type` examples |
+| --------------- | -------------------------------------------- | --------------------------- |
+| `"agent"`       | Agent-side module failure (TTS, STT, LLM)    | `"llm"` (code 500)         |
+| `"message"`     | Client-side message delivery failure          | `"text"` (code 400)        |
+
+Default rendering shows a dismissible alert banner. Use the `children` render prop for custom error UI.
+
+### State Mapping
 
 State mapping from toolkit → visualizer:
 

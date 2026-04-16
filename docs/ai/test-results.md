@@ -6,12 +6,12 @@ Repo: agent-ui-kit
 
 ## Summary
 
-- Total questions: 10
-- Passed: 10 (correct answer, right level)
-- L1 gaps: 0
+- Total questions: 14
+- Passed: 14 (after L1 improvements)
+- L1 gaps fixed: 1 (06_interfaces.md — SessionErrorDisplay props + ShenPanel family)
 - L2 gaps: 0
 - Cross-ref issues: 0
-- Structural checks: all passed (after fixing 6 L2 format issues)
+- Structural checks: 11/11 passed (after fixing 6 L2 format issues)
 
 ## Structural Checks
 
@@ -77,6 +77,28 @@ All checks now pass:
 | 9 | How does the session integration work with ConversationalAIProvider? | Yes | L0, 02_architecture, deep_dives/session_integration | L0+L1+L2 | Pass |
 | 10 | What are the RTC publish/unpublish state drift issues and how are they handled? | Yes | L0, 07_gotchas, deep_dives/realtime_integrations | L0+L1+L2 | Pass |
 
+### Round 2 — Targeted Coverage (Higher-Risk Contracts)
+
+| # | Question (short) | Answer Correct? | Files Read | Level Loaded | Result |
+| --- | --- | --- | --- | --- | --- |
+| 11 | Entry point placement decision + breakage | Yes | L1 (02, 05, 06, 07), L2 (entry_points) | L0+L1 sufficient | Pass |
+| 12 | SessionErrorDisplay usage + error kinds | Yes (after fix) | L1 (02, 06), L2 (session_integration) | L0+L1+L2 | Pass |
+| 13 | ShenPanel vs ThymiaPanel differences + import paths | Yes (after fix) | L1 (02, 03, 06, 07), L2 (biomarker_components) | L0+L1+L2 | Pass |
+| 14 | Avoiding SSR crashes with RTC components | Yes | L1 (04, 07), L2 (entry_points) | L0+L1 sufficient | Pass |
+
+Round 2 found 2 L1 improvements needed, both applied:
+
+- Q12: Added `SessionErrorDisplayProps` interface and error source types (`agent` vs `message`) to `06_interfaces.md`
+- Q13: Added `Biomarker/Vitals` family row with `ShenPanel` to `06_interfaces.md` Base Entry Families table
+
+## Summary (Updated)
+
+- Total questions: 14
+- Passed: 14 (after L1 improvements)
+- L1 gaps fixed: 1 (06_interfaces.md — SessionErrorDisplay props + ShenPanel family)
+- L2 gaps: 0
+- Cross-ref issues: 0
+
 ## Recommended Fixes
 
-None — all tests passed after L2 format fixes.
+All applied — see Round 2 notes above.
