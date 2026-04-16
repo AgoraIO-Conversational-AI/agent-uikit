@@ -1,5 +1,7 @@
 # 04 — Conventions
 
+> Coding patterns, naming rules, styling approach, and testing standards for the UI kit.
+
 ## Language & Style
 
 - **TypeScript strict mode** — `strict: true` in tsconfig

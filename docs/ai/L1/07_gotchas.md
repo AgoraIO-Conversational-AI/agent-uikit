@@ -1,5 +1,7 @@
 # 07 — Gotchas
 
+> Critical pitfalls, tribal knowledge, and non-obvious behaviors in the UI kit.
+
 ## Standalone Dependency Reality
 
 This repo installs standalone. Session features still depend on published `agora-agent-client-toolkit` packages, but they resolve as normal package dependencies instead of a sibling workspace checkout. If install or CI fails, check registry access and version ranges before assuming a workspace issue.

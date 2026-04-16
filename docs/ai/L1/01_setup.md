@@ -1,6 +1,6 @@
 # 01 — Setup
 
-Purpose: get the monorepo installed, run the library/demo locally, and avoid local setup traps.
+> Get the monorepo installed, run the library/demo locally, and avoid local setup traps.
 
 ## Prerequisites
 

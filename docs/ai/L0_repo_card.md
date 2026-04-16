@@ -12,7 +12,7 @@
 | **Owner**         | AgoraIO Conversational AI                                          |
 | **License**       | MIT                                                                |
 | **Repository**    | `github.com/AgoraIO-Conversational-AI/agent-uikit`                |
-| **last_reviewed** | 2026-04-07                                                         |
+| **last_reviewed** | 2026-04-16                                                         |
 
 ## Naming Note
 

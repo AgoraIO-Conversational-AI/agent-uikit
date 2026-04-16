@@ -1,6 +1,6 @@
 # 02 — Architecture
 
-Purpose: explain how the monorepo is split between the publishable UI kit, optional runtime integrations, and the demo/export app.
+> How the monorepo is split between the publishable UI kit, optional runtime integrations, and the demo/export app.
 
 ## Normative Status
 

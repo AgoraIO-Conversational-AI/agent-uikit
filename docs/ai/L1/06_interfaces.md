@@ -1,6 +1,6 @@
 # 06 — Interfaces
 
-Purpose: document the public contracts at the edges of the package, including subpath exports, optional peers, theme inputs, and RTM message expectations.
+> Public contracts at the edges of the package, including subpath exports, optional peers, theme inputs, and RTM message expectations.
 
 ## Normative Status
 

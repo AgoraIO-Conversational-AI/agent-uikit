@@ -1,5 +1,7 @@
 # 03 — Code Map
 
+> Directory structure, module map, and where to find things in the monorepo.
+
 ## Top-Level Tree
 
 ```

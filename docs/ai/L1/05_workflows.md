@@ -1,6 +1,6 @@
 # 05 — Workflows
 
-Purpose: provide the shortest reliable paths for common maintenance tasks in this repo.
+> Shortest reliable paths for common maintenance tasks in this repo.
 
 ## Add A New Base Component
 

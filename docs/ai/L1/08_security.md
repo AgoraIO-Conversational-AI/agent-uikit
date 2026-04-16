@@ -1,6 +1,6 @@
 # 08 — Security
 
-Purpose: document the trust model, sanitization guarantees, caller responsibilities, and review triggers for security-affecting changes.
+> Trust model, sanitization guarantees, caller responsibilities, and review triggers for security-affecting changes.
 
 ## Trust Model
 

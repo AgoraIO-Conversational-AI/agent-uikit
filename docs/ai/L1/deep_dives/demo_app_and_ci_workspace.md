@@ -1,6 +1,6 @@
 # Demo App And CI Workspace
 
-When to read this: when installs fail, local behavior differs from CI, or a component change only reproduces in the demo/export app.
+> **When to Read This:** When installs fail, local behavior differs from CI, or a component change only reproduces in the demo/export app.
 
 ## Workspace Coupling
 
