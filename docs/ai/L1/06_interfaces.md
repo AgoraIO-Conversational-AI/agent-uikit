@@ -177,11 +177,11 @@ Supported `SessionChatInput` integration modes:
 
 ## Related Deep Dives
 
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Realtime Integrations](deep_dives/realtime_integrations.md)
-- [Chat Components](deep_dives/chat_components.md)
-- [Voice Components](deep_dives/voice_components.md)
-- [Video Components](deep_dives/video_components.md)
-- [Session Integration](deep_dives/session_integration.md)
-- [Theming](deep_dives/theming.md)
-- [Biomarker Components](deep_dives/biomarker_components.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Realtime Integrations](L2/realtime_integrations.md)
+- [Chat Components](L2/chat_components.md)
+- [Voice Components](L2/voice_components.md)
+- [Video Components](L2/video_components.md)
+- [Session Integration](L2/session_integration.md)
+- [Theming](L2/theming.md)
+- [Biomarker Components](L2/biomarker_components.md)

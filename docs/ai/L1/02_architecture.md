@@ -116,6 +116,6 @@ ConversationalAIProvider (toolkit)
 
 ## Related Deep Dives
 
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Realtime Integrations](deep_dives/realtime_integrations.md)
-- [Demo App And CI Workspace](deep_dives/demo_app_and_ci_workspace.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Realtime Integrations](L2/realtime_integrations.md)
+- [Demo App And CI Workspace](L2/demo_app_and_ci_workspace.md)

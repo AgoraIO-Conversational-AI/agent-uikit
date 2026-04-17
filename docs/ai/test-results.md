@@ -61,21 +61,21 @@ All checks now pass:
 | # | Question | Answer Correct? | Files Read | Level Loaded | Result |
 | --- | --- | --- | --- | --- | --- |
 | 5 | What component naming and file organization conventions does this project use? | Yes | L0, 04_conventions | L0+L1 | Pass |
-| 6 | How should I handle theming and styling in this codebase? | Yes | L0, 04_conventions, deep_dives/theming | L0+L1+L2 | Pass |
+| 6 | How should I handle theming and styling in this codebase? | Yes | L0, 04_conventions, L2/theming | L0+L1+L2 | Pass |
 
 ### Development
 
 | # | Question | Answer Correct? | Files Read | Level Loaded | Result |
 | --- | --- | --- | --- | --- | --- |
-| 7 | How would I add a new optional subpath export entry? | Yes | L0, 05_workflows, deep_dives/entry_points_and_optional_dependencies | L0+L1+L2 | Pass |
-| 8 | How would I add a new voice visualization component? | Yes | L0, 05_workflows, 03_code_map, deep_dives/voice_components | L0+L1+L2 | Pass |
+| 7 | How would I add a new optional subpath export entry? | Yes | L0, 05_workflows, L2/entry_points_and_optional_dependencies | L0+L1+L2 | Pass |
+| 8 | How would I add a new voice visualization component? | Yes | L0, 05_workflows, 03_code_map, L2/voice_components | L0+L1+L2 | Pass |
 
 ### Deep Dive
 
 | # | Question | Answer Correct? | Files Read | Level Loaded | Result |
 | --- | --- | --- | --- | --- | --- |
-| 9 | How does the session integration work with ConversationalAIProvider? | Yes | L0, 02_architecture, deep_dives/session_integration | L0+L1+L2 | Pass |
-| 10 | What are the RTC publish/unpublish state drift issues and how are they handled? | Yes | L0, 07_gotchas, deep_dives/realtime_integrations | L0+L1+L2 | Pass |
+| 9 | How does the session integration work with ConversationalAIProvider? | Yes | L0, 02_architecture, L2/session_integration | L0+L1+L2 | Pass |
+| 10 | What are the RTC publish/unpublish state drift issues and how are they handled? | Yes | L0, 07_gotchas, L2/realtime_integrations | L0+L1+L2 | Pass |
 
 ### Round 2 — Targeted Coverage (Higher-Risk Contracts)
 
