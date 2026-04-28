@@ -15,6 +15,7 @@ const items: Item[] = [
 ]
 
 export default function PrimitivesDemo() {
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [selectedValue, setSelectedValue] = useState<string | undefined>("option-1")
 
   return (
@@ -51,10 +52,10 @@ export default function PrimitivesDemo() {
         </TabsContent>
 
         <TabsContent value="value-picker" className="space-y-4">
-          <div className="mx-auto max-w-lg space-y-4">
-            <ValuePicker label="Select a value" items={items} value={selectedValue} onValueChange={setSelectedValue} placeholder="Choose an option..." maxHeight="150px" />
+         <div className={`mx-auto max-w-lg space-y-4 ${pickerOpen ? "pb-40" : ""}`}>
+            <ValuePicker label="Select a value" items={items} value={selectedValue} onValueChange={setSelectedValue} placeholder="Choose an option..." maxHeight="150px" onOpenChange={setPickerOpen}/>
             {selectedValue && (
-              <div className="rounded-lg border p-4">
+             <div className={`rounded-lg border p-4 ${pickerOpen ? "mt-40" : ""}`}>
                 <p className="text-sm font-medium">Selected: {items.find((i) => i.id === selectedValue)?.name}</p>
                 <p className="text-muted-foreground mt-1 text-sm">ID: {selectedValue}</p>
               </div>
