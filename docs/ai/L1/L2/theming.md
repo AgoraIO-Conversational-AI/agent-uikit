@@ -1,6 +1,6 @@
 # Theming
 
-When to Read This: use this document when changing runtime theme variables, `RemoteThemeConfig`, or how consumers customize styling.
+> **When to Read This:** Use this document when changing runtime theme variables, `RemoteThemeConfig`, or how consumers customize styling.
 
 ## Main Files
 

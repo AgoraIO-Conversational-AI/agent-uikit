@@ -1,6 +1,6 @@
 # Session Integration
 
-When to Read This: use this document when editing the `/session` entry or any component that depends on `ConversationalAIProvider`.
+> **When to Read This:** Use this document when editing the `/session` entry or any component that depends on `ConversationalAIProvider`.
 
 ## Purpose
 

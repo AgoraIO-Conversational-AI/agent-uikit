@@ -1,5 +1,7 @@
 # 03 — Code Map
 
+> Directory structure, module map, and where to find things in the monorepo.
+
 ## Top-Level Tree
 
 ```
@@ -100,5 +102,5 @@ agent-uikit/
 
 ## Related Deep Dives
 
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Demo App And CI Workspace](deep_dives/demo_app_and_ci_workspace.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Demo App And CI Workspace](L2/demo_app_and_ci_workspace.md)

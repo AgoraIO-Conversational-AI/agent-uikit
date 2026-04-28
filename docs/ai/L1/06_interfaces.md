@@ -1,6 +1,6 @@
 # 06 — Interfaces
 
-Purpose: document the public contracts at the edges of the package, including subpath exports, optional peers, theme inputs, and RTM message expectations.
+> Public contracts at the edges of the package, including subpath exports, optional peers, theme inputs, and RTM message expectations.
 
 ## Normative Status
 
@@ -24,6 +24,7 @@ This file is normative for public entrypoints, peer dependency expectations, and
 | Video             | `Avatar`, `AvatarVideoDisplay`, `LocalVideoPreview`, `CameraSelector`       |
 | Layout            | `VideoGrid`, `VideoGridWithControls`, `MobileTabs`                          |
 | Settings          | `SettingsDialog`, `AgentSettings`, `SessionPanel`                           |
+| Biomarker/Vitals  | `ShenPanel` (camera-based vitals via Shen.AI — consumer passes `ShenState` as props, no SDK dependency in component) |
 | Branding/utils    | `AgoraLogo`, `cn`, `renderMarkdownToHtml`, theme helpers                    |
 
 `AgentSettings` stays in the base entry because its core language, AIVAD, prompt, and greeting controls do not require RTC. When `onMicChange` is provided, it enables microphone selection and dynamically imports `agora-rtc-react` to enumerate devices.
@@ -104,8 +105,28 @@ Session components depend on hooks from `agora-agent-client-toolkit-react`:
 | ---------------------------- | ------------------------ | ------------------------------ |
 | `useTranscript()`            | SessionTranscript        | `TranscriptHelperItem[]`       |
 | `useAgentState()`            | AgentStateVisualizer     | toolkit agent state string     |
-| `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null`      |
+| `useAgentError()`            | SessionErrorDisplay      | `AgentErrorEvent \| null` (see below) |
 | `useConversationalAIContext()` or props | SessionChatInput | provider actions or explicit `sendMessage` / `interrupt` overrides |
+
+### SessionErrorDisplay
+
+```typescript
+interface SessionErrorDisplayProps {
+  className?: string;
+  children?: (error: AgentErrorEvent, clearError: () => void) => React.ReactNode;
+}
+```
+
+Two error source types via `AgentErrorEvent`:
+
+| `error.source` | Meaning                                      | `error.error.type` examples |
+| --------------- | -------------------------------------------- | --------------------------- |
+| `"agent"`       | Agent-side module failure (TTS, STT, LLM)    | `"llm"` (code 500)         |
+| `"message"`     | Client-side message delivery failure          | `"text"` (code 400)        |
+
+Default rendering shows a dismissible alert banner. Use the `children` render prop for custom error UI.
+
+### State Mapping
 
 State mapping from toolkit → visualizer:
 
@@ -156,11 +177,11 @@ Supported `SessionChatInput` integration modes:
 
 ## Related Deep Dives
 
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Realtime Integrations](deep_dives/realtime_integrations.md)
-- [Chat Components](deep_dives/chat_components.md)
-- [Voice Components](deep_dives/voice_components.md)
-- [Video Components](deep_dives/video_components.md)
-- [Session Integration](deep_dives/session_integration.md)
-- [Theming](deep_dives/theming.md)
-- [Biomarker Components](deep_dives/biomarker_components.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Realtime Integrations](L2/realtime_integrations.md)
+- [Chat Components](L2/chat_components.md)
+- [Voice Components](L2/voice_components.md)
+- [Video Components](L2/video_components.md)
+- [Session Integration](L2/session_integration.md)
+- [Theming](L2/theming.md)
+- [Biomarker Components](L2/biomarker_components.md)

@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 const docsRoot = join(repoRoot, "docs", "ai");
 const l1Root = join(docsRoot, "L1");
-const deepDiveRoot = join(l1Root, "deep_dives");
+const deepDiveRoot = join(l1Root, "L2");
 const rootFiles = ["AGENTS.md", "CLAUDE.md", "docs/ai/L0_repo_card.md"];
 const requiredL1 = [
   "01_setup.md",
@@ -74,7 +74,7 @@ if (actualL1.length !== 8) {
 for (const rel of requiredDeepDives) {
   const full = join(deepDiveRoot, rel);
   if (!existsSync(full)) {
-    errors.push(`Missing required deep dive: docs/ai/L1/deep_dives/${rel}`);
+    errors.push(`Missing required deep dive: docs/ai/L1/L2/${rel}`);
   }
 }
 

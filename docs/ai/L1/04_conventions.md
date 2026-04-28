@@ -1,5 +1,7 @@
 # 04 — Conventions
 
+> Coding patterns, naming rules, styling approach, and testing standards for the UI kit.
+
 ## Language & Style
 
 - **TypeScript strict mode** — `strict: true` in tsconfig
@@ -58,7 +60,7 @@
 
 ## Theming
 
-Runtime: `applyCustomTheme()` sets CSS variables on `:root` from `RemoteThemeConfig`. Build-time: Tailwind config and `className`. See [theming deep dive](deep_dives/theming.md) for full mapping.
+Runtime: `applyCustomTheme()` sets CSS variables on `:root` from `RemoteThemeConfig`. Build-time: Tailwind config and `className`. See [theming deep dive](L2/theming.md) for full mapping.
 
 ## Imports & Exports
 
@@ -99,5 +101,5 @@ When adding or changing a public component:
 
 ## Related Deep Dives
 
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Realtime Integrations](deep_dives/realtime_integrations.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Realtime Integrations](L2/realtime_integrations.md)

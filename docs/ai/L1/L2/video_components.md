@@ -1,6 +1,6 @@
 # Video Components
 
-When to Read This: use this document when changing local/remote video rendering, avatar fallback logic, or camera-selection behavior.
+> **When to Read This:** Use this document when changing local/remote video rendering, avatar fallback logic, or camera-selection behavior.
 
 ## Main Files
 

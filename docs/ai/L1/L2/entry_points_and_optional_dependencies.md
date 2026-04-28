@@ -1,6 +1,6 @@
 # Entry Points And Optional Dependencies
 
-When to read this: before changing `exports`, peer dependencies, or any import path that might move code between the base package and optional integrations.
+> **When to Read This:** Before changing `exports`, peer dependencies, or any import path that might move code between the base package and optional integrations.
 
 ## Goal
 

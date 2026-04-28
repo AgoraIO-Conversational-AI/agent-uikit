@@ -1,6 +1,6 @@
 # Realtime Integrations
 
-When to read this: when changing Agora RTC, toolkit session, RTM message handling, or any component that crosses from pure UI into live runtime state.
+> **When to Read This:** When changing Agora RTC, toolkit session, RTM message handling, or any component that crosses from pure UI into live runtime state.
 
 ## Integration Zones
 

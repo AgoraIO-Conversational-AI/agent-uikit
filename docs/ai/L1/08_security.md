@@ -1,6 +1,6 @@
 # 08 — Security
 
-Purpose: document the trust model, sanitization guarantees, caller responsibilities, and review triggers for security-affecting changes.
+> Trust model, sanitization guarantees, caller responsibilities, and review triggers for security-affecting changes.
 
 ## Trust Model
 
@@ -89,8 +89,8 @@ Re-check this file when a change:
 
 ## Related Deep Dives
 
-- [Realtime Integrations](deep_dives/realtime_integrations.md)
-- [Entry Points And Optional Dependencies](deep_dives/entry_points_and_optional_dependencies.md)
-- [Chat Components](deep_dives/chat_components.md)
-- [Biomarker Components](deep_dives/biomarker_components.md)
-- [Theming](deep_dives/theming.md)
+- [Realtime Integrations](L2/realtime_integrations.md)
+- [Entry Points And Optional Dependencies](L2/entry_points_and_optional_dependencies.md)
+- [Chat Components](L2/chat_components.md)
+- [Biomarker Components](L2/biomarker_components.md)
+- [Theming](L2/theming.md)
